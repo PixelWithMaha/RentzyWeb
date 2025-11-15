@@ -1,0 +1,39 @@
+﻿@model IEnumerable<Rentzy.DAL.Models.Property>
+
+<h1>Properties</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Property Name</th>
+            <th>Rent Amount</th>
+            <th>Landlord</th>
+            <th>Tenants</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var prop in Model)
+        {
+                <tr>
+                    <td>@prop.Name</td>
+                    <td>@prop.RentAmount</td>
+                    <td>@prop.Landlord?.FullName</td>
+                    <td>
+                    @if (prop.TenantProperties != null && prop.TenantProperties.Any())
+                    {
+                                <ul>
+                            @foreach (var tp in prop.TenantProperties)
+                            {
+                                        <li>@tp.Tenant.FullName</li>
+                            }
+                                </ul>
+                    }
+                    else
+                    {
+                                <span>No tenants</span>
+                    }
+                    </td>
+                </tr>
+        }
+    </tbody>
+</table>
