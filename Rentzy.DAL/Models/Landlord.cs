@@ -2,14 +2,9 @@
 
 namespace Rentzy.DAL.Models
 {
-    public class Landlord
+    public class Landlord : User
     {
-        public int Id { get; set; }
-        public string FullName { get; set; } = "";
-        public string Email { get; set; } = "";
-        public string PhoneNumber { get; set; } = "";
-
-        // Navigation property: all properties owned by landlord
-        public ICollection<Property>? Properties { get; set; }
+        public bool IsVerified { get; set; } = false;
+        public ICollection<Property> Properties { get; set; } = new List<Property>();
     }
 }
