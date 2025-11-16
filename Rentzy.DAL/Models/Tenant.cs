@@ -2,14 +2,11 @@
 
 namespace Rentzy.DAL.Models
 {
-    public class Tenant
+    public class Tenant : User
     {
-        public int Id { get; set; }
-        public string FullName { get; set; } = "";
-        public string Email { get; set; } = "";
-        public string PhoneNumber { get; set; } = "";
-
-        // Navigation property for many-to-many
-        public virtual ICollection<TenantProperty> TenantProperties { get; set; } = new List<TenantProperty>();
+        public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+        public ICollection<PropertyRentalRequest> RentalRequests { get; set; } = new List<PropertyRentalRequest>();
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
+
 }

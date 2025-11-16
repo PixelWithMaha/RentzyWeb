@@ -15,16 +15,16 @@
         @foreach (var prop in Model)
         {
                 <tr>
-                    <td>@prop.Name</td>
-                    <td>@prop.RentAmount</td>
-                    <td>@prop.Landlord?.FullName</td>
+                    <td>@prop.Title</td>
+                    <td>@prop.MonthlyRent</td>
+                    <td>@(prop.Landlord != null ? prop.Landlord.FirstName + " " + prop.Landlord.LastName : "N/A")</td>
                     <td>
-                    @if (prop.TenantProperties != null && prop.TenantProperties.Any())
+                    @if (prop.Bookings != null && prop.Bookings.Any())
                     {
                                 <ul>
-                            @foreach (var tp in prop.TenantProperties)
+                            @foreach (var booking in prop.Bookings)
                             {
-                                        <li>@tp.Tenant.FullName</li>
+                                        <li>@(booking.Tenant.FirstName + " " + booking.Tenant.LastName)</li>
                             }
                                 </ul>
                     }
