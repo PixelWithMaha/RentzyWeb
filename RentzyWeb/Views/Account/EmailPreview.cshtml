@@ -1,0 +1,261 @@
+﻿@{
+    ViewData["Title"] = "Email Preview - Mock Email System";
+    var resetLink = TempData["ResetLink"]?.ToString() ?? "#";
+    var userEmail = TempData["UserEmail"]?.ToString() ?? "user@example.com";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <!-- Left Side: Email Client Mockup -->
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <!-- Email Client Header -->
+                <div class="card-header bg-gradient text-white py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">
+                                <i class="fas fa-envelope me-2"></i>Rentzy Email System
+                            </h5>
+                            <small class="opacity-75">Mock Email Preview - University Project Demo</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-white text-primary">DEMO MODE</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Inbox View -->
+                <div class="card-body p-0">
+                    <!-- Inbox Header -->
+                    <div class="border-bottom bg-light p-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-inbox me-2 text-primary"></i>Inbox (1)
+                                </h6>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <span class="text-muted small">
+                                    <i class="far fa-clock me-1"></i>Just now
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email List Item -->
+                    <div class="border-bottom p-3 bg-light" style="cursor: pointer;">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width: 45px; height: 45px;">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 fw-bold">Rentzy Support</h6>
+                                    <small class="text-muted">Just now</small>
+                                </div>
+                                <p class="mb-0 text-muted small">Reset Your Rentzy Password</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Content -->
+                    <div class="p-4" style="background-color: #f8f9fa;">
+                        <div class="bg-white rounded shadow-sm p-4">
+                            <!-- Email Header -->
+                            <div class="border-bottom pb-3 mb-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <strong class="me-2">From:</strong>
+                                    <span class="text-muted">noreply@rentzy.com</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <strong class="me-2">To:</strong>
+                                    <span class="text-muted">@userEmail</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <strong class="me-2">Subject:</strong>
+                                    <span class="text-muted">Reset Your Rentzy Password</span>
+                                </div>
+                            </div>
+
+                            <!-- Email Body -->
+                            <div style="max-width: 600px; margin: 0 auto;">
+                                <div class="text-center mb-4">
+                                    <i class="fas fa-home text-primary" style="font-size: 3rem;"></i>
+                                    <h2 class="text-primary mt-3 mb-0">Rentzy</h2>
+                                    <p class="text-muted small">Rental Management Simplified</p>
+                                </div>
+
+                                <h3 class="text-dark mb-3">Reset Your Password</h3>
+
+                                <p class="text-muted mb-4">
+                                    Hi there,
+                                </p>
+
+                                <p class="text-muted mb-4">
+                                    We received a request to reset your password for your Rentzy account.
+                                    Click the button below to create a new password.
+                                </p>
+
+                                <div class="text-center my-4 p-4 bg-light rounded">
+                                    <a href="@resetLink"
+                                       class="btn btn-primary btn-lg px-5 py-3"
+                                       style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border: none;">
+                                        <i class="fas fa-key me-2"></i>Reset Password
+                                    </a>
+                                </div>
+
+                                <div class="alert alert-warning border-0" role="alert">
+                                    <i class="fas fa-clock me-2"></i>
+                                    <strong>This link will expire in 1 hour</strong> for security reasons.
+                                </div>
+
+                                <p class="text-muted small mb-4">
+                                    If the button doesn't work, copy and paste this link into your browser:
+                                </p>
+
+                                <div class="p-3 bg-light rounded mb-4">
+                                    <code class="text-break small">@resetLink</code>
+                                </div>
+
+                                <div class="alert alert-info border-0" role="alert">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    If you didn't request a password reset, you can safely ignore this email.
+                                    Your password will remain unchanged.
+                                </div>
+
+                                <hr class="my-4">
+
+                                <div class="text-center">
+                                    <p class="text-muted small mb-2">
+                                        <strong>Need help?</strong>
+                                    </p>
+                                    <p class="text-muted small mb-3">
+                                        Contact us at <a href="mailto:support@rentzy.com">support@rentzy.com</a>
+                                    </p>
+                                    <p class="text-muted" style="font-size: 11px;">
+                                        © 2024 Rentzy - Rental Management Simplified<br>
+                                        This is an automated email. Please do not reply.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Info Panel -->
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <!-- System Info Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Email Sent Successfully
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1">Recipient</small>
+                        <strong>@userEmail</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1">Timestamp</small>
+                        <strong>@DateTime.Now.ToString("MMM dd, yyyy HH:mm:ss")</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1">Status</small>
+                        <span class="badge bg-success">
+                            <i class="fas fa-check me-1"></i>Delivered
+                        </span>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block mb-1">Token Expiry</small>
+                        <strong>@DateTime.Now.AddHours(1).ToString("HH:mm:ss")</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Production Note Card -->
+            <div class="card shadow-sm border-0 mb-4 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Production Implementation
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="small mb-3">
+                        <strong>This is a mock email preview.</strong> In production, this would be sent via:
+                    </p>
+                    <ul class="small mb-0 ps-3">
+                        <li class="mb-2">
+                            <strong>SendGrid API</strong><br>
+                            <span class="text-muted">Cloud-based email delivery</span>
+                        </li>
+                        <li class="mb-2">
+                            <strong>SMTP Server</strong><br>
+                            <span class="text-muted">Gmail, Outlook, etc.</span>
+                        </li>
+                        <li class="mb-2">
+                            <strong>AWS SES</strong><br>
+                            <span class="text-muted">Amazon email service</span>
+                        </li>
+                        <li>
+                            <strong>MailKit</strong><br>
+                            <span class="text-muted">.NET email library</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Security Features Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>Security Features
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <small>Secure token generation</small>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <small>1-hour token expiration</small>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <small>One-time use tokens</small>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <small>BCrypt password hashing</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <small>Database token storage</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-2 mt-4">
+                <a href="@resetLink" class="btn btn-primary">
+                    <i class="fas fa-key me-2"></i>Test Reset Link
+                </a>
+                <a asp-action="Login" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+</style>
