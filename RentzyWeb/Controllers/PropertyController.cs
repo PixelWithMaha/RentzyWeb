@@ -12,10 +12,10 @@ namespace Rentzy.Web.Controllers
             _propertyService = propertyService;
         }
 
-        public IActionResult Index()
-        {
-            var properties = _propertyService.GetAllProperties();
-            return View(properties);
-        }
+        //public IActionResult Index()
+        //{
+          //  var properties = _propertyService.GetAllProperties();
+           // return View(properties);
+        //}
     }
 }

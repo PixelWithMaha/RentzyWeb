@@ -2,6 +2,8 @@
 using Rentzy.DAL.Context;
 using Rentzy.DAL.Repositories;
 using Rentzy.BLL.Services;
+using Rentzy.DAL.Repository.Landlord;
+using Rentzy.DAL.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,9 +16,17 @@ builder.Services.AddDbContext<RentzyDBContext>(options =>
 
 // Register repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
-// Register services
 builder.Services.AddScoped<AuthService>();
+
+
+builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
+builder.Services.AddScoped<ILandlordRepository, LandlordRepository>();
+
+// Add Services
+builder.Services.AddScoped<PropertyService>();
+
+builder.Services.AddScoped<LandlordService>();
+
 
 // ===== ADD SESSION CONFIGURATION HERE =====
 builder.Services.AddDistributedMemoryCache(); // Required for session

@@ -1,0 +1,45 @@
+﻿@model List<Rentzy.BLL.DTOs.PropertyDTO>
+
+@{
+    ViewData["Title"] = "My Properties";
+}
+
+<h2>My Properties</h2>
+
+<a href="@Url.Action("AddProperty", "Landlord")" class="btn btn-primary mb-3">Add New Property</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Rent</th>
+            <th>City</th>
+            <th>Type</th>
+            <th>Images</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var prop in Model)
+        {
+                <tr>
+                    <td>@prop.Title</td>
+                    <td>@prop.Description</td>
+                    <td>@prop.Rent</td>
+                    <td>@prop.CityId</td>
+                    <td>@prop.PropertyTypeId</td>
+                    <td>
+                    @foreach (var img in prop.Images)
+                    {
+                                <img src="@img.ImageUrl" width="50" height="50" class="me-1 mb-1"/>
+                    }
+                    </td>
+                    <td>
+                        <a href="@Url.Action("EditProperty", "Landlord", new { id = prop.Id })" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="@Url.Action("DeleteProperty", "Landlord", new { id = prop.Id })" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+        }
+    </tbody>
+</table>
