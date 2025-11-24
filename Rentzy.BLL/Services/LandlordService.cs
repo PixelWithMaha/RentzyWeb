@@ -1,6 +1,7 @@
 ﻿using Rentzy.BLL.DTOs;
 using Rentzy.BLL.DTOs.BookingDTOs;
 using Rentzy.DAL.Models;
+using Rentzy.DAL.Repository;
 using Rentzy.DAL.Repository.Landlord;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,8 +65,38 @@ namespace Rentzy.BLL.Services
 
         public async Task<bool> ApproveTenantRequestAsync(int requestId)
         {
-            return await _repo.ApproveTenantRequestAsync(requestId);
+            // 1️⃣ Get the request
+            var request = await _repo.GetTenantRequestByIdAsync(requestId);
+            if (request == null || request.Status.Name != "Pending")
+                return false; // Already approved/rejected or not found
+
+            // 2️⃣ Get approved status for PropertyRentalRequest
+            var approvedRequestStatus = await _repo.GetRequestStatusByNameAsync("Approved");
+            if (approvedRequestStatus == null) return false;
+
+            request.StatusId = approvedRequestStatus.Id;
+
+            // 3️⃣ Get "Active" booking status
+            var activeBookingStatus = await _repo.GetBookingStatusByNameAsync("Active");
+            if (activeBookingStatus == null) return false;
+
+            // 4️⃣ Create a booking
+            var booking = new Booking
+            {
+                TenantId = request.TenantId,
+                PropertyId = request.PropertyId,
+                StatusId = activeBookingStatus.Id,
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddMonths(1)
+            };
+
+            // 5️⃣ Save changes
+            await _repo.UpdateRequestAsync(request);
+            await _repo.AddBookingAsync(booking);
+
+            return true;
         }
+
 
 
         public Task RejectTenantRequestAsync(int requestId) =>

@@ -28,3 +28,16 @@ INSERT INTO PropertyTypes (Name) VALUES
 ('Warehouse'),
 ('Farmhouse');
 
+INSERT INTO ApprovalStatus ( Name) VALUES
+( 'Pending'),
+( 'Approved'),
+( 'Rejected'),
+( 'Cancelled');
+
+INSERT INTO BookingStatuses ( Name)
+VALUES 
+    ( 'Active'),
+    ( 'Completed'),
+    ( 'Cancelled');
+
+

@@ -16,8 +16,13 @@ namespace Rentzy.DAL.Repository.Landlord
         Task<int> GetPendingTenantRequestsCountAsync(int landlordId);
         Task RejectTenantRequestAsync(int requestId);
         Task DeletePropertyImageAsync(int imageId);
-
+        Task<PropertyRentalRequest?> GetTenantRequestByIdAsync(int requestId);
+        Task UpdateRequestAsync(PropertyRentalRequest request);
+        Task AddBookingAsync(Booking booking);
+        Task<ApprovalStatus?> GetStatusByNameAsync(string statusName);
         Task<bool> ApproveTenantRequestAsync(int requestId);
+        Task<ApprovalStatus?> GetRequestStatusByNameAsync(string name);
+        Task<BookingStatus?> GetBookingStatusByNameAsync(string name);
 
         // Dropdown helpers
         Task<List<City>> GetAllCitiesAsync();

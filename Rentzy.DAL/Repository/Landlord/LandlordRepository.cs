@@ -77,6 +77,13 @@ namespace Rentzy.DAL.Repository
                 .ToListAsync();
         }
 
+        public async Task<PropertyRentalRequest?> GetTenantRequestByIdAsync(int requestId)
+        {
+            return await _context.PropertyRentalRequests
+                .Include(r => r.Status)
+                .FirstOrDefaultAsync(r => r.Id == requestId);
+        }
+
         // DAL / Repository
         public async Task<bool> ApproveTenantRequestAsync(int requestId)
         {
@@ -146,6 +153,32 @@ namespace Rentzy.DAL.Repository
             }
         }
 
+        public async Task<ApprovalStatus?> GetStatusByNameAsync(string statusName)
+        {
+            return await _context.ApprovalStatuses.FirstOrDefaultAsync(s => s.Name == statusName);
+        }
+
+        public async Task AddBookingAsync(Booking booking)
+        {
+            await _context.Bookings.AddAsync(booking);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateRequestAsync(PropertyRentalRequest request)
+        {
+            _context.PropertyRentalRequests.Update(request);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<ApprovalStatus?> GetRequestStatusByNameAsync(string name)
+        {
+            return await _context.ApprovalStatuses.FirstOrDefaultAsync(s => s.Name == name);
+        }
+
+        public async Task<BookingStatus?> GetBookingStatusByNameAsync(string name)
+        {
+            return await _context.BookingStatuses.FirstOrDefaultAsync(s => s.Name == name);
+        }
         public async Task<List<City>> GetAllCitiesAsync()
         {
             return await _context.Cities.ToListAsync();
