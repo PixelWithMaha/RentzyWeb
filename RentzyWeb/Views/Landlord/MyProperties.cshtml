@@ -4,42 +4,91 @@
     ViewData["Title"] = "My Properties";
 }
 
-<h2>My Properties</h2>
+<div class="container mt-4">
 
-<a href="@Url.Action("AddProperty", "Landlord")" class="btn btn-primary mb-3">Add New Property</a>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary">My Properties</h2>
+        <a href="@Url.Action("AddProperty", "Landlord")" class="btn btn-primary btn-lg">
+            + Add New Property
+        </a>
+    </div>
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Rent</th>
-            <th>City</th>
-            <th>Type</th>
-            <th>Images</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var prop in Model)
-        {
-                <tr>
-                    <td>@prop.Title</td>
-                    <td>@prop.Description</td>
-                    <td>@prop.Rent</td>
-                    <td>@prop.CityId</td>
-                    <td>@prop.PropertyTypeId</td>
-                    <td>
-                    @foreach (var img in prop.Images)
+    @if (Model == null || !Model.Any())
+    {
+            <div class="alert alert-info text-center p-4 shadow-sm rounded-3">
+                <h5>No properties added yet.</h5>
+                <p>Add your first property to start listing rentals.</p>
+                <a href="@Url.Action("AddProperty", "Landlord")" class="btn btn-success btn-lg mt-2">Add Property</a>
+            </div>
+    }
+    else
+    {
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered shadow-sm rounded-3">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 15%;">Title</th>
+                            <th style="width: 25%;">Description</th>
+                            <th>Rent</th>
+                            <th>City</th>
+                            <th>Type</th>
+                            <th style="width: 20%;">Images</th>
+                            <th style="width: 15%;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var prop in Model)
                     {
-                                <img src="@img.ImageUrl" width="50" height="50" class="me-1 mb-1"/>
+                                <tr>
+                                    <td class="fw-semibold">@prop.Title</td>
+                                    <td>@prop.Description</td>
+                                    <td class="text-success fw-bold">Rs @prop.Rent</td>
+
+                                    <td>
+                                        <span class="badge bg-primary">
+                                    @prop.CityId
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge bg-info text-dark">
+                                    @prop.PropertyTypeId
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                @if (prop.Images != null && prop.Images.Any())
+                                {
+                                    @foreach (var img in prop.Images)
+                                    {
+                                                        <img src="@img.ImageUrl"
+                                                             style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px; margin-right: 5px; margin-bottom: 5px;"
+                                                             class="shadow-sm" />
+                                    }
+                                }
+                                else
+                                {
+                                                <span class="text-muted">No Images</span>
+                                }
+                                    </td>
+
+                                    <td>
+                                        <a href="@Url.Action("EditProperty", "Landlord", new { id = prop.Id })"
+                                           class="btn btn-warning btn-sm me-1">
+                                            Edit
+                                        </a>
+
+                                        <form method="post" asp-action="DeleteProperty" asp-controller="Landlord"
+                                              onsubmit="return confirm('Are you sure you want to delete this property?');"
+                                              style="display:inline;">
+                                            <input type="hidden" name="id" value="@prop.Id" />
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
                     }
-                    </td>
-                    <td>
-                        <a href="@Url.Action("EditProperty", "Landlord", new { id = prop.Id })" class="btn btn-sm btn-warning">Edit</a>
-                        <a href="@Url.Action("DeleteProperty", "Landlord", new { id = prop.Id })" class="btn btn-sm btn-danger">Delete</a>
-                    </td>
-                </tr>
-        }
-    </tbody>
-</table>
+                    </tbody>
+                </table>
+            </div>
+    }
+</div>

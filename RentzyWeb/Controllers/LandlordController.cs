@@ -7,11 +7,10 @@ using System.Threading.Tasks;
 
 namespace Rentzy.Web.Controllers
 {
-    [AuthorizeRole("Landlord")] // Only Landlords can access
+    [AuthorizeRole("Landlord")]
     public class LandlordController : Controller
     {
         private readonly PropertyService _propertyService;
-
         private readonly LandlordService _landlordService;
 
         public LandlordController(PropertyService propertyService, LandlordService landlordService)
@@ -19,7 +18,6 @@ namespace Rentzy.Web.Controllers
             _propertyService = propertyService;
             _landlordService = landlordService;
         }
-
 
         // LANDLORD DASHBOARD
         [HttpGet]
@@ -29,12 +27,15 @@ namespace Rentzy.Web.Controllers
             if (landlordId == null) return RedirectToAction("Login", "Account");
 
             ViewBag.UserName = HttpContext.Session.GetString("UserName");
-            ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
 
+            // load properties list for dashboard
             var properties = await _propertyService.GetPropertiesByLandlordAsync(landlordId.Value);
-            return View(properties);
+            ViewBag.Properties = properties;
+
+            return View();
         }
 
+        // ADD PROPERTY PAGE
         [HttpGet]
         public async Task<IActionResult> AddProperty()
         {
@@ -43,7 +44,7 @@ namespace Rentzy.Web.Controllers
             return View(new PropertyDTO());
         }
 
-        [HttpPost]
+        // ADD PROPERTY ACTION
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddProperty(PropertyDTO dto, List<IFormFile> images)
@@ -55,34 +56,39 @@ namespace Rentzy.Web.Controllers
                 return View(dto);
             }
 
-            // Get logged-in landlord ID from session
             var landlordId = HttpContext.Session.GetInt32("UserId");
             if (landlordId == null)
-            {
                 return RedirectToAction("Login", "Account");
-            }
 
-            dto.LandlordId = landlordId.Value; // assign FK
+            dto.LandlordId = landlordId.Value;
 
-            // Add property
             await _propertyService.AddPropertyAsync(dto);
 
-            // Retrieve the newly added property to get its generated ID
             var addedProperty = (await _propertyService.GetPropertiesByLandlordAsync(landlordId.Value))
-                                    .FirstOrDefault(p => p.Title == dto.Title && p.Description == dto.Description);
+                                .FirstOrDefault(p => p.Title == dto.Title && p.Description == dto.Description);
 
             if (addedProperty != null && images?.Count > 0)
             {
+                var imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/properties");
+
+                // Ensure directory exists
+                if (!Directory.Exists(imageFolder))
+                    Directory.CreateDirectory(imageFolder);
+
                 var imageUrls = new List<string>();
                 foreach (var file in images)
                 {
-                    var filePath = Path.Combine("wwwroot/images/properties", file.FileName);
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName); // unique name
+                    var filePath = Path.Combine(imageFolder, fileName);
+
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await file.CopyToAsync(stream);
                     }
-                    imageUrls.Add("/images/properties/" + file.FileName);
+
+                    imageUrls.Add("/images/properties/" + fileName);
                 }
+
                 await _propertyService.UploadPropertyImagesAsync(addedProperty.Id, imageUrls);
             }
 
@@ -119,7 +125,7 @@ namespace Rentzy.Web.Controllers
             return RedirectToAction("Dashboard");
         }
 
-        // UPLOAD PROPERTY IMAGES
+        // UPLOAD IMAGES
         [HttpGet]
         public IActionResult UploadImages(int propertyId)
         {
@@ -136,7 +142,7 @@ namespace Rentzy.Web.Controllers
             return RedirectToAction("Dashboard");
         }
 
-        // TENANT RENTAL REQUESTS
+        // TENANT REQUESTS
         [HttpGet]
         public async Task<IActionResult> TenantRequests()
         {
@@ -165,6 +171,7 @@ namespace Rentzy.Web.Controllers
             return RedirectToAction("TenantRequests");
         }
 
+        // MY PROPERTIES PAGE
         [HttpGet]
         public async Task<IActionResult> MyProperties()
         {
@@ -172,7 +179,7 @@ namespace Rentzy.Web.Controllers
             if (landlordId == null)
                 return RedirectToAction("Login", "Account");
 
-            var properties = await _landlordService.GetPropertiesByLandlordAsync(landlordId.Value);
+            var properties = await _propertyService.GetPropertiesByLandlordAsync(landlordId.Value);
             return View(properties);
         }
     }
