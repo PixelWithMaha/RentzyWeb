@@ -69,9 +69,13 @@ namespace Rentzy.DAL.Repository
         public async Task<IEnumerable<PropertyRentalRequest>> GetTenantRequestsAsync(int landlordId)
         {
             return await _context.PropertyRentalRequests
-                .Include(r => r.Property)
-                .Where(r => r.Property.LandlordId == landlordId)
-                .ToListAsync();
+               .Include(r => r.Property)
+               .Include(r => r.Tenant)
+               .Include(r => r.Status)
+               .Where(r => r.Property.LandlordId == landlordId
+                        && r.Status.Name == "Pending")  // only pending requests
+               .OrderByDescending(r => r.RequestedAt)
+               .ToListAsync();
         }
 
         public async Task UpdateRentalRequestStatusAsync(int requestId, string status)

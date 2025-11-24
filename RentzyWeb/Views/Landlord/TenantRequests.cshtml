@@ -1,0 +1,109 @@
+﻿@model List<Rentzy.BLL.DTOs.BookingDTOs.PropertyRentalRequestDto>
+@{
+    ViewData["Title"] = "Tenant Requests";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-semibold text-gray-800 mb-6 text-center" 
+        style="text-shadow: 1px 1px 2px #A78BFA;">
+        Tenant Requests
+    </h1>
+
+    <div class="grid gap-6">
+        @foreach (var req in Model)
+        {
+                <div class="request-card p-5 rounded-xl shadow-lg" id="row-@req.Id">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-white font-semibold text-lg mb-1">Property: @req.PropertyTitle</p>
+                            <p class="text-blue-200">Tenant: @req.TenantName</p>
+                            <p class="text-blue-100 text-sm">Status: @req.Status</p>
+                            <p class="text-blue-100 text-sm">Requested At: @req.RequestedAt.ToString("g")</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <button class="approve-btn px-4 py-2 rounded-lg font-semibold text-white shadow-md hover:scale-105 transition-transform bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+                                    data-id="@req.Id">
+                                Approve
+                            </button>
+                            <button class="reject-btn px-4 py-2 rounded-lg font-semibold text-white shadow-md hover:scale-105 transition-transform bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
+                                    data-id="@req.Id">
+                                Reject
+                            </button>
+                        </div>
+                    </div>
+                </div>
+        }
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        const token = $('input[name="__RequestVerificationToken"]').val();
+
+        function updateRequest(actionUrl, requestId, row) {
+            $.ajax({
+                url: actionUrl,
+                type: 'POST',
+                headers: { "RequestVerificationToken": token },
+                data: { requestId: requestId },
+                success: function () {
+                    row.fadeOut(500, function () { $(this).remove(); });
+                },
+                error: function (xhr) {
+                    alert("Error: " + xhr.responseText);
+                }
+            });
+        }
+
+        $(document).on("click", ".approve-btn", function () {
+            const requestId = $(this).data("id");
+            const row = $("#row-" + requestId);
+            updateRequest('@Url.Action("ApproveRequest", "Landlord")', requestId, row);
+        });
+
+        $(document).on("click", ".reject-btn", function () {
+            const requestId = $(this).data("id");
+            const row = $("#row-" + requestId);
+            updateRequest('@Url.Action("RejectRequest", "Landlord")', requestId, row);
+        });
+    });
+</script>
+
+<style>
+    body {
+        background: #ffffff;
+        font-family: "Poppins", sans-serif;
+    }
+
+    .request-card {
+        background: linear-gradient(135deg, #7C3AED, #3B82F6);
+        transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+        cursor: pointer;
+    }
+
+    .request-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 25px rgba(0,0,0,0.25);
+        background: linear-gradient(135deg, #9333EA, #2563EB);
+    }
+
+    button:focus {
+        outline: none;
+    }
+
+    button.approve-btn, button.reject-btn {
+        transition: all 0.3s ease;
+    }
+
+    button.approve-btn:hover {
+        transform: scale(1.08);
+    }
+
+    button.reject-btn:hover {
+        transform: scale(1.08);
+    }
+</style>

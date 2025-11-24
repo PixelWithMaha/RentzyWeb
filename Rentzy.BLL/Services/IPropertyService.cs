@@ -14,7 +14,7 @@ namespace Rentzy.BLL.Services
         Task UpdatePropertyAsync(PropertyDTO propertyDto);
         Task DeletePropertyAsync(int id);
         Task UploadPropertyImagesAsync(int propertyId, List<string> imageUrls);
-        Task<IEnumerable<RentalRequestDTO>> GetTenantRequestsAsync(int landlordId);
+        Task<IEnumerable<PropertyRentalRequestDto>> GetTenantRequestsAsync(int landlordId);
         Task UpdateRentalRequestStatusAsync(int requestId, string status);
     }
 }

@@ -39,21 +39,34 @@ namespace Rentzy.BLL.Services
             _propertyService.UploadPropertyImagesAsync(propertyId, imageUrls);
 
         // Tenant Requests
-        public async Task<List<RentalRequestDTO>> GetTenantRequestsAsync(int landlordId)
+        public async Task<List<PropertyRentalRequestDto>> GetTenantRequestsAsync(int landlordId)
         {
             var requests = await _repo.GetTenantRequestsAsync(landlordId);
-            return requests.Select(r => new RentalRequestDTO
-            {
-                Id = r.Id,
-                PropertyId = r.PropertyId,
-                PropertyTitle = r.Property.Title,
-                TenantId = r.TenantId,
-                Status = r.Status?.Name
-            }).ToList();
+
+            return requests
+                .Where(r => r.Status.Name == "Pending")  // <-- only pending
+                .Select(r => new PropertyRentalRequestDto
+                {
+                    Id = r.Id,
+                    TenantName = r.Tenant.FirstName + " " + r.Tenant.LastName,
+                    PropertyTitle = r.Property.Title,
+                    RequestedAt = r.RequestedAt,
+                    Status = r.Status?.Name
+                })
+                .ToList();
         }
 
-        public Task ApproveTenantRequestAsync(int requestId) =>
-            _repo.ApproveTenantRequestAsync(requestId);
+        public async Task<int> GetPendingRequestsCountAsync(int landlordId)
+        {
+            return await _repo.GetPendingTenantRequestsCountAsync(landlordId);
+        }
+
+
+        public async Task<bool> ApproveTenantRequestAsync(int requestId)
+        {
+            return await _repo.ApproveTenantRequestAsync(requestId);
+        }
+
 
         public Task RejectTenantRequestAsync(int requestId) =>
             _repo.RejectTenantRequestAsync(requestId);

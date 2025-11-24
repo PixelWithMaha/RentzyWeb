@@ -77,21 +77,37 @@ namespace Rentzy.DAL.Repository
                 .ToListAsync();
         }
 
-        public async Task ApproveTenantRequestAsync(int requestId)
+        // DAL / Repository
+        public async Task<bool> ApproveTenantRequestAsync(int requestId)
         {
             var request = await _context.PropertyRentalRequests
-                .Include(r => r.Status)
                 .FirstOrDefaultAsync(r => r.Id == requestId);
 
-            if (request != null)
-            {
-                var approvedStatus = await _context.ApprovalStatuses
-                    .FirstOrDefaultAsync(s => s.Name == "Approved");
+            if (request == null) return false;
 
-                request.Status = approvedStatus;
-                await _context.SaveChangesAsync();
-            }
+            var approvedStatus = await _context.ApprovalStatuses
+                .FirstOrDefaultAsync(s => s.Name == "Approved");
+
+            if (approvedStatus == null) return false;
+
+            if (request.StatusId == approvedStatus.Id)
+                return false; // already approved
+
+            request.StatusId = approvedStatus.Id;  // critical line
+
+            var changes = await _context.SaveChangesAsync();
+            return changes > 0;
         }
+
+        public async Task<int> GetPendingTenantRequestsCountAsync(int landlordId)
+        {
+            return await _context.PropertyRentalRequests
+                .Include(r => r.Property)
+                .Where(r => r.Property.LandlordId == landlordId && r.Status.Name == "Pending")
+                .CountAsync();
+        }
+
+
 
         public async Task RejectTenantRequestAsync(int requestId)
         {

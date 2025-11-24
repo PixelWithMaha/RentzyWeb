@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.DTOs;
 using Rentzy.BLL.Services;
 using Rentzy.DAL.Models;
@@ -37,7 +38,7 @@ namespace Rentzy.Web.Controllers
             ViewBag.TotalProperties = properties.Count;
             //ViewBag.ActiveTenants = await _landlordService.GetActiveTenantsCountAsync(landlordId.Value);
             //ViewBag.MonthlyRevenue = await _landlordService.GetMonthlyRevenueAsync(landlordId.Value);
-            //ViewBag.PendingRequests = await _landlordService.GetPendingRequestsCountAsync(landlordId.Value);
+            ViewBag.PendingRequests = await _landlordService.GetPendingRequestsCountAsync(landlordId.Value);
 
             // Pass properties to the view
             ViewBag.Properties = properties;
@@ -203,18 +204,24 @@ namespace Rentzy.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApproveRequest(int requestId)
         {
-            await _landlordService.ApproveTenantRequestAsync(requestId);
-            TempData["SuccessMessage"] = "Tenant request approved!";
+            var success = await _landlordService.ApproveTenantRequestAsync(requestId);
+            if (success)
+                TempData["SuccessMessage"] = "Tenant request approved!";
+            else
+                TempData["ErrorMessage"] = "Approval failed.";
+
             return RedirectToAction("TenantRequests");
         }
+
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RejectRequest(int requestId)
         {
             await _landlordService.RejectTenantRequestAsync(requestId);
-            TempData["ErrorMessage"] = "Tenant request rejected!";
-            return RedirectToAction("TenantRequests");
+            return Ok(new { success = true });
         }
 
         // MY PROPERTIES PAGE
