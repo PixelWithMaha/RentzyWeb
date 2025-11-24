@@ -33,7 +33,7 @@
             <div class="card shadow-sm border-0 rounded-3 hover-shadow p-3 text-center">
                 <i class="fas fa-home text-primary mb-2" style="font-size:2.5rem;"></i>
                 <h5>Total Properties</h5>
-                <h3 class="text-primary">@ViewBag.TotalProperties ?? 0</h3>
+                <h3 class="text-primary">@ViewBag.TotalProperties </h3>
             </div>
         </div>
 
@@ -137,9 +137,10 @@
                                             <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                                         </form>
 
-                                        <a asp-controller="Landlord" asp-action="UploadImages"
-                                           asp-route-propertyId="@property.Id"
-                                           class="btn btn-sm btn-outline-success">Images</a>
+                                                <a asp-controller="Landlord" asp-action="UpdateImages" 
+           asp-route-propertyId="@property.Id" 
+           class="btn btn-sm btn-outline-success">Images</a>
+
                                     </div>
                                 </div>
                             </div>

@@ -15,6 +15,7 @@ namespace Rentzy.DAL.Repository.Landlord
         Task<List<PropertyRentalRequest>> GetTenantRequestsAsync(int landlordId);
         Task ApproveTenantRequestAsync(int requestId);
         Task RejectTenantRequestAsync(int requestId);
+        Task DeletePropertyImageAsync(int imageId);
 
         // Dropdown helpers
         Task<List<City>> GetAllCitiesAsync();

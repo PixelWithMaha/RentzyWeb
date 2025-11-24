@@ -1,9 +1,11 @@
-﻿using Rentzy.BLL.DTOs;
+﻿using Microsoft.EntityFrameworkCore;
+using Rentzy.BLL.DTOs;
 using Rentzy.DAL.Models;
 using Rentzy.DAL.Repository.Landlord;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Rentzy.DAL.Repository;
 
 namespace Rentzy.BLL.Services
 {
@@ -11,10 +13,12 @@ namespace Rentzy.BLL.Services
     {
         private readonly ILandlordRepository _repo;
 
+
         public PropertyService(ILandlordRepository repo)
         {
-            _repo = repo;
-        }
+            _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+       }
+
 
         // CRUD
         public async Task<List<PropertyDTO>> GetPropertiesByLandlordAsync(int landlordId)
@@ -88,6 +92,12 @@ namespace Rentzy.BLL.Services
         {
             await _repo.UploadPropertyImagesAsync(propertyId, imageUrls);
         }
+
+        public Task DeletePropertyImageAsync(int imageId)
+        {
+            return _repo.DeletePropertyImageAsync(imageId);
+        }
+
 
         // Dropdown helpers
         public Task<List<City>> GetAllCitiesAsync() => _repo.GetAllCitiesAsync();

@@ -17,5 +17,6 @@ namespace Rentzy.DAL.Repository
 
         Task<IEnumerable<PropertyRentalRequest>> GetTenantRequestsAsync(int landlordId);
         Task UpdateRentalRequestStatusAsync(int requestId, string status);
+        
     }
 }

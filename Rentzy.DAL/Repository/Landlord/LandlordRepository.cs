@@ -109,6 +109,27 @@ namespace Rentzy.DAL.Repository
             }
         }
 
+        public async Task DeletePropertyImageAsync(int imageId)
+        {
+            var image = await _context.PropertyImages
+                                      .SingleOrDefaultAsync(i => i.Id == imageId);
+            if (image != null)
+            {
+                // Remove from DB
+                _context.PropertyImages.Remove(image);
+                await _context.SaveChangesAsync();
+
+                // Remove file from wwwroot
+                var filePath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot",
+                    image.ImageUrl.TrimStart('/').Replace("/", "\\")
+                );
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+            }
+        }
+
         public async Task<List<City>> GetAllCitiesAsync()
         {
             return await _context.Cities.ToListAsync();

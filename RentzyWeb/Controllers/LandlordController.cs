@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Rentzy.BLL.DTOs;
 using Rentzy.BLL.Services;
+using Rentzy.DAL.Models;
 using Rentzy.Web.Authorization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -27,13 +28,23 @@ namespace Rentzy.Web.Controllers
             if (landlordId == null) return RedirectToAction("Login", "Account");
 
             ViewBag.UserName = HttpContext.Session.GetString("UserName");
+            ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
 
-            // load properties list for dashboard
+            // Get properties
             var properties = await _propertyService.GetPropertiesByLandlordAsync(landlordId.Value);
+
+            // Set ViewBag for cards
+            ViewBag.TotalProperties = properties.Count;
+            //ViewBag.ActiveTenants = await _landlordService.GetActiveTenantsCountAsync(landlordId.Value);
+            //ViewBag.MonthlyRevenue = await _landlordService.GetMonthlyRevenueAsync(landlordId.Value);
+            //ViewBag.PendingRequests = await _landlordService.GetPendingRequestsCountAsync(landlordId.Value);
+
+            // Pass properties to the view
             ViewBag.Properties = properties;
 
             return View();
         }
+
 
         // ADD PROPERTY PAGE
         [HttpGet]
@@ -147,12 +158,35 @@ namespace Rentzy.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadImages(int propertyId, List<string> imageUrls)
+        public async Task<IActionResult> UploadImages(int propertyId, List<IFormFile> imageFiles)
         {
-            await _propertyService.UploadPropertyImagesAsync(propertyId, imageUrls);
-            TempData["SuccessMessage"] = "Images uploaded successfully!";
-            return RedirectToAction("Dashboard");
+            if (imageFiles != null && imageFiles.Any())
+            {
+                var imageUrls = new List<string>();
+                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/properties");
+                if (!Directory.Exists(uploadPath))
+                    Directory.CreateDirectory(uploadPath);
+
+                foreach (var file in imageFiles)
+                {
+                    var uniqueFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                    var filePath = Path.Combine(uploadPath, uniqueFileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    imageUrls.Add("/images/properties/" + uniqueFileName);
+                }
+
+                await _propertyService.UploadPropertyImagesAsync(propertyId, imageUrls);
+
+                // Return JSON of uploaded images
+                var result = imageUrls.Select(url => new { url }).ToList();
+                return Json(result);
+            }
+            return BadRequest("No files uploaded");
         }
+
 
         // TENANT REQUESTS
         [HttpGet]
@@ -194,5 +228,69 @@ namespace Rentzy.Web.Controllers
             var properties = await _propertyService.GetPropertiesByLandlordAsync(landlordId.Value);
             return View(properties);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> UpdateImages(int propertyId)
+        {
+            var property = await _propertyService.GetPropertyByIdAsync(propertyId);
+            if (property == null) return NotFound();
+
+            ViewBag.PropertyId = propertyId;
+            return View(property); // Pass property with Images to the view
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadNewImages(int propertyId, List<IFormFile> imageFiles)
+        {
+            if (imageFiles != null && imageFiles.Any())
+            {
+                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/properties");
+                if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
+
+                var uploadedImages = new List<PropertyImage>();
+                foreach (var file in imageFiles)
+                {
+                    var uniqueFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                    var filePath = Path.Combine(uploadPath, uniqueFileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    uploadedImages.Add(new PropertyImage
+                    {
+                        PropertyId = propertyId,
+                        ImageUrl = "/images/properties/" + uniqueFileName
+                    });
+                }
+
+                // Save to DB
+                await _propertyService.UploadPropertyImagesAsync(propertyId, uploadedImages.Select(i => i.ImageUrl).ToList());
+
+                // Get IDs from DB (or include after save)
+                var property = await _propertyService.GetPropertyByIdAsync(propertyId);
+                var result = uploadedImages.Select(u => new { id = property.Images.LastOrDefault(i => i.ImageUrl == u.ImageUrl)?.Id, url = u.ImageUrl }).ToList();
+
+                return Json(result);
+            }
+            return BadRequest("No files uploaded");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePropertyImage(int imageId)
+        {
+            await _propertyService.DeletePropertyImageAsync(imageId);
+            return Ok(new { success = true }); // return JSON for JS to remove from UI
+        }
+
+        // Done button
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DoneUpdatingImages(int propertyId)
+        {
+            return RedirectToAction("EditProperty", new { id = propertyId });
+        }
+
     }
 }
