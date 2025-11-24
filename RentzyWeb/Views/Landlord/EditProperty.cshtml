@@ -1,0 +1,93 @@
+﻿@model Rentzy.BLL.DTOs.PropertyDTO
+
+@{
+    ViewData["Title"] = "Edit Property";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-4 hover-card">
+                <div class="card-header text-center bg-gradient-primary text-white py-4 rounded-top">
+                    <h2 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Property</h2>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="EditProperty" method="post" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-bold"></label>
+                            <input asp-for="Title" class="form-control form-control-lg input-hover" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-bold"></label>
+                            <textarea asp-for="Description" class="form-control form-control-lg input-hover" rows="4"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Rent" class="form-label fw-bold"></label>
+                            <input asp-for="Rent" class="form-control form-control-lg input-hover" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CityId" class="form-label fw-bold"></label>
+                            <select asp-for="CityId" class="form-select form-select-lg input-hover" asp-items="@(new SelectList(ViewBag.Cities, "Id", "Name"))"></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PropertyTypeId" class="form-label fw-bold"></label>
+                            <select asp-for="PropertyTypeId" class="form-select form-select-lg input-hover" asp-items="@(new SelectList(ViewBag.PropertyTypes, "Id", "Name"))"></select>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-gradient-primary btn-lg shadow-sm hover-btn">
+                                <i class="fas fa-save me-2"></i>Update Property
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    }
+
+   .hover-card {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 1rem 2rem rgba(0,0,0,0.25);
+}
+
+    .input-hover:focus {
+        border-color: #6a11cb;
+        box-shadow: 0 0 8px rgba(106, 17, 203, 0.4);
+        transition: all 0.3s ease-in-out;
+    }
+
+    .hover-btn {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        color: white;
+        transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    .hover-btn:hover {
+        background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
+        transform: scale(1.05);
+    }
+
+    .form-label {
+        color: #333;
+    }
+</style>

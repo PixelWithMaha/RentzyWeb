@@ -103,6 +103,9 @@ namespace Rentzy.Web.Controllers
             var property = await _propertyService.GetPropertyByIdAsync(id);
             if (property == null) return NotFound();
 
+            ViewBag.Cities = await _propertyService.GetAllCitiesAsync();
+            ViewBag.PropertyTypes = await _propertyService.GetAllPropertyTypesAsync();
+
             return View(property);
         }
 
@@ -110,10 +113,19 @@ namespace Rentzy.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProperty(PropertyDTO dto)
         {
+            var landlordId = HttpContext.Session.GetInt32("UserId");
+            if (landlordId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            dto.LandlordId = landlordId.Value; // ensure valid FK
+
             await _propertyService.UpdatePropertyAsync(dto);
             TempData["SuccessMessage"] = "Property updated successfully!";
             return RedirectToAction("Dashboard");
         }
+
 
         // DELETE PROPERTY
         [HttpPost]
