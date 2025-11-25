@@ -2,7 +2,160 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    /* Feature Cards with Hover Effect */
+    .feature-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        color: white;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        height: 280px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+        .feature-card:hover {
+            transform: scale(1.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+    .feature-card-blue {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .feature-card-cyan {
+        background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+    }
+
+    .feature-card-pink {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .feature-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .feature-description {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+</style>
+
+<!-- Hero Section - Full Width -->
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 d-flex align-items-center">
+    <div class="container-fluid px-5 py-5">
+        <div class="row align-items-center g-5">
+            <!-- Left Column - Image -->
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <img src="~/images/new.png"
+                         alt="Rentzy Dashboard"
+                         class="img-fluid rounded-4 shadow-lg"
+                         style="max-width: 100%; height: auto;" />
+                </div>
+            </div>
+
+            <!-- Right Column - Content -->
+            <div class="col-lg-6 text-center text-lg-start">
+                <h1 class="display-3 fw-bold mb-4 lh-sm">
+                    Rentzy:
+                    <span style="background: linear-gradient(135deg, #3B82F6, #9333EA); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        Rental Management
+                    </span>
+                    <span class="d-block mt-2">Simplified</span>
+                </h1>
+
+                <p class="fs-4 text-muted mb-4 lh-base">
+                    The all-in-one platform for Landlords, Tenants, and Admins.
+                    Manage properties, agreements, payments, and maintenance with ease.
+                </p>
+
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
+                    <a asp-controller="Account" asp-action="Register"
+                       class="btn-register-modern text-center px-5 py-3">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Get Started Free
+                    </a>
+                    <a href="#features"
+                       class="btn-login-modern text-center px-5 py-3">
+                        <i class="bi bi-lightbulb me-2"></i>View Features
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section with Square Cards -->
+<div id="features" class="py-5 bg-white">
+    <div class="container-fluid px-5">
+        <h2 class="display-4 fw-bold text-center mb-5">Why Choose Rentzy?</h2>
+
+        <div class="row g-4 justify-content-center">
+            <!-- Feature Card 1 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card feature-card-blue">
+                    <div class="feature-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="feature-title">Property Management</div>
+                    <div class="feature-description">
+                        List and manage multiple properties with ease. Track availability and pricing.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Card 2 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card feature-card-cyan">
+                    <div class="feature-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <div class="feature-title">Secure Payments</div>
+                    <div class="feature-description">
+                        Handle rent payments securely. Automatic reminders and tracking.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Card 3 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card feature-card-pink">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="feature-title">Analytics Dashboard</div>
+                    <div class="feature-description">
+                        Get insights with detailed reports and real-time analytics.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="py-5 text-white" style="background: linear-gradient(135deg, #3B82F6, #2563EB);">
+    <div class="container-fluid px-5 text-center">
+        <h2 class="display-4 fw-bold mb-4">Ready to Get Started?</h2>
+        <p class="fs-5 mb-4">
+            Join thousands of landlords and tenants managing their properties efficiently.
+        </p>
+        <a asp-controller="Account" asp-action="Register"
+           class="btn btn-light btn-lg px-5 py-3 fw-bold text-primary">
+            Create Free Account
+        </a>
+    </div>
 </div>

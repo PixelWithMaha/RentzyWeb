@@ -38,5 +38,22 @@ namespace Rentzy.DAL.Context
         // Reviews
         public DbSet<Review> Reviews { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Ignore NoUser (Null Object Pattern)
+            modelBuilder.Ignore<NoUser>();
+
+            // Configure decimal precision for Payment.Amount
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.Amount)
+                .HasColumnType("decimal(18,2)");
+
+            // Set default value for User.CreatedAt
+            modelBuilder.Entity<User>()
+                .Property(u => u.CreatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }
