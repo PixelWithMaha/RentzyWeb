@@ -209,9 +209,18 @@
                             <a asp-controller="Home" asp-action="Index" class="nav-link-modern">
                                 <i class="fas fa-home me-1"></i>Home
                             </a>
+                            @if (userType == "Landlord")
+                            {
+                             <a asp-controller="Landlord" asp-action="MyProperties" class="nav-link-modern">
+                               <i class="fas fa-building me-1"></i>Properties
+                                 </a>
+                            }
+                            else
+                            {
                             <a asp-controller="Property" asp-action="Index" class="nav-link-modern">
                                 <i class="fas fa-building me-1"></i>Properties
                             </a>
+                            }
 
                             <!-- Role-Specific Dashboard Links -->
                             @if (userType == "Tenant")

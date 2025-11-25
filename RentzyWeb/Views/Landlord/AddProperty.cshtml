@@ -1,0 +1,76 @@
+﻿@model Rentzy.BLL.DTOs.PropertyDTO
+
+@{
+    ViewData["Title"] = "Add Property";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient text-white py-3" style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);">
+                    <h3 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>Add New Property
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+
+                    <form asp-action="AddProperty" asp-controller="Landlord" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Property Title</label>
+                            <input asp-for="Title" class="form-control shadow-sm" placeholder="Enter property title" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control shadow-sm" rows="4" placeholder="Describe your property"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Rent" class="form-label">Monthly Rent ($)</label>
+                            <input asp-for="Rent" type="number" class="form-control shadow-sm" placeholder="Enter rent amount" />
+                            <span asp-validation-for="Rent" class="text-danger"></span>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">City</label>
+                                <select asp-for="CityId" class="form-select shadow-sm" asp-items="@(new SelectList(ViewBag.Cities, "Id", "Name"))">
+                                    <option value="">-- Select City --</option>
+                                </select>
+                                <span asp-validation-for="CityId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Property Type</label>
+                                <select asp-for="PropertyTypeId" class="form-select shadow-sm" asp-items="@(new SelectList(ViewBag.PropertyTypes, "Id", "Name"))">
+                                    <option value="">-- Select Type --</option>
+                                </select>
+                                <span asp-validation-for="PropertyTypeId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Upload Images</label>
+                            <input type="file" name="images" class="form-control shadow-sm" multiple accept=".jpg,.jpeg,.png" />
+                            <small class="text-muted">You can select multiple images (jpg, png)</small>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                                <i class="fas fa-plus-circle me-2"></i>Add Property
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+}

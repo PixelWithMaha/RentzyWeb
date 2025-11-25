@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Rentzy.Web.Authorization;
 
+
 namespace Rentzy.Web.Controllers
 {
     [AuthorizeRole("Tenant")] // Only Tenants can access this controller

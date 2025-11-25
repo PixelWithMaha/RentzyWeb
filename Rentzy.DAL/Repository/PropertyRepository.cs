@@ -1,10 +1,12 @@
-﻿using Rentzy.DAL.Models;
+﻿// Repositories/PropertyRepository.cs
 using Microsoft.EntityFrameworkCore;
+using Rentzy.DAL.Context;
+using Rentzy.DAL.Models;
 using System.Collections.Generic;
 using System.Linq;
-using Rentzy.DAL.Context;
+using System.Threading.Tasks;
 
-namespace Rentzy.DAL.Repositories
+namespace Rentzy.DAL.Repository
 {
     public class PropertyRepository : IPropertyRepository
     {
@@ -15,62 +17,86 @@ namespace Rentzy.DAL.Repositories
             _context = context;
         }
 
-        // Get all properties with related data
-        public IEnumerable<Property> GetAllProperties()
+        public async Task<IEnumerable<Property>> GetAllPropertiesByLandlordAsync(int landlordId)
         {
-            return _context.Properties
-                .Include(p => p.Landlord) // Landlord info
-                .Include(p => p.Images)    // Property images
-                .Include(p => p.Bookings)
-                    .ThenInclude(b => b.Tenant) // Booked tenants
-                .Include(p => p.RentalRequests)
-                    .ThenInclude(r => r.Tenant) // Rental request tenants
-                .Include(p => p.ApprovalRequests)
-                    .ThenInclude(a => a.Admin)  // Admin who approved/rejected
-                .ToList();
+            return await _context.Properties
+                        .Include(p => p.Images)
+                        .Where(p => p.LandlordId == landlordId)
+                        .ToListAsync();
         }
 
-        // Get a property by ID with related data
-        public Property? GetPropertyById(int id)
+        public async Task<Property> GetPropertyByIdAsync(int id)
         {
-            return _context.Properties
-                .Include(p => p.Landlord)
-                .Include(p => p.Images)
-                .Include(p => p.Bookings)
-                    .ThenInclude(b => b.Tenant)
-                .Include(p => p.RentalRequests)
-                    .ThenInclude(r => r.Tenant)
-                .Include(p => p.ApprovalRequests)
-                    .ThenInclude(a => a.Admin)
-                .FirstOrDefault(p => p.Id == id);
+            return await _context.Properties
+                        .Include(p => p.Images)
+                        .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        // Add a new property
-        public void AddProperty(Property property)
+        public async Task AddPropertyAsync(Property property)
         {
             _context.Properties.Add(property);
+            await _context.SaveChangesAsync();
         }
 
-        // Update an existing property
-        public void UpdateProperty(Property property)
+        public async Task UpdatePropertyAsync(Property property)
         {
             _context.Properties.Update(property);
+            await _context.SaveChangesAsync();
         }
 
-        // Delete a property by ID
-        public void DeleteProperty(int id)
+        public async Task DeletePropertyAsync(int id)
         {
-            var property = _context.Properties.Find(id);
-            if (property != null)
+            var prop = await _context.Properties.FindAsync(id);
+            if (prop != null)
             {
-                _context.Properties.Remove(property);
+                _context.Properties.Remove(prop);
+                await _context.SaveChangesAsync();
             }
         }
 
-        // Save changes to the database
-        public void SaveChanges()
+        public async Task AddPropertyImagesAsync(int propertyId, List<string> imageUrls)
         {
-            _context.SaveChanges();
+            var images = imageUrls.Select(url => new PropertyImage
+            {
+                PropertyId = propertyId,
+                ImageUrl = url
+            }).ToList();
+
+            _context.PropertyImages.AddRange(images);
+            await _context.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<PropertyRentalRequest>> GetTenantRequestsAsync(int landlordId)
+        {
+            return await _context.PropertyRentalRequests
+               .Include(r => r.Property)
+               .Include(r => r.Tenant)
+               .Include(r => r.Status)
+               .Where(r => r.Property.LandlordId == landlordId
+                        && r.Status.Name == "Pending")  // only pending requests
+               .OrderByDescending(r => r.RequestedAt)
+               .ToListAsync();
+        }
+
+        public async Task UpdateRentalRequestStatusAsync(int requestId, string status)
+        {
+            var request = await _context.PropertyRentalRequests
+                                        .Include(r => r.Status)
+                                        .FirstOrDefaultAsync(r => r.Id == requestId);
+
+            if (request != null)
+            {
+                var approvalStatus = await _context.ApprovalStatuses
+                                                   .FirstOrDefaultAsync(a => a.Name == status);
+                if (approvalStatus != null)
+                {
+                    request.Status = approvalStatus;
+                    await _context.SaveChangesAsync();
+                }
+            }
+        }
+
+       
+
     }
 }
