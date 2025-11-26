@@ -1,7 +1,7 @@
 ﻿using Rentzy.BLL.DTOs;
 using Rentzy.BLL.DTOs.BookingDTOs;
 using Rentzy.DAL.Models;
-using Rentzy.DAL.Repository;
+using Rentzy.DAL;
 using Rentzy.DAL.Repository.Landlord;
 using System.Collections.Generic;
 using System.Linq;
@@ -96,6 +96,12 @@ namespace Rentzy.BLL.Services
 
             return true;
         }
+
+        public async Task<Dictionary<string, List<TenantWithProperty>>> GetTenantsWithPropertyByStatusAsync(int landlordId)
+        {
+            return await _repo.GetTenantsWithPropertyByStatusAsync(landlordId);
+        }
+
 
 
 

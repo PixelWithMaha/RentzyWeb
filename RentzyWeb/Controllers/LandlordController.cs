@@ -40,6 +40,11 @@ namespace Rentzy.Web.Controllers
             //ViewBag.MonthlyRevenue = await _landlordService.GetMonthlyRevenueAsync(landlordId.Value);
             ViewBag.PendingRequests = await _landlordService.GetPendingRequestsCountAsync(landlordId.Value);
 
+            var activeTenants = await _landlordService.GetTenantsWithPropertyByStatusAsync(landlordId.Value);
+            // Count tenants with status "Active"
+            ViewBag.ActiveTenants = activeTenants.ContainsKey("Active") ? activeTenants["Active"].Count : 0;
+
+
             // Pass properties to the view
             ViewBag.Properties = properties;
 
@@ -214,7 +219,15 @@ namespace Rentzy.Web.Controllers
         }
 
 
+        [HttpGet]
+        public async Task<IActionResult> Tenants()
+        {
+            var landlordId = HttpContext.Session.GetInt32("UserId");
+            if (landlordId == null) return RedirectToAction("Login", "Account");
 
+            var tenantsByStatus = await _landlordService.GetTenantsWithPropertyByStatusAsync(landlordId.Value);
+            return View(tenantsByStatus);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

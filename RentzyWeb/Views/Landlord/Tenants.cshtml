@@ -1,0 +1,110 @@
+﻿@model Dictionary<string, List<Rentzy.DAL.TenantWithProperty>>
+
+@{
+    ViewData["Title"] = "My Tenants";
+}
+
+<div class="container my-5">
+    <h1 class="mb-4 fw-bold">Tenants Overview</h1>
+
+    @foreach (var group in Model)
+    {
+            <div class="status-section mb-5 p-3 rounded-4">
+                <h3 class="fw-bold mb-3 text-primary">@group.Key Tenants</h3>
+
+            @if (group.Value != null && group.Value.Count > 0)
+            {
+                foreach (var tp in group.Value)
+                {
+                                <div class="tenant-row d-flex justify-content-between align-items-center mb-4 p-4 rounded-4 shadow-sm gradient-box">
+                                    <div class="left text-white">
+                                        <h4 class="fw-bold">@tp.Tenant.FirstName</h4>
+
+                                        <p class="mb-1 opacity-75">Email: @tp.Tenant.Email</p>
+                                        <p class="mb-1 opacity-75">Phone: @tp.Tenant.Phone</p>
+
+                                        <p class="mb-1">
+                                            Property: <strong class="text-warning">@tp.Property.Title</strong>
+                                        </p>
+
+                            @if (tp.Booking != null && tp.Booking.Status != null)
+                            {
+                                                <p class="mb-1">
+                                                    Status: <strong>@tp.Booking.Status.Name</strong>
+                                                </p>
+                            }
+                            else
+                            {
+                                                <p class="mb-1">
+                                                    Status: <strong class="text-light">No Booking</strong>
+                                                </p>
+                            }
+                                    </div>
+
+                                    <div class="right text-end">
+                            @if (tp.Booking != null)
+                            {
+                                                <div class="date-box fw-bold text-dark">
+                                    @tp.Booking.StartDate.ToString("dd MMM yyyy") 
+                                                    <br />
+                                                    — 
+                                                    <br />
+                                    @tp.Booking.EndDate.ToString("dd MMM yyyy")
+                                                </div>
+                            }
+                                    </div>
+                                </div>
+                }
+            }
+            else
+            {
+                        <p class="text-muted">No tenants in this category.</p>
+            }
+            </div>
+    }
+</div>
+
+<style>
+
+    /* Gradient Background Box (Like Requests Page) */
+    .gradient-box {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        color: white;
+        border: none !important;
+        transition: 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .gradient-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(96, 60, 255, 0.55);
+    }
+
+    /* Light Purple Date Box */
+    .date-box {
+        background: #efe6ff;
+        padding: 12px 18px;
+        border-radius: 12px;
+        display: inline-block;
+        box-shadow: 0 0 8px rgba(120, 80, 255, 0.2);
+        min-width: 140px;
+    }
+
+    .status-section {
+        background: #fafaff;
+        border-left: 6px solid #6a11cb;
+        padding-left: 20px;
+        border-radius: 12px;
+    }
+
+    /* Smooth animation */
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tenant-row {
+        animation: fadeIn 0.35s ease;
+    }
+
+</style>

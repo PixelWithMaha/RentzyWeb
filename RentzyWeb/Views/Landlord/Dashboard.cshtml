@@ -37,13 +37,15 @@
             </div>
         </div>
 
-        <div class="col-md-3 col-6">
-            <div class="card shadow-sm border-0 rounded-3 hover-shadow p-3 text-center">
-                <i class="fas fa-users text-success mb-2" style="font-size:2.5rem;"></i>
-                <h5>Active Tenants</h5>
-                <h3 class="text-success">@ViewBag.ActiveTenants ?? 0</h3>
-            </div>
-        </div>
+       <div class="col-md-3 col-6">
+    <div class="card shadow-sm border-0 rounded-3 hover-shadow p-3 text-center">
+        <a asp-controller="Landlord" asp-action="Tenants" class="text-decoration-none">
+            <i class="fas fa-users text-success mb-2" style="font-size:2.5rem;"></i>
+            <h5>Active Tenants</h5>
+            <h3 class="text-success">@ViewBag.ActiveTenants </h3>
+        </a>
+    </div>
+</div>
 
         <div class="col-md-3 col-6 position-relative">
             <div class="card shadow-sm border-0 rounded-3 hover-shadow p-3 text-center">

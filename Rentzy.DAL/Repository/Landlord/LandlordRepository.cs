@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Rentzy.DAL.Repository.Landlord;
 
+
 namespace Rentzy.DAL.Repository
 {
     public class LandlordRepository : ILandlordRepository
@@ -188,5 +189,34 @@ namespace Rentzy.DAL.Repository
         {
             return await _context.PropertyTypes.ToListAsync();
         }
+
+        public async Task<Dictionary<string, List<TenantWithProperty>>> GetTenantsWithPropertyByStatusAsync(int landlordId)
+        {
+            var bookings = await _context.Bookings
+                .Include(b => b.Tenant)
+                .Include(b => b.Status)
+                .Include(b => b.Property)
+                .Where(b => b.Property.LandlordId == landlordId)
+                .ToListAsync();
+
+            var grouped = bookings
+                .GroupBy(b => b.Status.Name)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(b => new TenantWithProperty
+                    {
+                        Tenant = b.Tenant,
+                        Property = b.Property,
+                        Booking = b               // 🔥 FIX 1 — Map the booking!
+                    })
+                    .ToList()
+                );
+
+            return grouped;
+        }
+
     }
+
+
+
 }
