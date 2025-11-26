@@ -14,6 +14,10 @@ namespace Rentzy.BLL.DTOs
         public int PropertyTypeId { get; set; }
 
         public int LandlordId { get; set; }
+        public string LandlordName { get; set; } = "N/A"; // Flattened
+
+        // Flatten bookings to just tenant names
+        public List<string> TenantNames { get; set; } = new List<string>();
 
         public List<PropertyImage> Images { get; set; } = new List<PropertyImage>();
     }

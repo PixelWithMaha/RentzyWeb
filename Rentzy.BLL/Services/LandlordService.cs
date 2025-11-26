@@ -13,11 +13,13 @@ namespace Rentzy.BLL.Services
     {
         private readonly ILandlordRepository _repo;
         private readonly PropertyService _propertyService;
+        private readonly IPropertyRepository _propertyRepo;
 
-        public LandlordService(ILandlordRepository repo)
+        public LandlordService(ILandlordRepository repo, IPropertyRepository propertyRepo)
         {
             _repo = repo;
-            _propertyService = new PropertyService(repo); // reuse core property logic
+            _propertyRepo = propertyRepo;
+            _propertyService = new PropertyService(repo,propertyRepo); // reuse core property logic
         }
 
         // Property CRUD delegated to PropertyService
