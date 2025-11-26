@@ -17,6 +17,18 @@ namespace Rentzy.DAL.Repository
             _context = context;
         }
 
+        public async Task<IEnumerable<Property>> SearchByPropertyType(string typeName)
+        {
+            return  _context.Properties
+                .Include(p => p.Landlord)
+                .Include(p => p.PropertyType)
+                .Include(p => p.Bookings)
+                    .ThenInclude(b => b.Tenant)
+                .Where(p => p.PropertyType.Name.Contains(typeName))
+                .ToList();
+        }
+
+
         public async Task<IEnumerable<Property>> GetAllPropertiesByLandlordAsync(int landlordId)
         {
             return await _context.Properties
@@ -96,7 +108,25 @@ namespace Rentzy.DAL.Repository
             }
         }
 
-       
+        //public async Task<IEnumerable<Property>> GetAllPropertiesAsync()
+        //{
+        //    return await _context.Properties
+        //        .Include(p => p.Images)
+        //        .Include(p => p.PropertyType)
+        //        .Include(p => p.Landlord)
+        //        .ToListAsync();
+        //}
+
+        public async Task<List<Property>> GetAllPropertiesAsync()
+        {
+            return await _context.Properties
+                .Include(p => p.Landlord)                  // Include landlord details
+                .Include(p => p.Bookings)                  // Include bookings
+                .ThenInclude(b => b.Tenant)           // Include tenant details in bookings
+                .Include(p => p.Images)                    // Include property images
+                .Include(p => p.PropertyType)              // Include property type
+                .ToListAsync();
+        }
 
     }
 }

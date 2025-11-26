@@ -9,6 +9,8 @@ namespace Rentzy.BLL.Services
     public interface IPropertyService
     {
         Task<IEnumerable<PropertyDTO>> GetPropertiesByLandlordAsync(int landlordId);
+        Task<IEnumerable<PropertyDTO>> GetAllPropertiesAsync();
+        Task<IEnumerable<PropertyDTO>> SearchPropertiesByTypeAsync(string typeName);
         Task<PropertyDTO> GetPropertyByIdAsync(int id);
         Task AddPropertyAsync(PropertyDTO propertyDto);
         Task UpdatePropertyAsync(PropertyDTO propertyDto);

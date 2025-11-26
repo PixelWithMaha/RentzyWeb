@@ -7,7 +7,10 @@ namespace Rentzy.DAL.Repository
 {
     public interface IPropertyRepository
     {
+        //Task<IEnumerable<Property>> GetAllPropertiesAsync();
+        Task<List<Property>> GetAllPropertiesAsync();
         Task<IEnumerable<Property>> GetAllPropertiesByLandlordAsync(int landlordId);
+        Task<IEnumerable<Property>>SearchByPropertyType(string typeName);
         Task<Property> GetPropertyByIdAsync(int id);
         Task AddPropertyAsync(Property property);
         Task UpdatePropertyAsync(Property property);
