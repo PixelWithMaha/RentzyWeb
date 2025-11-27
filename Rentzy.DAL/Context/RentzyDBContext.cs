@@ -35,6 +35,7 @@ namespace Rentzy.DAL.Context
         // Approvals
         public DbSet<PropertyApprovalRequest> PropertyApprovalRequests { get; set; }
         public DbSet<ApprovalStatus> ApprovalStatuses { get; set; }
+        public DbSet<PaymentNotification> PaymentNotifications { get; set; }
 
         // Reviews
         public DbSet<Review> Reviews { get; set; }

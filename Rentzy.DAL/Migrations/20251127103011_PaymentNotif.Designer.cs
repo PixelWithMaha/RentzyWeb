@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rentzy.DAL.Context;
 
@@ -11,9 +12,11 @@ using Rentzy.DAL.Context;
 namespace Rentzy.DAL.Migrations
 {
     [DbContext(typeof(RentzyDBContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127103011_PaymentNotif")]
+    partial class PaymentNotif
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -105,51 +108,6 @@ namespace Rentzy.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Cities");
-                });
-
-            modelBuilder.Entity("Rentzy.DAL.Models.LandlordApproval", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AdminNotes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("ApprovalStatusId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DocumentUrl")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("LandlordId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ReviewedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ReviewedByAdminId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SubmittedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApprovalStatusId");
-
-                    b.HasIndex("LandlordId");
-
-                    b.ToTable("LandlordApprovals");
                 });
 
             modelBuilder.Entity("Rentzy.DAL.Models.Payment", b =>
@@ -480,10 +438,6 @@ namespace Rentzy.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Users");
@@ -496,6 +450,10 @@ namespace Rentzy.DAL.Migrations
             modelBuilder.Entity("Rentzy.DAL.Models.Admin", b =>
                 {
                     b.HasBaseType("Rentzy.DAL.Models.User");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasDiscriminator().HasValue("Admin");
                 });
@@ -542,25 +500,6 @@ namespace Rentzy.DAL.Migrations
                     b.Navigation("Status");
 
                     b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("Rentzy.DAL.Models.LandlordApproval", b =>
-                {
-                    b.HasOne("Rentzy.DAL.Models.ApprovalStatus", "ApprovalStatus")
-                        .WithMany()
-                        .HasForeignKey("ApprovalStatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Rentzy.DAL.Models.Landlord", "Landlord")
-                        .WithMany()
-                        .HasForeignKey("LandlordId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ApprovalStatus");
-
-                    b.Navigation("Landlord");
                 });
 
             modelBuilder.Entity("Rentzy.DAL.Models.Payment", b =>

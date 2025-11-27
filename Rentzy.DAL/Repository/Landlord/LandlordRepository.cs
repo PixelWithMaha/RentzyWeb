@@ -82,6 +82,7 @@ namespace Rentzy.DAL.Repository
         {
             return await _context.PropertyRentalRequests
                 .Include(r => r.Status)
+                .Include(r => r.Property)   // 🔥 Add this
                 .FirstOrDefaultAsync(r => r.Id == requestId);
         }
 
