@@ -23,6 +23,8 @@ namespace Rentzy.DAL.Repository.Landlord
         Task<bool> ApproveTenantRequestAsync(int requestId);
         Task<ApprovalStatus?> GetRequestStatusByNameAsync(string name);
         Task<BookingStatus?> GetBookingStatusByNameAsync(string name);
+        Task<Dictionary<string, List<TenantWithProperty>>> GetTenantsWithPropertyByStatusAsync(int landlordId);
+
 
         // Dropdown helpers
         Task<List<City>> GetAllCitiesAsync();
