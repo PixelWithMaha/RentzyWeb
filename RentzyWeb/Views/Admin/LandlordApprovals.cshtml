@@ -1,0 +1,152 @@
+﻿@using Rentzy.DAL.Models
+@model List<Rentzy.DAL.Models.LandlordApproval>
+
+@{
+    ViewData["Title"] = "Landlord Approvals";
+    var statuses = ViewBag.ApprovalStatuses as List<Rentzy.DAL.Models.ApprovalStatus> ?? new List<Rentzy.DAL.Models.ApprovalStatus>();
+    int currentStatus = ViewBag.CurrentStatusId ?? 1;
+}
+
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-8">
+            <h3><i class="fas fa-check-circle me-2 text-primary"></i>Landlord Approvals</h3>
+            <p class="text-muted">Manage landlord verification requests</p>
+        </div>
+        <div class="col-4 text-end">
+            <a class="btn btn-outline-secondary" href="@Url.Action("Dashboard", "Admin")"><i class="fas fa-arrow-left me-2"></i>Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <form method="get" class="d-flex gap-2 align-items-center">
+                        <label class="mb-0">Filter Status:</label>
+                        <select name="statusId" class="form-select w-auto" onchange="this.form.submit()">
+                            @foreach (var s in statuses)
+                            {
+                                <option value="@s.Id" selected="@(s.Id == currentStatus ? "selected" : null)">
+                                    @s.Name
+                                </option>
+                            }
+
+                        </select>
+                        <a class="btn btn-sm btn-outline-primary ms-2" href="@Url.Action("LandlordApprovals", "Admin")">Reset</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-user-clock" style="font-size:3rem; opacity:0.2"></i>
+                        <p class="mt-3 text-muted">No approval requests found for selected status.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Landlord</th>
+                                        <th>Submitted</th>
+                                        <th>Documents</th>
+                                        <th>Status</th>
+                                        <th>Reviewed At</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>@item.Id</td>
+                                            <td>
+                                                <strong>@(item.Landlord?.FirstName) @(item.Landlord?.LastName)</strong><br />
+                                                <small class="text-muted">@item.Landlord?.Email</small>
+                                            </td>
+                                            <td>@item.SubmittedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                            
+                                            <td>
+                                                <span class="badge bg-@(item.ApprovalStatusId == 1 ? "secondary" : item.ApprovalStatusId == 2 ? "success" : item.ApprovalStatusId == 3 ? "danger" : "warning")">
+                                                    @(item.ApprovalStatus?.Name ?? "Unknown")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @(item.ReviewedAt.HasValue? item.ReviewedAt.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm") : "-")
+                                            </td>
+                                            <td class="text-end">
+                                                @* Only show action buttons when pending *@
+                                                @if (item.ApprovalStatusId == ApprovalStatusConstants.Pending)
+                                                {
+                                                    <div class="d-flex justify-content-end gap-2">
+                                                        <form asp-action="ApproveLandlord" asp-controller="Admin" method="post" class="d-inline">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="id" value="@item.Id" />
+                                                            <input type="hidden" name="notes" value="" />
+                                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Are you sure you want to approve this landlord?');">
+                                                                <i class="fas fa-check me-1"></i>Approve
+                                                            </button>
+                                                        </form>
+
+                                                        <form asp-action="RejectLandlord" asp-controller="Admin" method="post" class="d-inline">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="id" value="@item.Id" />
+                                                            <input type="hidden" name="notes" value="Rejected by admin" />
+                                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Reject this request?');">
+                                                                <i class="fas fa-times me-1"></i>Reject
+                                                            </button>
+                                                        </form>
+
+                                                        <form asp-action="CancelLandlordApproval" asp-controller="Admin" method="post" class="d-inline">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="id" value="@item.Id" />
+                                                            <input type="hidden" name="notes" value="Cancelled by admin" />
+                                                            <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Cancel this request?');">
+                                                                <i class="fas fa-ban me-1"></i>Cancel
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-sm btn-outline-primary" href="@Url.Action("LandlordApprovalDetails", "Admin", new { id = item.Id })">
+                                                        <i class="fas fa-eye me-1"></i>View
+                                                    </a>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div> <!-- table-responsive -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@* include constants for client-side usage *@
+@section Scripts {
+    <script>
+        // small helper - nothing required now
+    </script>
+}
+  is me koi changes na krna except that k Douments or Actions ka column hata kr baaki k proportions balance kr do k UI professional hi lgy

@@ -1,10 +1,11 @@
-﻿using Rentzy.DAL.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Rentzy.DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using static Rentzy.DAL.Models.LandlordApproval;
 
 namespace Rentzy.DAL.Context
 {
@@ -37,7 +38,7 @@ namespace Rentzy.DAL.Context
 
         // Reviews
         public DbSet<Review> Reviews { get; set; }
-
+        public DbSet<LandlordApproval> LandlordApprovals { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Ignore NoUser (Null Object Pattern)
@@ -52,8 +53,31 @@ namespace Rentzy.DAL.Context
             modelBuilder.Entity<User>()
                 .Property(u => u.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
+            //---------------------------------------------------------------------
 
+            modelBuilder.Entity<LandlordApproval>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                // Relationship: Landlord → LandlordApproval (1-to-many)
+                entity.HasOne(e => e.Landlord)
+                    .WithMany()                       // ❗ No navigation property on Landlord
+                    .HasForeignKey(e => e.LandlordId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Relationship: ApprovalStatus → LandlordApproval (1-to-many)
+                entity.HasOne(e => e.ApprovalStatus)
+                    .WithMany()                       // ❗ No navigation collection needed
+                    .HasForeignKey(e => e.ApprovalStatusId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(e => e.SubmittedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
+            });
+
+            //-----------------------------------------------------------------------
             base.OnModelCreating(modelBuilder);
+
         }
     }
 }

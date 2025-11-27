@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Rentzy.BLL.DTOs;
 using Rentzy.BLL.Exceptions;
 using Rentzy.BLL.Services;
+using Rentzy.DAL.Models;
 using Rentzy.Web.Models;
 using System;
 using System.Dynamic;
@@ -112,9 +113,9 @@ namespace Rentzy.Web.Controllers
                     _ => RedirectToAction("Index", "Home")
                 };
             }
-            catch (AuthenticationException)
+            catch (AuthenticationException ex)
             {
-                ModelState.AddModelError("", "Invalid email or password. Please try again.");
+                ModelState.AddModelError("",ex.Message.ToString() );
                 return View(model);
             }
             catch (ValidationException ex)

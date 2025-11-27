@@ -14,6 +14,7 @@ namespace Rentzy.BLL.DTOs
         public string Email { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
         public string UserType { get; set; } = string.Empty; 
+        public string Role {  get; set; } = string.Empty;  
         public DateTime CreatedAt { get; set; }
 
         public string FullName => $"{FirstName} {LastName}";
