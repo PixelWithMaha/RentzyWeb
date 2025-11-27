@@ -41,3 +41,17 @@ VALUES
     ( 'Cancelled');
 
 
+    INSERT INTO PaymentMethod (Name)
+VALUES 
+('Credit Card'),
+('Debit Card'),
+('Bank Transfer'),
+('Cash'),
+('PayPal');
+
+
+INSERT INTO PaymentStatus (Name)
+VALUES
+('Pending'),
+('Paid'),
+('Failed');
