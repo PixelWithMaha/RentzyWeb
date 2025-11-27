@@ -94,39 +94,49 @@
                 <span>Add Property</span>
             </a>
         </div>
+
         <div class="col-md-3 col-6">
             <a asp-controller="Landlord" asp-action="MyProperties" class="btn btn-gradient-blue quick-action-btn shadow-hover">
                 <i class="fas fa-list mb-2" style="font-size:2rem;"></i>
                 <span>My Properties</span>
             </a>
         </div>
-        <div class="col-md-3 col-6">
-            <a asp-controller="Landlord" asp-action="TenantRequests" class="btn btn-gradient-green quick-action-btn shadow-hover">
-                <i class="fas fa-users mb-2" style="font-size:2rem;"></i>
-                <span>Tenant Requests</span>
-            </a>
-        </div>
-        <div class="col-md-3 col-6">
-            <a asp-controller="Reports" asp-action="Index" class="btn btn-gradient-yellow quick-action-btn shadow-hover">
-                <i class="fas fa-chart-line mb-2" style="font-size:2rem;"></i>
-                <span>Reports</span>
-            </a>
-        </div>
+
+        <!-- View Tenants button -->
         <div class="col-md-3 col-6">
             <a asp-controller="Landlord" asp-action="Tenants" class="btn btn-gradient-purple quick-action-btn shadow-hover">
                 <i class="fas fa-eye mb-2" style="font-size:2rem;"></i>
                 <span>View Your Tenants</span>
             </a>
         </div>
+
+        <!-- Payments button aligned right next to View Tenants -->
+        <div class="col-md-3 col-6">
+            <a asp-controller="Payment" asp-action="Index" class="btn quick-action-btn shadow-hover"
+               style="background-color:#80ef80; color:#064d00; display:flex; flex-direction:column; justify-content:center; align-items:center; border-radius:10px;">
+                <i class="fas fa-money-bill-wave mb-2" style="font-size:2rem;"></i>
+                <span>Payments</span>
+                @if (ViewBag.PendingPaymentsReminders != null && ViewBag.PendingPaymentsReminders > 0)
+                {
+                        <span class="pending-dot">@ViewBag.PendingPaymentsReminders</span>
+                }
+            </a>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <a asp-controller="Landlord" asp-action="TenantRequests" class="btn btn-gradient-green quick-action-btn shadow-hover">
+                <i class="fas fa-users mb-2" style="font-size:2rem;"></i>
+                <span>Tenant Requests</span>
+            </a>
+        </div>
+
+        <div class="col-md-3 col-6">
+            <a asp-controller="Reports" asp-action="Index" class="btn btn-gradient-yellow quick-action-btn shadow-hover">
+                <i class="fas fa-chart-line mb-2" style="font-size:2rem;"></i>
+                <span>Reports</span>
+            </a>
+        </div>
     </div>
-
-    <div class="col-md-3 col-6">
-    <a asp-controller="Payment" asp-action="Index" class="btn btn-gradient-orange quick-action-btn shadow-hover">
-        <i class="fas fa-money-check-alt mb-2" style="font-size:2rem;"></i>
-        <span>Payments</span>
-    </a>
-</div>
-
 
     <!-- Properties Overview Header Ribbon -->
     <div class="row mb-3">
@@ -192,7 +202,7 @@
 /* Modern Sleek Dashboard Header */
 .dashboard-header {
     width: 100%;
-    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%); /* smooth gradient */
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
     color: #fff;
     padding: 25px 30px;
     border-radius: 10px;
@@ -220,7 +230,6 @@
     margin-right: 15px;
 }
 
-
 /* Stats Cards Hover */
 .stats-card { transition: transform 0.3s, box-shadow 0.3s; }
 .stats-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.25); }
@@ -239,5 +248,5 @@
 .hover-shadow:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.25); }
 
 /* Notification Dot */
-.pending-dot { position: absolute; top: 10px; right: 15px; width: 12px; height: 12px; background-color: red; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
+.pending-dot { position: absolute; top: 10px; right: 15px; width: 20px; height: 20px; background-color: red; border-radius: 50%; color:white; font-size:0.8rem; font-weight:bold; display:flex; justify-content:center; align-items:center; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
 </style>
