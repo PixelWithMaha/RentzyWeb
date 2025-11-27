@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rentzy.DAL.Context;
 
@@ -11,9 +12,11 @@ using Rentzy.DAL.Context;
 namespace Rentzy.DAL.Migrations
 {
     [DbContext(typeof(RentzyDBContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127102336_InitLandlordApproval")]
+    partial class InitLandlordApproval
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -206,34 +209,6 @@ namespace Rentzy.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PaymentMethods");
-                });
-
-            modelBuilder.Entity("Rentzy.DAL.Models.PaymentNotification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsSeen")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PaymentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PaymentId");
-
-                    b.ToTable("PaymentNotifications");
                 });
 
             modelBuilder.Entity("Rentzy.DAL.Models.PaymentStatus", b =>
@@ -588,17 +563,6 @@ namespace Rentzy.DAL.Migrations
                     b.Navigation("PaymentMethod");
 
                     b.Navigation("Status");
-                });
-
-            modelBuilder.Entity("Rentzy.DAL.Models.PaymentNotification", b =>
-                {
-                    b.HasOne("Rentzy.DAL.Models.Payment", "Payment")
-                        .WithMany()
-                        .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("Rentzy.DAL.Models.Property", b =>
