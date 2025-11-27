@@ -6,6 +6,8 @@ using Rentzy.DAL.Repository.Landlord;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Rentzy.DAL.Repository;
+using Rentzy.DAL.Repositories;
 
 namespace Rentzy.BLL.Services
 {
@@ -14,12 +16,14 @@ namespace Rentzy.BLL.Services
         private readonly ILandlordRepository _repo;
         private readonly PropertyService _propertyService;
         private readonly IPropertyRepository _propertyRepo;
+        private readonly PaymentService _paymentService;
 
-        public LandlordService(ILandlordRepository repo, IPropertyRepository propertyRepo)
+        public LandlordService(ILandlordRepository repo, IPropertyRepository propertyRepo, PaymentService paymentService)
         {
             _repo = repo;
             _propertyRepo = propertyRepo;
-            _propertyService = new PropertyService(repo,propertyRepo); // reuse core property logic
+            _propertyService = new PropertyService(repo, propertyRepo); // reuse core property logic
+            _paymentService = paymentService;
         }
 
         // Property CRUD delegated to PropertyService
@@ -65,24 +69,20 @@ namespace Rentzy.BLL.Services
         }
 
 
+        // Approve request, create booking & payment
         public async Task<bool> ApproveTenantRequestAsync(int requestId)
         {
-            // 1️⃣ Get the request
             var request = await _repo.GetTenantRequestByIdAsync(requestId);
-            if (request == null || request.Status.Name != "Pending")
-                return false; // Already approved/rejected or not found
+            if (request == null || request.Status.Name != "Pending") return false;
 
-            // 2️⃣ Get approved status for PropertyRentalRequest
-            var approvedRequestStatus = await _repo.GetRequestStatusByNameAsync("Approved");
-            if (approvedRequestStatus == null) return false;
+            var approvedStatus = await _repo.GetRequestStatusByNameAsync("Approved");
+            if (approvedStatus == null) return false;
+            request.StatusId = approvedStatus.Id;
+            await _repo.UpdateRequestAsync(request);
 
-            request.StatusId = approvedRequestStatus.Id;
-
-            // 3️⃣ Get "Active" booking status
             var activeBookingStatus = await _repo.GetBookingStatusByNameAsync("Active");
             if (activeBookingStatus == null) return false;
 
-            // 4️⃣ Create a booking
             var booking = new Booking
             {
                 TenantId = request.TenantId,
@@ -92,12 +92,14 @@ namespace Rentzy.BLL.Services
                 EndDate = DateTime.Now.AddMonths(1)
             };
 
-            // 5️⃣ Save changes
-            await _repo.UpdateRequestAsync(request);
             await _repo.AddBookingAsync(booking);
+
+            // Create initial pending payment
+            await _paymentService.CreateInitialPaymentAsync(booking.Id, request.Property.MonthlyRent);
 
             return true;
         }
+
 
         public async Task<Dictionary<string, List<TenantWithProperty>>> GetTenantsWithPropertyByStatusAsync(int landlordId)
         {

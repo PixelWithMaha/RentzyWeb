@@ -1,0 +1,35 @@
+﻿@model Rentzy.BLL.DTOs.PaymentDTO
+
+@{
+    ViewData["Title"] = "Payment Details";
+}
+
+<div class="container my-5">
+
+    <h2 class="mb-4">Payment Details</h2>
+
+    <div class="card shadow-sm p-4 rounded">
+        <dl class="row">
+            <dt class="col-sm-3">Tenant</dt>
+            <dd class="col-sm-9">@Model.TenantName</dd>
+
+            <dt class="col-sm-3">Booking</dt>
+            <dd class="col-sm-9">@Model.PropertyTitle</dd>
+
+            <dt class="col-sm-3">Amount</dt>
+            <dd class="col-sm-9">@Model.Amount.ToString("C")</dd>
+
+            <dt class="col-sm-3">Payment Method</dt>
+            <dd class="col-sm-9">@Model.Method</dd>
+
+            <dt class="col-sm-3">Status</dt>
+            <dd class="col-sm-9">@Model.StatusName</dd>
+
+            <dt class="col-sm-3">Paid At</dt>
+            <dd class="col-sm-9">@Model.PaidAt?.ToString("dd MMM yyyy") ?? "-" </dd>
+        </dl>
+
+        <a asp-action="Index" class="btn btn-secondary mt-3">Back to Payments</a>
+    </div>
+
+</div>

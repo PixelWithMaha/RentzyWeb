@@ -14,11 +14,13 @@ namespace Rentzy.Web.Controllers
     {
         private readonly PropertyService _propertyService;
         private readonly LandlordService _landlordService;
+        private readonly PaymentService _paymentService;
 
-        public LandlordController(PropertyService propertyService, LandlordService landlordService)
+        public LandlordController(PropertyService propertyService, LandlordService landlordService,PaymentService payservice)
         {
             _propertyService = propertyService;
             _landlordService = landlordService;
+            _paymentService = payservice;
         }
 
         // LANDLORD DASHBOARD

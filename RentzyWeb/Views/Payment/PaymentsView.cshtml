@@ -1,0 +1,47 @@
+﻿@model IEnumerable<Rentzy.BLL.DTOs.PaymentDTO>
+
+@{
+    ViewData["Title"] = "Payments";
+}
+
+<div class="container my-5">
+
+    <h2 class="mb-4">Payments Overview</h2>
+
+    <table class="table table-striped table-hover shadow-sm rounded">
+        <thead class="table-dark">
+            <tr>
+                <th>Tenant</th>
+                <th>Booking</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Status</th>
+                <th>Paid At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var payment in Model)
+            {
+                    <tr>
+                        <td>@payment.TenantName</td>
+                        <td>@payment.PropertyTitle</td>
+                        <td>@payment.Amount.ToString("C")</td>
+                        <td>@payment.Method</td>
+                        <td>@payment.StatusName</td>
+                        <td>@(payment.PaidAt.HasValue ? payment.PaidAt.Value.ToString("dd MMM yyyy") : "-")</td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@payment.Id" class="btn btn-sm btn-info me-1">View</a>
+                        @if (payment.StatusName == "Pending")
+                        {
+                                    <form asp-action="SendReminder" method="post" class="d-inline">
+                                        <input type="hidden" name="paymentId" value="@payment.Id" />
+                                        <button type="submit" class="btn btn-sm btn-warning">Send Reminder</button>
+                                    </form>
+                        }
+                        </td>
+                    </tr>
+            }
+        </tbody>
+    </table>
+</div>
