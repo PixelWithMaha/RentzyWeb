@@ -1,6 +1,13 @@
-﻿@model IEnumerable<Rentzy.DAL.Models.Property>
+﻿@model IEnumerable<Rentzy.BLL.DTOs.PropertyDTO>
 
 <h1>Properties</h1>
+
+<form asp-controller="Property" asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="searchType" class="form-control" placeholder="Search by property type..." />
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
 
 <table class="table table-bordered">
     <thead>
@@ -14,26 +21,26 @@
     <tbody>
         @foreach (var prop in Model)
         {
-                <tr>
-                    <td>@prop.Title</td>
-                    <td>@prop.MonthlyRent</td>
-                    <td>@(prop.Landlord != null ? prop.Landlord.FirstName + " " + prop.Landlord.LastName : "N/A")</td>
-                    <td>
-                    @if (prop.Bookings != null && prop.Bookings.Any())
+            <tr>
+                <td>@prop.Title</td>
+                <td>@prop.Rent</td>
+                <td>@prop.LandlordName</td>
+                <td>
+                    @if (prop.TenantNames.Any())
                     {
-                                <ul>
-                            @foreach (var booking in prop.Bookings)
+                        <ul>
+                            @foreach (var tenant in prop.TenantNames)
                             {
-                                        <li>@(booking.Tenant.FirstName + " " + booking.Tenant.LastName)</li>
+                                <li>@tenant</li>
                             }
-                                </ul>
+                        </ul>
                     }
                     else
                     {
-                                <span>No tenants</span>
+                        <span>No tenants</span>
                     }
-                    </td>
-                </tr>
+                </td>
+            </tr>
         }
     </tbody>
 </table>

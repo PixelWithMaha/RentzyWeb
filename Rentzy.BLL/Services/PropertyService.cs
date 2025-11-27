@@ -12,12 +12,45 @@ namespace Rentzy.BLL.Services
     public class PropertyService
     {
         private readonly ILandlordRepository _repo;
+        private readonly IPropertyRepository _propertyRepository;
 
 
-        public PropertyService(ILandlordRepository repo)
+        public PropertyService(ILandlordRepository repo,IPropertyRepository prepo)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo));
-       }
+            _propertyRepository= prepo ?? throw new ArgumentNullException(nameof(prepo));
+        }
+        public async Task<IEnumerable<PropertyDTO>> GetAllPropertiesAsync()
+        {
+            var properties = await _propertyRepository.GetAllPropertiesAsync();
+            return properties.Select(MapToDTO).ToList();
+        }
+
+        public async Task<IEnumerable<PropertyDTO>> SearchPropertiesByTypeAsync(string typeName)
+        {
+            var properties = await _propertyRepository.SearchByPropertyType(typeName);
+            return properties.Select(MapToDTO).ToList();
+        }
+
+        private PropertyDTO MapToDTO(Rentzy.DAL.Models.Property p)
+        {
+            if (p == null) return null;
+
+            return new PropertyDTO
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                Rent = (int)p.MonthlyRent,
+                CityId = p.CityId,
+                PropertyTypeId = p.PropertyTypeId,
+                LandlordId = p.LandlordId,
+                LandlordName = p.Landlord != null ? p.Landlord.FirstName + " " + p.Landlord.LastName : "N/A",
+                TenantNames = p.Bookings?.Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName).ToList() ?? new List<string>(),
+                Images = p.Images?.ToList() ?? new List<PropertyImage>()
+            };
+        }
+
 
 
         // CRUD
