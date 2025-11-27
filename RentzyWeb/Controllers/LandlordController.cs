@@ -38,8 +38,7 @@ namespace Rentzy.Web.Controllers
 
             // Set ViewBag for cards
             ViewBag.TotalProperties = properties.Count;
-            //ViewBag.ActiveTenants = await _landlordService.GetActiveTenantsCountAsync(landlordId.Value);
-            //ViewBag.MonthlyRevenue = await _landlordService.GetMonthlyRevenueAsync(landlordId.Value);
+           ViewBag.MonthlyRevenue = await _landlordService.GetMonthlyRevenueAsync(landlordId.Value);
             ViewBag.PendingRequests = await _landlordService.GetPendingRequestsCountAsync(landlordId.Value);
 
             var activeTenants = await _landlordService.GetTenantsWithPropertyByStatusAsync(landlordId.Value);
