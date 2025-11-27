@@ -27,6 +27,9 @@ builder.Services.AddScoped<PropertyService>();
 
 builder.Services.AddScoped<LandlordService>();
 
+builder.Services.AddScoped<PaymentRepository>();
+builder.Services.AddScoped<PaymentService>();
+
 
 // ===== ADD SESSION CONFIGURATION HERE =====
 builder.Services.AddDistributedMemoryCache(); // Required for session
