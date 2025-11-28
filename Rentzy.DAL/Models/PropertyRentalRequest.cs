@@ -24,6 +24,9 @@ namespace Rentzy.DAL.Models
         public ApprovalStatus Status { get; set; }
 
         public DateTime RequestedAt { get; set; } = DateTime.Now;
+        // NEW COLUMNS
+        public DateTime StartDate { get; set; }  // Tenant-selected start
+        public DateTime EndDate { get; set; }    // Tenant-selected end
     }
 
 }
