@@ -18,7 +18,7 @@ html {
 
 body {
     /* Creates space at the bottom for the fixed-height footer (60px) */
-    margin-bottom: 60px;
+    margin-bottom: 30px;
 }
 
 /* Custom focus styles to match Bootstrap defaults */
@@ -33,7 +33,7 @@ body {
 
 .hero-section {
     background-color: #f7f9fc;
-    padding-top: 4rem;
+    padding-top: 2rem;
     padding-bottom: 4rem;
 }
 

@@ -1,15 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Rentzy.BLL.Configuration;
 using Rentzy.BLL.Services;
 using Rentzy.BLL.Services.ApprovalServices;
 using Rentzy.DAL.Context;
 using Rentzy.DAL.Repositories;
-using Rentzy.DAL.Repository;
 using Rentzy.DAL.Repository.Approvals;
-using Rentzy.DAL.Repository.Landlord;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
+// Add services
 builder.Services.AddControllersWithViews();
 
 
@@ -20,45 +19,45 @@ builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddDbContext<RentzyDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// ✅ Configure EmailSettings from appsettings.json
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
 // Register repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<AuthService>();
 
-
-builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
-builder.Services.AddScoped<ILandlordRepository, LandlordRepository>();
 
 builder.Services.AddScoped<ILandlordApprovalService, LandlordApprovalService>();
 builder.Services.AddScoped<ILandlordApprovalRepository, LandlordApprovalRepository>();
 
-// Add Services
-builder.Services.AddScoped<PropertyService>();
-builder.Services.AddScoped<LandlordService>();
 
-builder.Services.AddScoped<LandlordApprovalService>();
-builder.Services.AddScoped<PaymentRepository>();
-builder.Services.AddScoped<PaymentService>();
+// Register services
+builder.Services.AddScoped<AuthService>();
 
+// ✅ Register Email Service (Switch between Mock and Real)
+var emailSettings = builder.Configuration.GetSection("EmailSettings").Get<EmailSettings>();
+{
+    builder.Services.AddScoped<EmailService>();
+    Console.WriteLine("Using REAL Gmail Email Service");
+}
 
 
 // ===== ADD SESSION CONFIGURATION HERE =====
 builder.Services.AddDistributedMemoryCache(); // Required for session
 
+// Session
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Session timeout
-    options.Cookie.HttpOnly = true; // Security: cookie not accessible via JavaScript
-    options.Cookie.IsEssential = true; // Required for GDPR compliance
-    options.Cookie.Name = ".Rentzy.Session"; // Custom cookie name
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
-// ==========================================
 
-// Add HttpContextAccessor (optional, for accessing session in services)
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Configure middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -67,12 +66,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
-// ===== ADD SESSION MIDDLEWARE HERE (IMPORTANT ORDER!) =====
-app.UseSession(); // Must be AFTER UseRouting() and BEFORE UseAuthorization()
-// ========================================================
+app.UseSession();
 
 app.UseAuthorization();
 
