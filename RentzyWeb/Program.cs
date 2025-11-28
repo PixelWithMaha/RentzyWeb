@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.Services;
 using Rentzy.BLL.Services.ApprovalServices;
+using Rentzy.BLL.Services.ReportsServices;
 using Rentzy.DAL.Context;
 using Rentzy.DAL.Repositories;
 using Rentzy.DAL.Repository;
 using Rentzy.DAL.Repository.Approvals;
 using Rentzy.DAL.Repository.Landlord;
+using Rentzy.DAL.Repository.Reports;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,8 +34,12 @@ builder.Services.AddScoped<PropertyService>();
 builder.Services.AddScoped<LandlordService>();
 
 builder.Services.AddScoped<LandlordApprovalService>();
+
 builder.Services.AddScoped<PaymentRepository>();
 builder.Services.AddScoped<PaymentService>();
+
+builder.Services.AddScoped<ReportsRepository>();
+builder.Services.AddScoped<ReportsService>();
 
 // ===== ADD SESSION CONFIGURATION HERE =====
 builder.Services.AddDistributedMemoryCache(); // Required for session

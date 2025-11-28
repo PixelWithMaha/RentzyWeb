@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.DTOs;
 using Rentzy.BLL.Services;
 using Rentzy.DAL.Models;
+using Rentzy.BLL.Services.ReportsServices;
 using Rentzy.Web.Authorization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,12 +16,14 @@ namespace Rentzy.Web.Controllers
         private readonly PropertyService _propertyService;
         private readonly LandlordService _landlordService;
         private readonly PaymentService _paymentService;
+        private readonly ReportsService _reportsService;
 
-        public LandlordController(PropertyService propertyService, LandlordService landlordService,PaymentService payservice)
+        public LandlordController(PropertyService propertyService, LandlordService landlordService,PaymentService payservice, ReportsService reportsService)
         {
             _propertyService = propertyService;
             _landlordService = landlordService;
             _paymentService = payservice;
+            _reportsService = reportsService;
         }
 
         // LANDLORD DASHBOARD
@@ -33,24 +36,33 @@ namespace Rentzy.Web.Controllers
             ViewBag.UserName = HttpContext.Session.GetString("UserName");
             ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
 
-            // Get properties
             var properties = await _propertyService.GetPropertiesByLandlordAsync(landlordId.Value);
-
-            // Set ViewBag for cards
             ViewBag.TotalProperties = properties.Count;
-           ViewBag.MonthlyRevenue = await _landlordService.GetMonthlyRevenueAsync(landlordId.Value);
+            ViewBag.Properties = properties;
+            ViewBag.MonthlyRevenue = await _landlordService.GetMonthlyRevenueAsync(landlordId.Value);
             ViewBag.PendingRequests = await _landlordService.GetPendingRequestsCountAsync(landlordId.Value);
 
             var activeTenants = await _landlordService.GetTenantsWithPropertyByStatusAsync(landlordId.Value);
-            // Count tenants with status "Active"
             ViewBag.ActiveTenants = activeTenants.ContainsKey("Active") ? activeTenants["Active"].Count : 0;
 
+            // Reports
+            var data = await _reportsService.GetDashboardReportsForLandlordAsync(landlordId.Value);
 
-            // Pass properties to the view
-            ViewBag.Properties = properties;
+            // Booking Status Pie
+            ViewBag.BookingStatusLabels = data.BookingStatusCount.Select(x => x.Status).ToList();
+            ViewBag.BookingStatusData = data.BookingStatusCount.Select(x => x.Count).ToList();
+
+            // Bookings per Month Bar
+            ViewBag.MonthlyBookingLabels = data.MonthlyBookings.Select(x => $"{x.Month}/{x.Year}").ToList();
+            ViewBag.MonthlyBookingData = data.MonthlyBookings.Select(x => x.Count).ToList();
+
+            // Revenue per Month Line
+            ViewBag.MonthlyRevenueLabels = data.MonthlyRevenue.Select(x => $"{x.Month}/{x.Year}").ToList();
+            ViewBag.MonthlyRevenueData = data.MonthlyRevenue.Select(x => x.TotalRevenue).ToList();
 
             return View();
         }
+
 
 
         // ADD PROPERTY PAGE

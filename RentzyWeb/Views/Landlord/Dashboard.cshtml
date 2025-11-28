@@ -198,6 +198,36 @@
     </div>
 </div>
 
+<!-- Reports Section -->
+<div class="row g-4 mt-5">
+    <!-- Booking Status Pie Chart -->
+    <div class="col-md-4 col-12">
+        <div class="card shadow-sm border-0 rounded-3 p-3 h-100">
+            <h5 class="card-title text-center mb-3">Bookings by Status</h5>
+            <canvas id="statusPie" style="height:250px;"></canvas>
+        </div>
+    </div>
+
+    <!-- Bookings Per Month Bar Chart -->
+    <div class="col-md-4 col-12">
+        <div class="card shadow-sm border-0 rounded-3 p-3 h-100">
+            <h5 class="card-title text-center mb-3">Bookings per Month</h5>
+            <canvas id="bookingBar" style="height:250px;"></canvas>
+        </div>
+    </div>
+
+    <!-- Revenue Per Month Line Chart -->
+    <div class="col-md-4 col-12">
+        <div class="card shadow-sm border-0 rounded-3 p-3 h-100">
+            <h5 class="card-title text-center mb-3">Revenue per Month</h5>
+            <canvas id="revenueLine" style="height:250px;"></canvas>
+        </div>
+    </div>
+</div>
+
+
+
+
 <style>
 /* Modern Sleek Dashboard Header */
 .dashboard-header {
@@ -250,3 +280,49 @@
 /* Notification Dot */
 .pending-dot { position: absolute; top: 10px; right: 15px; width: 20px; height: 20px; background-color: red; border-radius: 50%; color:white; font-size:0.8rem; font-weight:bold; display:flex; justify-content:center; align-items:center; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Booking Status Pie
+    new Chart(document.getElementById('statusPie'), {
+        type: 'pie',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.BookingStatusLabels)),
+            datasets: [{
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.BookingStatusData)),
+                backgroundColor: ['#6a11cb','#2575fc','#f7971e']
+            }]
+        }
+    });
+
+    // Bookings per Month Bar
+    new Chart(document.getElementById('bookingBar'), {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.MonthlyBookingLabels)),
+            datasets: [{
+                label: "Bookings",
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.MonthlyBookingData)),
+                backgroundColor: '#2575fc'
+            }]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+    });
+
+    // Revenue per Month Line
+    new Chart(document.getElementById('revenueLine'), {
+        type: 'line',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.MonthlyRevenueLabels)),
+            datasets: [{
+                label: "Revenue ($)",
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.MonthlyRevenueData)),
+                borderColor: '#6a11cb',
+                backgroundColor: 'rgba(106,17,203,0.2)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+    });
+</script>
