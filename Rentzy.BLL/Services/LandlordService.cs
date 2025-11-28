@@ -107,6 +107,10 @@ namespace Rentzy.BLL.Services
             return await _repo.GetTenantsWithPropertyByStatusAsync(landlordId);
         }
 
+        public async Task<decimal> GetMonthlyRevenueAsync(int landlordId)
+        {
+            return await _repo.GetMonthlyRevenueAsync(landlordId);
+        }
 
 
 

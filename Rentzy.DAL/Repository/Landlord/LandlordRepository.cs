@@ -216,6 +216,19 @@ namespace Rentzy.DAL.Repository
             return grouped;
         }
 
+        // LandlordRepository.cs
+        public async Task<decimal> GetMonthlyRevenueAsync(int landlordId)
+        {
+            var activeBookings = await _context.Bookings
+                .Include(b => b.Property)
+                .Include(b => b.Status)
+                .Where(b => b.Property.LandlordId == landlordId && b.Status.Name == "Active")
+                .ToListAsync();
+
+            return activeBookings.Sum(b => (decimal?)b.Property.MonthlyRent) ?? 0m;
+        }
+
+
     }
 
 
