@@ -12,6 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 builder.Services.AddControllersWithViews();
 
+
+
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+
 // Add DbContext
 builder.Services.AddDbContext<RentzyDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -34,6 +38,8 @@ builder.Services.AddScoped<LandlordService>();
 builder.Services.AddScoped<LandlordApprovalService>();
 builder.Services.AddScoped<PaymentRepository>();
 builder.Services.AddScoped<PaymentService>();
+
+
 
 // ===== ADD SESSION CONFIGURATION HERE =====
 builder.Services.AddDistributedMemoryCache(); // Required for session

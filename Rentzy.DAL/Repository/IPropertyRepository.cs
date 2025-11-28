@@ -20,6 +20,23 @@ namespace Rentzy.DAL.Repository
 
         Task<IEnumerable<PropertyRentalRequest>> GetTenantRequestsAsync(int landlordId);
         Task UpdateRentalRequestStatusAsync(int requestId, string status);
-        
+
+
+        //Newww
+
+        // New - rental/booking/payment related methods (match DAL models)
+        Task<Property> GetPropertyDetailsAsync(int id);
+
+        // rental request (PropertyRentalRequest)
+        Task<int> AddRentalRequestAsync(PropertyRentalRequest request);
+        Task<PropertyRentalRequest> GetRentalRequestAsync(int requestId);
+
+        // booking creation
+        Task<int> AddBookingAsync(Booking booking);
+
+        // payment save
+        Task AddPaymentAsync(Payment payment);
+
+
     }
 }
