@@ -5,16 +5,19 @@ using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.Exceptions;
 using System;
 using System.Threading.Tasks;
+using Rentzy.DAL.Repository.Approvals;
 
 namespace Rentzy.BLL.Services
 {
     public class AuthService
     {
         private readonly IUserRepository _userRepository;
+        private readonly ILandlordApprovalRepository _landlordApprovalRepository;
 
-        public AuthService(IUserRepository userRepository)
+        public AuthService(IUserRepository userRepository, ILandlordApprovalRepository _repo)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _landlordApprovalRepository = _repo ?? throw new ArgumentNullException(nameof(_repo));
         }
 
         public async Task<UserDTO> RegisterUserAsync(RegisterDTO dto)
@@ -40,8 +43,8 @@ namespace Rentzy.BLL.Services
             // Create the appropriate user type
             User newUser = dto.UserType.ToLower() switch
             {
-                "tenant" => new Tenant(),
-                "landlord" => new Landlord { IsVerified = false },
+                "tenant" => new Tenant() { Role = "Tenant"},
+                "landlord" => new Landlord { IsVerified = false, Role = "Landlord"},
                 "admin" => new Admin { Role = "Admin" },
                 _ => throw new ArgumentException("Invalid user type. Must be 'tenant', 'landlord', or 'admin'")
             };
@@ -53,12 +56,27 @@ namespace Rentzy.BLL.Services
             newUser.Phone = dto.Phone;
             newUser.PasswordHash = HashPassword(dto.Password);
             newUser.CreatedAt = DateTime.UtcNow;
-
             try
             {
                 await _userRepository.AddUser(newUser);
                 await _userRepository.SaveChanges();
-                return MapToDto(newUser);
+
+                UserDTO user = MapToDto(newUser);
+
+                if (newUser.Role == "Landlord")
+                {
+                    var approval = new LandlordApproval
+                    {
+                        LandlordId = user.Id,
+                        SubmittedAt = DateTime.UtcNow,
+                        DocumentUrl = "N/A",         // Ya jo bhi file ho
+                        ApprovalStatusId = 1,  // Set Pending
+                        IsDeleted = false
+                    };
+                    await _landlordApprovalRepository.AddAsync(approval);
+                    await _landlordApprovalRepository.SaveChangesAsync();
+                }
+                return user;
             }
             catch (DbUpdateException ex)
             {
@@ -88,6 +106,15 @@ namespace Rentzy.BLL.Services
             {
                 // Wrong password
                 throw new AuthenticationException("Invalid email or password");
+            }
+
+            if(user.Role == "Landlord")
+            {
+                var verifiedLandlords = await _userRepository.GetVerifiedLandlords();
+                bool isVerified = verifiedLandlords.Any(l => l.Id == user.Id);
+
+                if (!isVerified)
+                    throw new AuthenticationException("Landlord is not approved by Admin");
             }
 
             return MapToDto(user);
@@ -187,7 +214,8 @@ namespace Rentzy.BLL.Services
                 Email = user.Email,
                 Phone = user.Phone,
                 UserType = user.GetType().Name,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                Role = user.Role
             };
         }
 
