@@ -15,12 +15,15 @@ namespace Rentzy.Web.Controllers
         private readonly PropertyService _propertyService;
         private readonly LandlordService _landlordService;
         private readonly PaymentService _paymentService;
+        private readonly AuthService _authService;
 
-        public LandlordController(PropertyService propertyService, LandlordService landlordService,PaymentService payservice)
+       
+        public LandlordController(AuthService authService,PropertyService propertyService, LandlordService landlordService,PaymentService payservice)
         {
             _propertyService = propertyService;
             _landlordService = landlordService;
             _paymentService = payservice;
+            _authService = authService;
         }
 
         // LANDLORD DASHBOARD
@@ -30,29 +33,52 @@ namespace Rentzy.Web.Controllers
             var landlordId = HttpContext.Session.GetInt32("UserId");
             if (landlordId == null) return RedirectToAction("Login", "Account");
 
-            ViewBag.UserName = HttpContext.Session.GetString("UserName");
-            ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
+            // Check if landlord is verified
+            try
+            {
+                var isVerified = await _authService.IsLandlordVerifiedAsync(landlordId.Value);
 
-            // Get properties
-            var properties = await _propertyService.GetPropertiesByLandlordAsync(landlordId.Value);
+                if (!isVerified)
+                {
+                    return RedirectToAction("PendingApproval");
+                }
 
-            // Set ViewBag for cards
-            ViewBag.TotalProperties = properties.Count;
-            //ViewBag.ActiveTenants = await _landlordService.GetActiveTenantsCountAsync(landlordId.Value);
-            //ViewBag.MonthlyRevenue = await _landlordService.GetMonthlyRevenueAsync(landlordId.Value);
-            ViewBag.PendingRequests = await _landlordService.GetPendingRequestsCountAsync(landlordId.Value);
+                ViewBag.UserName = HttpContext.Session.GetString("UserName");
+                ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
 
-            var activeTenants = await _landlordService.GetTenantsWithPropertyByStatusAsync(landlordId.Value);
-            // Count tenants with status "Active"
-            ViewBag.ActiveTenants = activeTenants.ContainsKey("Active") ? activeTenants["Active"].Count : 0;
+                // Get properties
+                var properties = await _propertyService.GetPropertiesByLandlordAsync(landlordId.Value);
 
+                // Set ViewBag for cards
+                ViewBag.TotalProperties = properties.Count;
+                //ViewBag.ActiveTenants = await _landlordService.GetActiveTenantsCountAsync(landlordId.Value);
+                //ViewBag.MonthlyRevenue = await _landlordService.GetMonthlyRevenueAsync(landlordId.Value);
+                ViewBag.PendingRequests = await _landlordService.GetPendingRequestsCountAsync(landlordId.Value);
 
-            // Pass properties to the view
-            ViewBag.Properties = properties;
+                var activeTenants = await _landlordService.GetTenantsWithPropertyByStatusAsync(landlordId.Value);
 
-            return View();
+                // Count tenants with status "Active"
+                ViewBag.ActiveTenants = activeTenants.ContainsKey("Active") ? activeTenants["Active"].Count : 0;
+
+                // Pass properties to the view
+                ViewBag.Properties = properties;
+
+                return View();
+            }
+            catch
+            {
+                return RedirectToAction("Login", "Account");
+            }
         }
 
+
+        [HttpGet]
+        public IActionResult PendingApproval()
+        {
+            var userName = HttpContext.Session.GetString("UserName");
+            ViewBag.UserName = userName;
+            return View();
+        }
 
         // ADD PROPERTY PAGE
         [HttpGet]
