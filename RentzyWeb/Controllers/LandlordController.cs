@@ -240,6 +240,7 @@ namespace Rentzy.Web.Controllers
             return View(requests);
         }
 
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApproveRequest(int requestId)

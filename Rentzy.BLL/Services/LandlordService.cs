@@ -52,17 +52,20 @@ namespace Rentzy.BLL.Services
             var requests = await _repo.GetTenantRequestsAsync(landlordId);
 
             return requests
-                .Where(r => r.Status.Name == "Pending")  // <-- only pending
+                .Where(r => r.Status.Name == "Pending")
                 .Select(r => new PropertyRentalRequestDto
                 {
                     Id = r.Id,
                     TenantName = r.Tenant.FirstName + " " + r.Tenant.LastName,
                     PropertyTitle = r.Property.Title,
                     RequestedAt = r.RequestedAt,
+                    StartDate = r.StartDate,   // added
+                    EndDate = r.EndDate,       // added
                     Status = r.Status?.Name
                 })
                 .ToList();
         }
+
 
         public async Task<int> GetPendingRequestsCountAsync(int landlordId)
         {
@@ -78,6 +81,7 @@ namespace Rentzy.BLL.Services
 
             var approvedStatus = await _repo.GetRequestStatusByNameAsync("Approved");
             if (approvedStatus == null) return false;
+
             request.StatusId = approvedStatus.Id;
             await _repo.UpdateRequestAsync(request);
 
@@ -89,14 +93,18 @@ namespace Rentzy.BLL.Services
                 TenantId = request.TenantId,
                 PropertyId = request.PropertyId,
                 StatusId = activeBookingStatus.Id,
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddMonths(1)
+                StartDate = request.StartDate,  // use tenant dates
+                EndDate = request.EndDate
             };
 
             await _repo.AddBookingAsync(booking);
 
-            // Create initial pending payment
-            await _paymentService.CreateInitialPaymentAsync(booking.Id, request.Property.MonthlyRent);
+            // Calculate number of months/days to compute initial payment
+            var totalDays = (booking.EndDate - booking.StartDate).TotalDays;
+            var totalMonths = Math.Ceiling(totalDays / 30); // approx monthly
+            var amount = (decimal)totalMonths * request.Property.MonthlyRent;
+
+            await _paymentService.CreateInitialPaymentAsync(booking.Id, amount);
 
             return true;
         }
