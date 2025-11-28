@@ -105,6 +105,9 @@ namespace Rentzy.Web.Controllers
 
                 TempData["SuccessMessage"] = $"Welcome back, {userDto.FullName}!";
 
+                if( userDto.UserType == "Admin")
+                    HttpContext.Session.SetString("Id",userDto.Id.ToString());
+
                 return userDto.UserType switch
                 {
                     "Admin" => RedirectToAction("Index", "Admin"),

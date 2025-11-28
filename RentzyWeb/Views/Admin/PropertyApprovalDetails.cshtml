@@ -1,0 +1,102 @@
+﻿@model Rentzy.DAL.Models.PropertyApprovalRequest
+
+@{
+    ViewData["Title"] = "Property Approval Details";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Property Approval Details</h1>
+
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin/Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="/Admin/PropertyApprovals">Property Approvals</a></li>
+        <li class="breadcrumb-item active">Details</li>
+    </ol>
+
+    <!-- Property Info Card -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-primary text-white fw-bold rounded-top-4">
+            Property Information
+        </div>
+
+        <div class="card-body p-4">
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Property ID:</div>
+                <div class="col-md-8">@Model.PropertyId</div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Title:</div>
+                <div class="col-md-8">@Model.property?.Title</div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Owner (Landlord):</div>
+                <div class="col-md-8">
+                    @Model.property?.Landlord?.FirstName @Model.property?.Landlord?.LastName
+                    <br />
+                    <span class="text-muted">@Model.property?.Landlord?.Email</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Approval Details -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-secondary text-white fw-bold rounded-top-4">
+            Approval Details
+        </div>
+
+        <div class="card-body p-4">
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Status:</div>
+                <div class="col-md-8">
+                    <span class="badge px-3 py-2 bg-@(
+                          Model.Status?.Name == "Approved" ? "success" :
+                          Model.Status?.Name == "Rejected" ? "danger" :
+                          "warning"
+                                        )">
+                        @Model.Status?.Name
+                    </span>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Admin:</div>
+                <div class="col-md-8">
+                    @Model.Admin?.FirstName @Model.Admin?.LastName
+                    <br />
+                    <small class="text-muted">@Model.Admin?.Email</small>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Admin Comments:</div>
+                <div class="col-md-8">@Model.Comments</div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Requested At:</div>
+                <div class="col-md-8">
+                    @Model.RequestedAt.ToString("dd MMM yyyy hh:mm tt")
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Reviewed At:</div>
+                <div class="col-md-8">
+                    @Model.ReviewedAt?.ToString("dd MMM yyyy hh:mm tt")
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <a href="/Admin/PropertyApprovals" class="btn btn-dark px-4 py-2 rounded-3">
+        <i class="fas fa-arrow-left me-2"></i>Back to List
+    </a>
+</div>

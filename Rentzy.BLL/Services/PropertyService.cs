@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.DTOs;
 using Rentzy.DAL.Models;
+using Rentzy.DAL.Repository;
+using Rentzy.DAL.Repository.Approvals;
 using Rentzy.DAL.Repository.Landlord;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
-using Rentzy.DAL.Repository;
 
 namespace Rentzy.BLL.Services
 {
@@ -13,12 +15,14 @@ namespace Rentzy.BLL.Services
     {
         private readonly ILandlordRepository _repo;
         private readonly IPropertyRepository _propertyRepository;
+        private readonly IPropertyApprovalRequestsRepo _RequestRepo;
 
 
-        public PropertyService(ILandlordRepository repo,IPropertyRepository prepo)
+        public PropertyService(ILandlordRepository repo,IPropertyRepository prepo, IPropertyApprovalRequestsRepo rep )
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo));
             _propertyRepository= prepo ?? throw new ArgumentNullException(nameof(prepo));
+            _RequestRepo = rep;
         }
         public async Task<IEnumerable<PropertyDTO>> GetAllPropertiesAsync()
         {
@@ -98,7 +102,18 @@ namespace Rentzy.BLL.Services
                 PropertyTypeId = dto.PropertyTypeId,
                 LandlordId = dto.LandlordId
             };
+
             await _repo.AddPropertyAsync(property);
+
+            var request = new PropertyApprovalRequest
+            {
+                Comments = "Admin has not viewed yet.",
+                PropertyId = property.Id,
+                StatusId = ApprovalStatusConstants.Pending,
+                RequestedAt = DateTime.UtcNow,
+            };
+
+            await _RequestRepo.CreateAsync(request);
         }
 
         public async Task UpdatePropertyAsync(PropertyDTO dto)
