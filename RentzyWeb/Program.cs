@@ -11,6 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services
 builder.Services.AddControllersWithViews();
 
+
+
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+
 // Add DbContext
 builder.Services.AddDbContext<RentzyDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -35,6 +39,10 @@ var emailSettings = builder.Configuration.GetSection("EmailSettings").Get<EmailS
     builder.Services.AddScoped<EmailService>();
     Console.WriteLine("Using REAL Gmail Email Service");
 }
+
+
+// ===== ADD SESSION CONFIGURATION HERE =====
+builder.Services.AddDistributedMemoryCache(); // Required for session
 
 // Session
 builder.Services.AddDistributedMemoryCache();

@@ -1,0 +1,17 @@
+﻿@model Rentzy.BLL.DTOs.PaymentDTO
+
+@{
+    ViewData["Title"] = "Payment";
+}
+
+<h2>Pay for @Model.PropertyTitle</h2>
+
+<p>Amount: <strong>@Model.Amount.ToString("C")</strong></p>
+
+<form asp-controller="Booking" asp-action="Pay" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="requestId" value="@Model.RequestId" />
+    <input type="hidden" name="amount" value="@Model.Amount" />
+
+    <button type="submit" class="btn btn-primary">Pay Now</button>
+</form>

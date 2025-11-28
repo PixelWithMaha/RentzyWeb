@@ -128,5 +128,50 @@ namespace Rentzy.DAL.Repository
                 .ToListAsync();
         }
 
+        //Newww
+        // returns property with related data
+        public async Task<Property> GetPropertyDetailsAsync(int id)
+        {
+            return await _context.Properties
+                .Include(p => p.Images)
+                .Include(p => p.Landlord)
+                .Include(p => p.Bookings)
+                    .ThenInclude(b => b.Tenant)
+                .Include(p => p.PropertyType)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        // add a rental request (PropertyRentalRequest)
+        public async Task<int> AddRentalRequestAsync(PropertyRentalRequest request)
+        {
+            _context.PropertyRentalRequests.Add(request);
+            await _context.SaveChangesAsync();
+            return request.Id;
+        }
+
+        // get a rental request including property and tenant
+        public async Task<PropertyRentalRequest> GetRentalRequestAsync(int requestId)
+        {
+            return await _context.PropertyRentalRequests
+                .Include(r => r.Property)
+                .Include(r => r.Tenant)
+                .FirstOrDefaultAsync(r => r.Id == requestId);
+        }
+
+        // create booking (returns booking id)
+        public async Task<int> AddBookingAsync(Booking booking)
+        {
+            _context.Bookings.Add(booking);
+            await _context.SaveChangesAsync();
+            return booking.Id;
+        }
+
+        // save payment
+        public async Task AddPaymentAsync(Payment payment)
+        {
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }
