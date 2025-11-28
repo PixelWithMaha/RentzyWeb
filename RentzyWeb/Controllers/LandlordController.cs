@@ -16,14 +16,25 @@ namespace Rentzy.Web.Controllers
         private readonly PropertyService _propertyService;
         private readonly LandlordService _landlordService;
         private readonly PaymentService _paymentService;
+<<<<<<< HEAD
         private readonly ReportsService _reportsService;
 
         public LandlordController(PropertyService propertyService, LandlordService landlordService,PaymentService payservice, ReportsService reportsService)
+=======
+        private readonly AuthService _authService;
+
+       
+        public LandlordController(AuthService authService,PropertyService propertyService, LandlordService landlordService,PaymentService payservice)
+>>>>>>> origin/master
         {
             _propertyService = propertyService;
             _landlordService = landlordService;
             _paymentService = payservice;
+<<<<<<< HEAD
             _reportsService = reportsService;
+=======
+            _authService = authService;
+>>>>>>> origin/master
         }
 
         // LANDLORD DASHBOARD
@@ -33,9 +44,12 @@ namespace Rentzy.Web.Controllers
             var landlordId = HttpContext.Session.GetInt32("UserId");
             if (landlordId == null) return RedirectToAction("Login", "Account");
 
-            ViewBag.UserName = HttpContext.Session.GetString("UserName");
-            ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
+            // Check if landlord is verified
+            try
+            {
+                var isVerified = await _authService.IsLandlordVerifiedAsync(landlordId.Value);
 
+<<<<<<< HEAD
             var properties = await _propertyService.GetPropertiesByLandlordAsync(landlordId.Value);
             ViewBag.TotalProperties = properties.Count;
             ViewBag.Properties = properties;
@@ -59,11 +73,52 @@ namespace Rentzy.Web.Controllers
             // Revenue per Month Line
             ViewBag.MonthlyRevenueLabels = data.MonthlyRevenue.Select(x => $"{x.Month}/{x.Year}").ToList();
             ViewBag.MonthlyRevenueData = data.MonthlyRevenue.Select(x => x.TotalRevenue).ToList();
+=======
+                if (!isVerified)
+                {
+                    return RedirectToAction("PendingApproval");
+                }
 
-            return View();
+                ViewBag.UserName = HttpContext.Session.GetString("UserName");
+                ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
+
+                // Get properties
+                var properties = await _propertyService.GetPropertiesByLandlordAsync(landlordId.Value);
+
+                // Set ViewBag for cards
+                ViewBag.TotalProperties = properties.Count;
+                //ViewBag.ActiveTenants = await _landlordService.GetActiveTenantsCountAsync(landlordId.Value);
+                //ViewBag.MonthlyRevenue = await _landlordService.GetMonthlyRevenueAsync(landlordId.Value);
+                ViewBag.PendingRequests = await _landlordService.GetPendingRequestsCountAsync(landlordId.Value);
+
+                var activeTenants = await _landlordService.GetTenantsWithPropertyByStatusAsync(landlordId.Value);
+>>>>>>> origin/master
+
+                // Count tenants with status "Active"
+                ViewBag.ActiveTenants = activeTenants.ContainsKey("Active") ? activeTenants["Active"].Count : 0;
+
+                // Pass properties to the view
+                ViewBag.Properties = properties;
+
+                return View();
+            }
+            catch
+            {
+                return RedirectToAction("Login", "Account");
+            }
         }
 
 
+<<<<<<< HEAD
+=======
+        [HttpGet]
+        public IActionResult PendingApproval()
+        {
+            var userName = HttpContext.Session.GetString("UserName");
+            ViewBag.UserName = userName;
+            return View();
+        }
+>>>>>>> origin/master
 
         // ADD PROPERTY PAGE
         [HttpGet]

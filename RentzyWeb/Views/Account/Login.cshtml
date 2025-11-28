@@ -5,77 +5,122 @@
     ViewData["Title"] = "Login";
 }
 
+<style>
+    /* -------------------------------------- */
+    /* Custom Modern Styling for Login Page   */
+    /* -------------------------------------- */
+
+    .login-card {
+        border-radius: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        padding: 2rem !important;
+    }
+
+    /* RED LINE THINNER: Reduced padding on the alert box */
+    .alert-thin {
+        padding: 0.5rem 1rem; /* Reduced vertical padding */
+        font-size: 0.9rem; /* Slightly smaller text */
+    }
+
+    .form-control {
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid #D1D5DB;
+        transition: all 0.2s;
+    }
+
+        .form-control:focus {
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+        }
+
+    .form-label {
+        font-weight: 600;
+        color: #4B5563;
+        margin-bottom: 0.4rem;
+    }
+
+    .btn-login-gradient {
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: white;
+        font-weight: 600;
+        border: none;
+        border-radius: 0.75rem;
+        padding: 0.6rem 1.5rem;
+        transition: all 0.3s;
+        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+    }
+
+        .btn-login-gradient:hover {
+            background: linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);
+        }
+
+</style>
+
 <div class="container">
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-5">
-            <div class="card shadow-lg border-0">
-                <div class="card-body p-5">
-                    <!-- Header -->
-                    <div class="text-center mb-4">
-                        <i class="fas fa-sign-in-alt text-primary mb-3" style="font-size: 3rem;"></i>
-                        <h2 class="fw-bold">Welcome Back</h2>
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0 login-card">
+                <div class="card-body p-4">
+
+                    <div class="text-center mb-3">
+                        <i class="fas fa-sign-in-alt text-primary mb-2" style="font-size: 3rem; color: #3B82F6 !important;"></i> <h2 class="fw-bold">Welcome Back</h2>
                         <p class="text-muted">Sign in to your Rentzy account</p>
                     </div>
 
-                    <!-- Login Form -->
                     <form asp-action="Login" method="post">
-                        <!-- Display all errors at the top -->
-                        <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+                        <div asp-validation-summary="ModelOnly"
+                             class="alert alert-danger mb-3 d-none alert-thin"
+                             role="alert"
+                             data-valmsg-summary="true"></div>
 
-                        <!-- Email Field -->
                         <div class="mb-3">
                             <label asp-for="Email" class="form-label fw-semibold">
                                 <i class="fas fa-envelope me-1"></i>Email Address
                             </label>
                             <input asp-for="Email"
-                                   class="form-control form-control-lg"
+                                   class="form-control"
                                    placeholder="your@email.com"
                                    autofocus />
                             <span asp-validation-for="Email" class="text-danger small"></span>
                         </div>
 
-                        <!-- Password Field -->
                         <div class="mb-3">
                             <label asp-for="Password" class="form-label fw-semibold">
                                 <i class="fas fa-lock me-1"></i>Password
                             </label>
                             <input asp-for="Password"
-                                   class="form-control form-control-lg"
+                                   class="form-control"
                                    placeholder="Enter your password" />
                             <span asp-validation-for="Password" class="text-danger small"></span>
                         </div>
 
-                        <!-- Remember Me -->
-                        <div class="form-check mb-4">
+                        <div class="form-check mb-3">
                             <input asp-for="RememberMe" class="form-check-input" />
-                            <label asp-for="RememberMe" class="form-check-label">
+                            <label asp-for="RememberMe" class="form-check-label small">
                                 Keep me signed in
                             </label>
                         </div>
 
-                        <!-- Submit Button -->
                         <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                            <button type="submit" class="btn btn-login-gradient">
                                 <i class="fas fa-sign-in-alt me-2"></i>Login
                             </button>
                         </div>
 
-                        <!-- Forgot Password Link -->
                         <div class="text-center mb-3">
-                            <a asp-action="ForgotPassword" class="text-decoration-none">
+                            <a asp-action="ForgotPassword" class="text-decoration-none small text-muted">
                                 <i class="fas fa-key me-1"></i>Forgot your password?
                             </a>
                         </div>
                     </form>
 
-                    <!-- Divider -->
-                    <hr class="my-4">
+                    <hr class="my-3">
 
-                    <!-- Register Link -->
                     <div class="text-center">
-                        <p class="mb-0">
+                        <p class="mb-0 small text-muted">
                             Don't have an account?
-                            <a asp-action="Register" class="text-primary fw-bold text-decoration-none">
+                            <a asp-action="Register" class="text-decoration-none fw-bold" style="color: #3B82F6;">
                                 Register here
                             </a>
                         </p>
@@ -83,8 +128,7 @@
                 </div>
             </div>
 
-            <!-- Additional Info -->
-            <div class="text-center mt-4">
+            <div class="text-center mt-3">
                 <p class="text-muted small">
                     <i class="fas fa-shield-alt me-1"></i>
                     Your information is secure and encrypted
@@ -96,4 +140,15 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // FIX: Ensure server-side errors are visible by removing 'd-none' if content exists.
+        document.addEventListener('DOMContentLoaded', function () {
+            var validationSummary = document.querySelector('[data-valmsg-summary="true"]');
+
+            // If it contains content (server-side error), remove the 'd-none' class so it becomes visible.
+            if (validationSummary && validationSummary.textContent.trim().length > 0) {
+                validationSummary.classList.remove('d-none');
+            }
+        });
+    </script>
 }

@@ -1,0 +1,27 @@
+﻿@model Rentzy.BLL.DTOs.PropertyDTO
+
+@{
+    ViewData["Title"] = Model?.Title ?? "Property Details";
+}
+
+<h2>@Model.Title</h2>
+
+<div>
+    <img src="@Model.Images?.FirstOrDefault()?.ImageUrl" alt="@Model.Title"
+         style="width:350px;height:220px;border-radius:10px;object-fit:cover;" />
+</div>
+
+<p>@Model.Description</p>
+
+<p>Rent: <strong>@Model.Rent.ToString("C")</strong></p>
+
+@if (Model.TenantNames != null && Model.TenantNames.Any())
+{
+    <p class="text-danger fw-bold">Currently Rented</p>
+}
+else
+{
+    <a asp-controller="Booking" asp-action="Request" asp-route-propertyId="@Model.Id" class="btn btn-success">
+        Book Now
+    </a>
+}
