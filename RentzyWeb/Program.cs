@@ -5,60 +5,53 @@ using Rentzy.BLL.Services.ApprovalServices;
 using Rentzy.BLL.Services.ReportsServices;
 using Rentzy.DAL.Context;
 using Rentzy.DAL.Repositories;
+using Rentzy.DAL.Repository;
 using Rentzy.DAL.Repository.Approvals;
-<<<<<<< HEAD
 using Rentzy.DAL.Repository.Landlord;
 using Rentzy.DAL.Repository.Reports;
-=======
->>>>>>> origin/master
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
+// Add controllers
 builder.Services.AddControllersWithViews();
 
-
-
+// Booking
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
-// Add DbContext
+// DbContext
 builder.Services.AddDbContext<RentzyDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ✅ Configure EmailSettings from appsettings.json
+// Email settings
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
-// Register repositories
+// User repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-
+// Landlord Approvals
 builder.Services.AddScoped<ILandlordApprovalService, LandlordApprovalService>();
 builder.Services.AddScoped<ILandlordApprovalRepository, LandlordApprovalRepository>();
 
-
-<<<<<<< HEAD
-builder.Services.AddScoped<LandlordApprovalService>();
-
+// Payment
 builder.Services.AddScoped<PaymentRepository>();
 builder.Services.AddScoped<PaymentService>();
-=======
-// Register services
+builder.Services.AddScoped<PropertyService>();
+builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
+
+builder.Services.AddScoped<ILandlordRepository, LandlordRepository>();
+builder.Services.AddScoped<LandlordService>();
+
+// Auth Service
 builder.Services.AddScoped<AuthService>();
 
-// ✅ Register Email Service (Switch between Mock and Real)
+// Email Service
 var emailSettings = builder.Configuration.GetSection("EmailSettings").Get<EmailSettings>();
-{
-    builder.Services.AddScoped<EmailService>();
-    Console.WriteLine("Using REAL Gmail Email Service");
-}
+builder.Services.AddScoped<EmailService>();
+Console.WriteLine("Using REAL Gmail Email Service");
 
->>>>>>> origin/master
-
+// Reports
 builder.Services.AddScoped<ReportsRepository>();
 builder.Services.AddScoped<ReportsService>();
-
-// ===== ADD SESSION CONFIGURATION HERE =====
-builder.Services.AddDistributedMemoryCache(); // Required for session
 
 // Session
 builder.Services.AddDistributedMemoryCache();
@@ -73,7 +66,7 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
-// Configure middleware
+// Middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -82,10 +75,10 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 
 app.UseSession();
-
 app.UseAuthorization();
 
 app.MapControllerRoute(
