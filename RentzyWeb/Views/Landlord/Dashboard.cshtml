@@ -7,7 +7,7 @@
 
 <div class="container my-5">
 
-    <!-- Header -->
+    <!-- HEADER (UNCHANGED) -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow border-0 rounded-3">
@@ -27,8 +27,51 @@
         </div>
     </div>
 
-    <!-- Quick Stats Header Ribbon -->
-    <div class="row mb-3">
+   <!-- REPORTS (left tall chart, right two stacked) -->
+<div class="row g-3 align-items-stretch">
+
+    <!-- LEFT: Tall Bar Chart -->
+    <div class="col-lg-8 col-12">
+        <div class="card shadow-sm border-0 rounded-3 p-3 reports-card-compact h-100">
+            <h6 class="card-title text-center mb-2 text-dark">Bookings per Month</h6>
+
+            <!-- Height = 360px so it matches the two right charts combined -->
+            <div style="height:360px;">
+                <canvas id="bookingBarFull" style="height:100%; width:100%;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Two stacked charts -->
+    <div class="col-lg-4 col-12 d-flex flex-column justify-content-between">
+
+        <!-- Top: Pie Chart -->
+        <div class="card shadow-sm border-0 rounded-3 p-3 reports-card-compact mb-3">
+            <h6 class="card-title text-center mb-2 text-dark">Bookings by Status</h6>
+
+            <!-- Height = 180px -->
+            <div style="height:180px;">
+                <canvas id="statusPieChart" style="height:100%; width:100%;"></canvas>
+            </div>
+        </div>
+
+        <!-- Bottom: Line Chart -->
+        <div class="card shadow-sm border-0 rounded-3 p-3 reports-card-compact">
+            <h6 class="card-title text-center mb-2 text-dark">Revenue per Month</h6>
+
+            <!-- Height = 180px -->
+            <div style="height:180px;">
+                <canvas id="revenueLineChart" style="height:100%; width:100%;"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+    <!-- QUICK STATS HEADER -->
+    <div class="row mb-3 mt-4">
         <div class="col-12">
             <div class="header-ribbon">
                 <span>Quick Stats</span>
@@ -36,7 +79,7 @@
         </div>
     </div>
 
-    <!-- Quick Stats Cards -->
+    <!-- QUICK STATS (original visuals restored) -->
     <div class="row g-4 mb-4">
         <div class="col-md-3 col-6">
             <div class="card stats-card shadow-sm border-0 rounded-3 text-center p-3 h-100 bg-white">
@@ -56,7 +99,7 @@
 
         <div class="col-md-3 col-6">
             <a asp-controller="Landlord" asp-action="TenantRequests" class="text-decoration-none">
-                <div class="card stats-card shadow-sm border-0 rounded-3 text-center p-3 h-100 bg-white">
+                <div class="card stats-card shadow-sm border-0 rounded-3 text-center p-3 h-100 bg-white position-relative">
                     <i class="fas fa-clipboard-list text-info mb-2" style="font-size:2.5rem;"></i>
                     <h5 class="text-dark">Pending Requests</h5>
                     <h3 class="text-dark">@ViewBag.PendingRequests</h3>
@@ -72,12 +115,12 @@
             <div class="card stats-card shadow-sm border-0 rounded-3 text-center p-3 h-100 bg-white">
                 <i class="fas fa-dollar-sign text-warning mb-2" style="font-size:2.5rem;"></i>
                 <h5 class="text-dark">Monthly Revenue</h5>
-                <h3 class="text-dark">$@ViewBag.MonthlyRevenue ?? 0</h3>
+                <h3 class="text-dark">$@ViewBag.MonthlyRevenue</h3>
             </div>
         </div>
     </div>
 
-    <!-- Quick Actions Header Ribbon -->
+    <!-- QUICK ACTIONS HEADER -->
     <div class="row mb-3">
         <div class="col-12">
             <div class="header-ribbon">
@@ -86,7 +129,7 @@
         </div>
     </div>
 
-    <!-- Quick Actions Buttons -->
+    <!-- QUICK ACTIONS (original gradients, sizes and hover effects restored) -->
     <div class="row g-3 mb-5">
         <div class="col-md-3 col-6">
             <a asp-controller="Landlord" asp-action="AddProperty" class="btn btn-gradient-purple quick-action-btn shadow-hover">
@@ -102,7 +145,6 @@
             </a>
         </div>
 
-        <!-- View Tenants button -->
         <div class="col-md-3 col-6">
             <a asp-controller="Landlord" asp-action="Tenants" class="btn btn-gradient-purple quick-action-btn shadow-hover">
                 <i class="fas fa-eye mb-2" style="font-size:2rem;"></i>
@@ -110,10 +152,8 @@
             </a>
         </div>
 
-        <!-- Payments button aligned right next to View Tenants -->
         <div class="col-md-3 col-6">
-            <a asp-controller="Payment" asp-action="Index" class="btn quick-action-btn shadow-hover"
-               style="background-color:#80ef80; color:#064d00; display:flex; flex-direction:column; justify-content:center; align-items:center; border-radius:10px;">
+            <a asp-controller="Payment" asp-action="Index" class="btn quick-action-btn shadow-hover payments-btn">
                 <i class="fas fa-money-bill-wave mb-2" style="font-size:2rem;"></i>
                 <span>Payments</span>
                 @if (ViewBag.PendingPaymentsReminders != null && ViewBag.PendingPaymentsReminders > 0)
@@ -130,15 +170,10 @@
             </a>
         </div>
 
-        <div class="col-md-3 col-6">
-            <a asp-controller="Reports" asp-action="Index" class="btn btn-gradient-yellow quick-action-btn shadow-hover">
-                <i class="fas fa-chart-line mb-2" style="font-size:2rem;"></i>
-                <span>Reports</span>
-            </a>
-        </div>
+        
     </div>
 
-    <!-- Properties Overview Header Ribbon -->
+    <!-- PROPERTIES SECTION (unchanged) -->
     <div class="row mb-3">
         <div class="col-12">
             <div class="header-ribbon">
@@ -147,7 +182,6 @@
         </div>
     </div>
 
-    <!-- Properties Overview Cards -->
     <div class="row">
         @if (ViewBag.Properties != null && ViewBag.Properties.Count > 0)
         {
@@ -174,8 +208,8 @@
                                               onsubmit="return confirm('Are you sure?');">
                                             <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                                         </form>
-                                        <a asp-controller="Landlord" asp-action="UpdateImages" 
-                                           asp-route-propertyId="@property.Id" 
+                                        <a asp-controller="Landlord" asp-action="UpdateImages"
+                                           asp-route-propertyId="@property.Id"
                                            class="btn btn-sm btn-outline-success">Images</a>
                                     </div>
                                 </div>
@@ -198,8 +232,11 @@
     </div>
 </div>
 
+<!-- STYLES: restored card & button visuals + compact report styling -->
 <style>
-/* Modern Sleek Dashboard Header */
+/* --- Restore original stats/card/button visuals (unchanged appearance) --- */
+
+/* Modern Sleek Dashboard Header (left untouched earlier) */
 .dashboard-header {
     width: 100%;
     background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
@@ -213,40 +250,143 @@
     font-family: 'Poppins', sans-serif;
 }
 
-.dashboard-header h1 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin: 0;
-}
+.dashboard-header h1 { font-size: 1.8rem; font-weight: 700; margin: 0; }
+.dashboard-header p { font-size: 1rem; opacity: 0.85; margin: 0; }
+.dashboard-header .header-icon { font-size: 2.2rem; margin-right: 15px; }
 
-.dashboard-header p {
-    font-size: 1rem;
-    opacity: 0.85;
-    margin: 0;
-}
-
-.dashboard-header .header-icon {
-    font-size: 2.2rem;
-    margin-right: 15px;
-}
-
-/* Stats Cards Hover */
+/* Stats Cards Hover - restored */
 .stats-card { transition: transform 0.3s, box-shadow 0.3s; }
 .stats-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.25); }
 
-/* Gradient Buttons */
+/* Gradient Buttons - restored exactly as original */
 .btn-gradient-purple { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white; font-weight:600; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
 .btn-gradient-blue { background: linear-gradient(135deg, #1c92d2 0%, #f2fcfe 100%); color: white; font-weight:600; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
 .btn-gradient-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; font-weight:600; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
 .btn-gradient-yellow { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); color: white; font-weight:600; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
 
-/* Quick Action Buttons Height & Hover */
-.quick-action-btn { min-height: 160px; margin-bottom: 15px; transition: all 0.3s; border-radius:10px; }
-.shadow-hover:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(0,0,0,0.3); }
+/* Quick Action Buttons Height & Hover - restored */
+.quick-action-btn { min-height: 140px; margin-bottom: 15px; transition: all 0.3s; border-radius:10px; padding: 12px; color: white; text-decoration:none; }
+.shadow-hover:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(0,0,0,0.18); }
 
 /* Properties Hover */
 .hover-shadow:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.25); }
 
-/* Notification Dot */
+/* Notification Dot - restored */
 .pending-dot { position: absolute; top: 10px; right: 15px; width: 20px; height: 20px; background-color: red; border-radius: 50%; color:white; font-size:0.8rem; font-weight:bold; display:flex; justify-content:center; align-items:center; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
+
+/* Payments quick button special (kept) */
+.payments-btn { background-color:#80ef80; color:#064d00; display:flex; flex-direction:column; justify-content:center; align-items:center; border-radius:10px; }
+
+/* Header ribbon */
+.header-ribbon {
+    display:inline-block;
+    background:#f6f7fb;
+    padding: 8px 14px;
+    border-radius: 30px;
+    font-weight:600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+/* Reports card (compact) - keep theme localized so other elements are unaffected */
+.reports-card-compact {
+    background: #eaf6ff;            /* very light blue background */
+    border-left: 4px solid #3b82f6; /* accent stripe */
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    padding: 10px !important;
+}
+
+/* Keep compact spacing for the small charts so they fit without scrolling */
+.reports-card-compact .card-title { font-size: 0.95rem; margin-bottom: 6px; }
+
+/* ensure canvas fills container */
+canvas { display: block; }
+
+/* small screens - stack nicely */
+    @@media (max-width: 991px) {
+    .quick-action-btn { min-height: 130px; }
+    .reports-card-compact { margin-bottom: 12px; }
+}
 </style>
+
+<!-- CHARTS SCRIPT: compact options, maintainAspectRatio:false so canvas fits card heights -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const darkBlue = "#1e3a8a";
+    const mediumBlue = "#3b82f6";
+    const lightBlueTint = "rgba(59,130,246,0.18)";
+    const purple = "#6a11cb";
+    const accentBlue2 = "#2575fc";
+
+    // Booking Bar (compact)
+    new Chart(document.getElementById('bookingBarFull'), {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.MonthlyBookingLabels)),
+            datasets: [{
+                label: "Bookings",
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.MonthlyBookingData)),
+                backgroundColor: mediumBlue,
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 900, easing: 'easeOutQuart' },
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { maxRotation:0, autoSkip:true, maxTicksLimit:8 } },
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+
+    // Status Pie (compact)
+    new Chart(document.getElementById('statusPieChart'), {
+        type: 'doughnut',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.BookingStatusLabels)),
+            datasets: [{
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.BookingStatusData)),
+                backgroundColor: [mediumBlue, darkBlue, purple, lightBlueTint, accentBlue2],
+                hoverOffset: 12
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { animateRotate: true, duration: 700, easing: 'easeOutCubic' },
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 8 } } }
+        }
+    });
+
+    // Revenue Line (compact)
+    new Chart(document.getElementById('revenueLineChart'), {
+        type: 'line',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.MonthlyRevenueLabels)),
+            datasets: [{
+                label: "Revenue ($)",
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.MonthlyRevenueData)),
+                borderColor: darkBlue,
+                backgroundColor: lightBlueTint,
+                fill: true,
+                tension: 0.35,
+                pointRadius: 4,
+                pointBackgroundColor: mediumBlue
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 900, easing: 'easeOutQuart' },
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { maxRotation:0, autoSkip:true, maxTicksLimit:8 } },
+                y: { beginAtZero: true, grid: { drawBorder: false } }
+            }
+        }
+    });
+</script>

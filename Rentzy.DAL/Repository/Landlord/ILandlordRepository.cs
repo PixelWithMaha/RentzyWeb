@@ -29,5 +29,6 @@ namespace Rentzy.DAL.Repository.Landlord
         // Dropdown helpers
         Task<List<City>> GetAllCitiesAsync();
         Task<List<PropertyType>> GetAllPropertyTypesAsync();
+        Task<decimal> GetMonthlyRevenueAsync(int landlordId);
     }
 }

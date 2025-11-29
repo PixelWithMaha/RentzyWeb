@@ -4,15 +4,15 @@
 }
 
 <style>
-    /* Custom dropdown that stays open on hover */
+    /* Custom dropdown that stays open on hover (Removed from usage) */
     .profile-dropdown {
         position: relative;
     }
-    
-    .profile-dropdown:hover .dropdown-menu {
-        display: block;
-    }
-    
+
+        .profile-dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
     .dropdown-menu {
         display: none;
         position: absolute;
@@ -21,7 +21,7 @@
         z-index: 1000;
         margin-top: 0.5rem;
     }
-    
+
     .profile-avatar {
         width: 120px;
         height: 120px;
@@ -33,58 +33,17 @@
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-8 offset-md-2">
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-            @if (TempData["ErrorMessage"] != null)
-            {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
 
             <div class="card shadow-lg border-0">
                 <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
                     <h2 class="mb-0">
                         <i class="fas fa-user-circle text-primary me-2"></i>My Profile
                     </h2>
-                    
-                    <!-- Dropdown Menu on Hover -->
-                    <div class="profile-dropdown">
-                        <button class="btn btn-primary dropdown-toggle" type="button">
-                            <i class="fas fa-cog me-1"></i> Account Settings
-                        </button>
-                        <ul class="dropdown-menu shadow">
-                            <li>
-                                <a class="dropdown-item" asp-action="EditProfile">
-                                    <i class="fas fa-edit me-2 text-primary"></i>Edit Profile
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" asp-action="ChangePassword">
-                                    <i class="fas fa-key me-2 text-warning"></i>Change Password
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form asp-action="Logout" method="post" class="d-inline w-100">
-                                    <button type="submit" class="dropdown-item text-danger">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
+
                 </div>
 
                 <div class="card-body p-4">
                     <div class="row mb-4">
-                        <!-- Profile Picture Section -->
                         <div class="col-md-4">
                             <div class="text-center">
                                 <div class="profile-avatar text-white rounded-circle d-inline-flex align-items-center justify-content-center shadow">
@@ -97,7 +56,6 @@
                             </div>
                         </div>
 
-                        <!-- Profile Details Section -->
                         <div class="col-md-8">
                             <h5 class="text-primary mb-3">
                                 <i class="fas fa-info-circle me-2"></i>Account Information
@@ -146,7 +104,6 @@
 
                     <hr class="my-4">
 
-                    <!-- Quick Actions Section -->
                     <div class="mt-4">
                         <h5 class="text-primary mb-3">
                             <i class="fas fa-bolt me-2"></i>Quick Actions
@@ -177,7 +134,6 @@
                 </div>
             </div>
 
-            <!-- Additional Info Card -->
             <div class="card shadow-sm border-0 mt-4">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -193,4 +149,4 @@
             </div>
         </div>
     </div>
-</div
+</div>

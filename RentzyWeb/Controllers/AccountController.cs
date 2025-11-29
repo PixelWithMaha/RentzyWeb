@@ -52,6 +52,11 @@ namespace Rentzy.Web.Controllers
                 };
 
                 var userDto = await _authService.RegisterUserAsync(dto);
+
+                _ = Task.Run(() =>
+                 _authService.SendWelcomeEmailAsync(userDto.Email, userDto.FullName)
+                    );
+
                 TempData["SuccessMessage"] = "Registration successful! Please login.";
                 return RedirectToAction("Login");
             }
@@ -110,8 +115,8 @@ namespace Rentzy.Web.Controllers
 
                 return userDto.UserType switch
                 {
-                    "Admin" => RedirectToAction("Index", "Admin"),
-                    "Landlord" => RedirectToAction("Dashboard", "Landlord"),
+                    "Admin" => RedirectToAction("Dashboard", "Admin"),
+                    "Landlord" => RedirectToAction("Dashboard", "Landlord"), // Will redirect to PendingApproval if not verified
                     "Tenant" => RedirectToAction("Dashboard", "Tenant"),
                     _ => RedirectToAction("Index", "Home")
                 };
@@ -253,42 +258,41 @@ namespace Rentzy.Web.Controllers
             return View();
         }
 
+        // POST: /Account/ForgotPassword
         [HttpPost]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model) // ✅ ViewModel
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(forgotPasswordDTO dto)
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                var viewModel = new ForgotPasswordViewModel
+                {
+                    Email = dto.Email
+                    // map other properties if needed
+                };
+                return View(viewModel);
             }
 
             try
             {
-                var token = await _authService.GeneratePasswordResetTokenAsync(model.Email);
+                var token = await _authService.GeneratePasswordResetTokenAsync(dto.Email);
 
-                var resetLink = Url.Action("ResetPassword", "Account",
-                    new { token = token, email = model.Email }, Request.Scheme);
+                TempData["SuccessMessage"] = "If your email exists in our system, you will receive a password reset link shortly.";
 
-                TempData["ResetLink"] = resetLink;
-                TempData["UserEmail"] = model.Email;
-
-                return RedirectToAction("EmailPreview");
-            }
-            catch
-            {
                 return RedirectToAction("ForgotPasswordConfirmation");
             }
-        }
-
-        [HttpGet]
-        public IActionResult EmailPreview()
-        {
-            if (TempData["ResetLink"] == null)
+            catch (Exception ex)
             {
-                return RedirectToAction("Login");
-            }
+                ModelState.AddModelError("", "An error occurred. Please try again.");
 
-            return View();
+                var viewModel = new ForgotPasswordViewModel
+                {
+                    Email = dto.Email
+                };
+                return View(viewModel);
+            }
         }
+
 
         [HttpGet]
         public IActionResult ForgotPasswordConfirmation()

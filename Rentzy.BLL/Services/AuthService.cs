@@ -13,11 +13,13 @@ namespace Rentzy.BLL.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly ILandlordApprovalRepository _landlordApprovalRepository;
+        private readonly EmailService _emailService;
 
-        public AuthService(IUserRepository userRepository, ILandlordApprovalRepository _repo)
+        public AuthService(IUserRepository userRepository, ILandlordApprovalRepository _repo, EmailService emailService) 
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _landlordApprovalRepository = _repo ?? throw new ArgumentNullException(nameof(_repo));
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
         }
 
         public async Task<UserDTO> RegisterUserAsync(RegisterDTO dto)
@@ -43,8 +45,8 @@ namespace Rentzy.BLL.Services
             // Create the appropriate user type
             User newUser = dto.UserType.ToLower() switch
             {
-                "tenant" => new Tenant() { Role = "Tenant"},
-                "landlord" => new Landlord { IsVerified = false, Role = "Landlord"},
+                "tenant" => new Tenant() { Role = "Tenant" },
+                "landlord" => new Landlord { IsVerified = false, Role = "Landlord" },
                 "admin" => new Admin { Role = "Admin" },
                 _ => throw new ArgumentException("Invalid user type. Must be 'tenant', 'landlord', or 'admin'")
             };
@@ -108,15 +110,6 @@ namespace Rentzy.BLL.Services
                 throw new AuthenticationException("Invalid email or password");
             }
 
-            if(user.Role == "Landlord")
-            {
-                var verifiedLandlords = await _userRepository.GetVerifiedLandlords();
-                bool isVerified = verifiedLandlords.Any(l => l.Id == user.Id);
-
-                if (!isVerified)
-                    throw new AuthenticationException("Landlord is not approved by Admin");
-            }
-
             return MapToDto(user);
         }
 
@@ -159,16 +152,17 @@ namespace Rentzy.BLL.Services
 
             if (user is NoUser)
             {
-                throw new InvalidOperationException("User not found");
+                throw new NotFoundException("User not found");
             }
 
             if (user is not Landlord landlord)
             {
-                throw new InvalidOperationException("User is not a landlord");
+                throw new BusinessException("User is not a landlord");
             }
 
             return landlord.IsVerified;
         }
+
 
         public async Task<UserDTO> GetUserByIdAsync(int userId)
         {
@@ -221,7 +215,7 @@ namespace Rentzy.BLL.Services
 
         private static string HashPassword(string password)
         {
-            return BCrypt.Net.BCrypt.HashPassword(password, 12);
+            return BCrypt.Net.BCrypt.HashPassword(password, 8);
         }
 
         private static bool VerifyPassword(string password, string hashedPassword)
@@ -247,8 +241,8 @@ namespace Rentzy.BLL.Services
 
             if (user is NoUser)
             {
-                // Don't reveal that user doesn't exist for security
-                // Still return a token format but it won't work
+                // For security, don't reveal if email doesn't exist
+                // But still send email attempt for logging
                 return Guid.NewGuid().ToString();
             }
 
@@ -263,11 +257,33 @@ namespace Rentzy.BLL.Services
             {
                 await _userRepository.UpdateUser(user);
                 await _userRepository.SaveChanges();
+
+                // ✅ BUILD THE RESET URL
+                // Note: In production, get the actual domain from configuration
+                var resetUrl = $"https://localhost:44359/Account/ResetPassword?token={token}&email={email}";
+
+                // ✅ SEND EMAIL
+                await _emailService.SendPasswordResetEmailAsync(email, token, resetUrl);
+
                 return token;
             }
             catch (DbUpdateException ex)
             {
                 throw new InvalidOperationException("Unable to generate reset token. Please try again later.", ex);
+            }
+        }
+
+        // Add this NEW method for welcome email
+        public async Task SendWelcomeEmailAsync(string email, string userName)
+        {
+            try
+            {
+                await _emailService.SendWelcomeEmailAsync(email, userName);
+            }
+            catch (Exception ex)
+            {
+                // Log but don't fail registration if email fails
+                Console.WriteLine($"Failed to send welcome email: {ex.Message}");
             }
         }
 
@@ -351,4 +367,5 @@ namespace Rentzy.BLL.Services
             return MapToDto(user);
         }
     }
+ 
 }
