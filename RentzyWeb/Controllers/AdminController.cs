@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.Services.ApprovalServices;
 using Rentzy.DAL.Context;
 using Rentzy.DAL.Models;
 using Rentzy.Web.Authorization;
+using Rentzy.Web.Models;
 
 namespace Rentzy.Web.Controllers
 {
@@ -12,12 +14,14 @@ namespace Rentzy.Web.Controllers
         private readonly RentzyDBContext _context;
         private readonly ILandlordApprovalService _approvalService;
         private readonly IPropertyApprovalRequestService _propertyService;
+        private readonly IUserStatuses_service _statusService;
 
-        public AdminController(RentzyDBContext context, ILandlordApprovalService approvalService, IPropertyApprovalRequestService rep)
+        public AdminController(RentzyDBContext context, ILandlordApprovalService approvalService, IPropertyApprovalRequestService rep, IUserStatuses_service statusService)
         {
             _context = context;
             _approvalService = approvalService;
             _propertyService = rep;
+            _statusService = statusService;
         }
 
         [HttpGet]
@@ -26,11 +30,14 @@ namespace Rentzy.Web.Controllers
             var userName = HttpContext.Session.GetString("UserName");
             var userEmail = HttpContext.Session.GetString("UserEmail");
             var totalUsers = _context.Users.Count();   
-            var ActiveLandlord = _context.LandlordApprovals.Count(x => x.ApprovalStatusId == 2);   
+            var ActiveLandlord = _context.LandlordApprovals.Count(x => x.ApprovalStatusId == 2); 
+            var totalPrpperties= _context.PropertyApprovalRequests.Count(x => x.StatusId == 2); 
+            
 
 
             ViewBag.TotalUsers = totalUsers;
             ViewBag.ActiveLandlords = ActiveLandlord;
+            ViewBag.TotalProperties = totalPrpperties;
             ViewBag.UserName = userName;
             ViewBag.UserEmail = userEmail;
 
@@ -41,6 +48,92 @@ namespace Rentzy.Web.Controllers
         public IActionResult Index()
         {
             return RedirectToAction("Dashboard");
+        }
+
+        //================================================================================================
+        //  Manage Users
+        //=============================================================================================
+
+        public async Task<IActionResult> ManageUsers()
+        {
+            var users = await _context.Users.ToListAsync();
+
+            var vm = new List<ManageUserVM>();
+
+            foreach (var u in users)
+            {
+                var status = await _statusService.GetStatusAsync(u.Id);
+
+                if( u.Role != "Admin")
+                {
+                    vm.Add(new ManageUserVM
+                    {
+                        UserId = u.Id,
+                        FullName = $"{u.FirstName} {u.LastName}",
+                        Email = u.Email,
+                        IsActive = status.IsActive,
+                        IsDeleted = status.IsDeleted
+                    });
+                }
+            }
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> BlockUser(int userId)
+        {
+            await _statusService.BlockUserAsync(userId);
+            return RedirectToAction("ManageUsers");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UnblockUser(int userId)
+        {
+            await _statusService.UnblockUserAsync(userId);
+            return RedirectToAction("ManageUsers");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            var vm = new EditUserVM
+            {
+                UserId = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                PhoneNumber = user.Phone
+            };
+            return View(vm); // yahan Edit.cshtml load hogi
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditUser(EditUserVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _context.Users.FindAsync(model.UserId);
+            if (user == null)
+                return NotFound();
+
+            // Update fields
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.Email = model.Email;
+            user.Phone = model.PhoneNumber;
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "User updated successfully.";
+
+            return RedirectToAction("ManageUsers", "Admin");
         }
 
         //================================================================================================
