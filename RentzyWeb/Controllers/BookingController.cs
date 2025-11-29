@@ -1,81 +1,93 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Rentzy.BLL.DTOs; // for PaymentDTO if needed
 using Rentzy.BLL.Services;
-using Rentzy.DAL.Repository;
-using Rentzy.DAL.Context;
+using Rentzy.DAL.Models;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace RentzyWeb.Controllers
 {
     public class BookingController : Controller
     {
-       // private readonly IPropertyService _service;
-        private readonly PropertyService _service;
+        private readonly ITenantBookingService _bookingService;
 
-
-        public BookingController()
+        public BookingController(ITenantBookingService bookingService)
         {
-            //_service = service;
-            var options = new DbContextOptionsBuilder<RentzyDBContext>()
-        .UseSqlServer("Server=localhost\\SQLEXPRESS;Database=RentzyDB;Trusted_Connection=True;TrustServerCertificate=True;Encrypt=False")
-        .Options;
-
-            var db = new RentzyDBContext(options);
-
-            var landlordRepo = new LandlordRepository(db);
-            var propertyRepo = new PropertyRepository(db);
-
-            _service = new PropertyService(landlordRepo, propertyRepo);
+            _bookingService = bookingService;
         }
 
-        // DETAILS: show full property page (uses existing PropertyDTO)
+        // DETAILS
         public async Task<IActionResult> Details(int id)
         {
-            var model = await _service.GetPropertyDetailsAsync(id); // returns PropertyDTO
+            var model = await _bookingService.GetPropertyDetailsAsync(id);
             if (model == null) return NotFound();
             return View(model);
         }
 
-        // CREATE RENTAL REQUEST: tenant clicks Book -> create PropertyRentalRequest record
+        // REQUEST GET
         public async Task<IActionResult> Request(int propertyId)
         {
-            // ensure session contains UserId
-            //var userIdString = HttpContext.Session.GetString("UserId");
-            //if (string.IsNullOrEmpty(userIdString)) return RedirectToAction("Login", "Account");
-
-           // int tenantId = int.Parse(userIdString);
-           // int requestId = await _service.CreateRentalRequestAsync(tenantId, propertyId);
-
             var tenantId = HttpContext.Session.GetInt32("UserId");
             if (tenantId == null) return RedirectToAction("Login", "Account");
 
-            // Use tenantId.Value below
-            int requestId = await _service.CreateRentalRequestAsync(tenantId.Value, propertyId);
+            var bookedDates = await _bookingService.GetBookedDatesAsync(propertyId);
+            var property = await _bookingService.GetPropertyDetailsAsync(propertyId);
 
+            ViewBag.PropertyId = propertyId;
+            ViewBag.PropertyTitle = property.Title;
+            ViewBag.PropertyImage = property.Images?.FirstOrDefault()?.ImageUrl;
+            ViewBag.BookedDates = bookedDates.Select(d => d.ToString("yyyy-MM-dd")).ToList();
 
-            // redirect to payment page for that request
-            return RedirectToAction(nameof(Payment), new { requestId });
+            return View();
         }
 
-        // PAYMENT (GET): show payment page for a rental request
+        // REQUEST POST
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Request(int propertyId, DateTime startDate, DateTime endDate)
+        {
+            var tenantId = HttpContext.Session.GetInt32("UserId");
+            if (tenantId == null) return RedirectToAction("Login", "Account");
+
+            var request = new PropertyRentalRequest
+            {
+                PropertyId = propertyId,
+                TenantId = tenantId.Value,
+                StartDate = startDate,
+                EndDate = endDate,
+                StatusId = 2 // Pending approval
+            };
+
+            await _bookingService.CreateRentalRequestAsync(request);
+
+            TempData["Success"] = "Rental request sent!";
+            return RedirectToAction("Details", new { id = propertyId });
+        }
+
+        // PAYMENT GET
         public async Task<IActionResult> Payment(int requestId)
         {
-            var model = await _service.GetPaymentInfoAsync(requestId); // returns PaymentDTO
+            var model = await _bookingService.GetPaymentInfoAsync(requestId);
             if (model == null) return NotFound();
             return View(model);
         }
 
-        // PROCESS PAYMENT (POST)
+        // PAYMENT POST
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Pay(int requestId, decimal amount)
+        public async Task<IActionResult> Pay(int paymentId)
         {
-            // you may want to check amount server-side in real app
-            await _service.ProcessPaymentAsync(requestId, amount);
-            return RedirectToAction(nameof(Receipt), new { requestId });
+            var tenantId = HttpContext.Session.GetInt32("UserId");
+            if (tenantId == null) return RedirectToAction("Login", "Account");
+
+            var payment = await _bookingService.GetPaymentByIdAsync(paymentId);
+            if (payment == null || payment.Booking.TenantId != tenantId.Value)
+                return Forbid();
+
+            await _bookingService.MarkPaymentAsPaidAsync(paymentId);
+
+            return RedirectToAction("Receipt", new { requestId = payment.BookingId });
         }
 
         // RECEIPT
