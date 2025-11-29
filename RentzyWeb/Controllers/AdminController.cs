@@ -11,11 +11,13 @@ namespace Rentzy.Web.Controllers
     {
         private readonly RentzyDBContext _context;
         private readonly ILandlordApprovalService _approvalService;
+        private readonly IPropertyApprovalRequestService _propertyService;
 
-        public AdminController(RentzyDBContext context, ILandlordApprovalService approvalService)
+        public AdminController(RentzyDBContext context, ILandlordApprovalService approvalService, IPropertyApprovalRequestService rep)
         {
             _context = context;
             _approvalService = approvalService;
+            _propertyService = rep;
         }
 
         [HttpGet]
@@ -23,9 +25,12 @@ namespace Rentzy.Web.Controllers
         {
             var userName = HttpContext.Session.GetString("UserName");
             var userEmail = HttpContext.Session.GetString("UserEmail");
-            var totalUsers = _context.Users.Count();   // Users table se count
+            var totalUsers = _context.Users.Count();   
+            var ActiveLandlord = _context.LandlordApprovals.Count(x => x.ApprovalStatusId == 2);   
+
 
             ViewBag.TotalUsers = totalUsers;
+            ViewBag.ActiveLandlords = ActiveLandlord;
             ViewBag.UserName = userName;
             ViewBag.UserEmail = userEmail;
 
@@ -37,6 +42,93 @@ namespace Rentzy.Web.Controllers
         {
             return RedirectToAction("Dashboard");
         }
+
+        //================================================================================================
+        //  Property Approvals
+        //=============================================================================================
+
+        [HttpGet]
+        public async Task<IActionResult> PropertyApprovals(int? statusId)
+        {
+            // default: show pending
+            if (!statusId.HasValue) statusId = ApprovalStatusConstants.Pending;
+
+            var approvals = await _propertyService.GetApprovalsByStatusAsync(statusId.Value);
+
+            ViewBag.CurrentStatusId = statusId.Value;
+            var statuses = _context.ApprovalStatuses.ToList();
+            ViewBag.ApprovalStatuses = statuses;
+
+            return View(approvals);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveProperty(int id, string? notes)
+        {
+            var adminId = GetCurrentAdminUserId(); // implement as per your auth/session
+            try
+            {
+                await _propertyService.ApproveAsync(id, adminId, notes);
+                TempData["Success"] = "Property approved successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error: {ex.Message}";
+            }
+            return RedirectToAction("PropertyApprovals");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectProperty(int id, string? notes)
+        {
+            var adminId = GetCurrentAdminUserId();
+            try
+            {
+                await _propertyService.RejectAsync(id, adminId, notes);
+                TempData["Success"] = "Property rejected.";
+
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error: {ex.Message}";
+            }
+            return RedirectToAction("PropertyApprovals");
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelPropertyRequest(int id, string? notes)
+        {
+            var adminId = GetCurrentAdminUserId();
+            try
+            {
+                await _propertyService.CancelAsync(id, adminId, notes);
+                TempData["Success"] = "Approval request cancelled.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error: {ex.Message}";
+            }
+            return RedirectToAction("PropertyApprovals");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> PropertyApprovalDetails(int id)
+        {
+            var Approval = await _propertyService.GetByIdAsync(id);
+            if (Approval == null) return NotFound();
+            
+                return View(Approval);
+        }
+      
+
+        //================================================================================================
+        //  Landlord Approvals
+        //=============================================================================================
+
 
         // New: list approvals (filter optional)
         [HttpGet]
@@ -119,7 +211,7 @@ namespace Rentzy.Web.Controllers
         // Helper: adjust according to your session/auth scheme
         private int GetCurrentAdminUserId()
         {
-            var idString = HttpContext.Session.GetString("UserId");
+            var idString = HttpContext.Session.GetString("Id");
             if (int.TryParse(idString, out var id)) return id;
             // fallback: admin id 0 (or throw)
             return 0;
