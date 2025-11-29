@@ -26,11 +26,14 @@ namespace Rentzy.Web.Controllers
             var userName = HttpContext.Session.GetString("UserName");
             var userEmail = HttpContext.Session.GetString("UserEmail");
             var totalUsers = _context.Users.Count();   
-            var ActiveLandlord = _context.LandlordApprovals.Count(x => x.ApprovalStatusId == 2);   
+            var ActiveLandlord = _context.LandlordApprovals.Count(x => x.ApprovalStatusId == 2); 
+            var totalPrpperties= _context.PropertyApprovalRequests.Count(x => x.StatusId == 2); 
+            
 
 
             ViewBag.TotalUsers = totalUsers;
             ViewBag.ActiveLandlords = ActiveLandlord;
+            ViewBag.TotalProperties = totalPrpperties;
             ViewBag.UserName = userName;
             ViewBag.UserEmail = userEmail;
 
@@ -42,6 +45,12 @@ namespace Rentzy.Web.Controllers
         {
             return RedirectToAction("Dashboard");
         }
+
+        //================================================================================================
+        //  Manage Users
+        //=============================================================================================
+
+
 
         //================================================================================================
         //  Property Approvals

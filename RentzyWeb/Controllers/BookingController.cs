@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.DTOs; // for PaymentDTO if needed
 using Rentzy.BLL.Services;
-using Rentzy.DAL.Repository;
 using Rentzy.DAL.Context;
+using Rentzy.DAL.Repository;
+using Rentzy.DAL.Repository.Approvals;
 using System;
 using System.Threading.Tasks;
 
@@ -15,12 +16,13 @@ namespace RentzyWeb.Controllers
        // private readonly IPropertyService _service;
         private readonly PropertyService _service;
 
+        private readonly IPropertyApprovalRequestsRepo _RequestRepo;
 
         public BookingController()
         {
             //_service = service;
             var options = new DbContextOptionsBuilder<RentzyDBContext>()
-        .UseSqlServer("Server=localhost\\SQLEXPRESS;Database=RentzyDB;Trusted_Connection=True;TrustServerCertificate=True;Encrypt=False")
+        .UseSqlServer("Server=DESKTOP-J77KRRE\\SQLEXPRESS;Database=RentzyDB;Trusted_Connection=True;TrustServerCertificate=True;Encrypt=False")
         .Options;
 
             var db = new RentzyDBContext(options);
@@ -28,7 +30,7 @@ namespace RentzyWeb.Controllers
             var landlordRepo = new LandlordRepository(db);
             var propertyRepo = new PropertyRepository(db);
 
-            _service = new PropertyService(landlordRepo, propertyRepo);
+            _service = new PropertyService(landlordRepo, propertyRepo, _RequestRepo);
         }
 
         // DETAILS: show full property page (uses existing PropertyDTO)
