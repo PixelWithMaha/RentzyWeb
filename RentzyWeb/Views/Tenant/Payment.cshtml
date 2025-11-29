@@ -1,0 +1,21 @@
+﻿@model Rentzy.DAL.Models.Payment
+
+@{
+    ViewData["Title"] = "Make Payment";
+}
+
+<h2>Payment for @Model.Booking.Property.Title</h2>
+<p>Amount Due: <strong>@Model.Amount.ToString("C")</strong></p>
+<p>Booking Dates: @Model.Booking.StartDate:dd/MM/yyyy - @Model.Booking.EndDate:dd/MM/yyyy</p>
+
+@if (Model.StatusId != 1)  
+{
+    <form asp-action="CompletePayment" method="post">
+        <input type="hidden" name="paymentId" value="@Model.Id" />
+        <button type="submit" class="btn btn-success">Pay Now</button>
+    </form>
+}
+else
+{
+    <div class="alert alert-success">Payment Completed on @Model.PaidAt?.ToString("dd/MM/yyyy HH:mm")</div>
+}

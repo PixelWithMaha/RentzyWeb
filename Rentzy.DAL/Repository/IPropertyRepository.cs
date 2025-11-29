@@ -37,6 +37,10 @@ namespace Rentzy.DAL.Repository
         // payment save
         Task AddPaymentAsync(Payment payment);
 
+        // Get all booked dates for a property (from confirmed bookings)
+        Task<List<DateTime>> GetBookedDatesForPropertyAsync(int propertyId);
+
+
 
     }
 }

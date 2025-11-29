@@ -163,6 +163,12 @@ namespace Rentzy.BLL.Services
             return _repo.DeletePropertyImageAsync(imageId);
         }
         //NEWWW
+
+        public async Task<List<DateTime>> GetBookedDatesAsync(int propertyId)
+        {
+            return await _propertyRepository.GetBookedDatesForPropertyAsync(propertyId);
+        }
+
         public async Task<PropertyDTO> GetPropertyDetailsAsync(int propertyId)
         {
             var p = await _propertyRepository.GetPropertyDetailsAsync(propertyId);
