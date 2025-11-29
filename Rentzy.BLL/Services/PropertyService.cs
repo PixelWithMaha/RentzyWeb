@@ -62,18 +62,31 @@ namespace Rentzy.BLL.Services
         public async Task<List<PropertyDTO>> GetPropertiesByLandlordAsync(int landlordId)
         {
             var properties = await _repo.GetPropertiesByLandlordAsync(landlordId);
-            return properties.Select(p => new PropertyDTO
+
+            var result = new List<PropertyDTO>();
+
+            foreach (var p in properties)
             {
-                Id = p.Id,
-                Title = p.Title,
-                Description = p.Description,
-                Rent = p.MonthlyRent,
-                CityId = p.CityId,
-                PropertyTypeId = p.PropertyTypeId,
-                LandlordId = p.LandlordId,
-                Images = p.Images.ToList()
-            }).ToList();
+                // Fetch latest approval request for this property
+                var approvalRequest = await _RequestRepo.GetByPropertyIdAsync(p.Id);
+
+                result.Add(new PropertyDTO
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Description = p.Description,
+                    Rent = p.MonthlyRent,
+                    CityId = p.CityId,
+                    PropertyTypeId = p.PropertyTypeId,
+                    LandlordId = p.LandlordId,
+                    Images = p.Images.ToList(),
+                    StatusId = approvalRequest?.StatusId ?? ApprovalStatusConstants.Pending
+                });
+            }
+
+            return result;
         }
+
 
         public async Task<PropertyDTO> GetPropertyByIdAsync(int propertyId)
         {
@@ -115,6 +128,7 @@ namespace Rentzy.BLL.Services
             };
 
             await _RequestRepo.CreateAsync(request);
+            await _RequestRepo.SaveChangesAsync();
         }
 
         public async Task UpdatePropertyAsync(PropertyDTO dto)

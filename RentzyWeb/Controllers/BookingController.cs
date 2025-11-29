@@ -8,6 +8,7 @@ using Rentzy.DAL.Repository;
 using Rentzy.DAL.Repository.Approvals;
 using System;
 using System.Threading.Tasks;
+using Rentzy.DAL.Repository.Approvals;
 
 namespace RentzyWeb.Controllers
 {
@@ -30,7 +31,9 @@ namespace RentzyWeb.Controllers
             var landlordRepo = new LandlordRepository(db);
             var propertyRepo = new PropertyRepository(db);
 
-            _service = new PropertyService(landlordRepo, propertyRepo, _RequestRepo);
+            var approvalRepo = new PropertyApprovalRequestsRepo(db); 
+
+            _service = new PropertyService(landlordRepo, propertyRepo,approvalRepo);
         }
 
         // DETAILS: show full property page (uses existing PropertyDTO)

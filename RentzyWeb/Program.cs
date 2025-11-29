@@ -36,6 +36,10 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ILandlordApprovalService, LandlordApprovalService>();
 builder.Services.AddScoped<ILandlordApprovalRepository, LandlordApprovalRepository>();
 
+builder.Services.AddScoped<IUserStatuses_service, UserStatuses_service>();
+builder.Services.AddScoped<IUserStatuses_Repo, UserStatuses_Repo>();
+
+
 builder.Services.AddScoped<IPropertyApprovalRequestsRepo, PropertyApprovalRequestsRepo>();
 builder.Services.AddScoped<IPropertyApprovalRequestService, PropertyApprovalRequestService>();
 

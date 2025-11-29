@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rentzy.DAL.Context;
 
@@ -11,9 +12,11 @@ using Rentzy.DAL.Context;
 namespace Rentzy.DAL.Migrations
 {
     [DbContext(typeof(RentzyDBContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251129083154_RafiaCode")]
+    partial class RafiaCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -500,31 +503,6 @@ namespace Rentzy.DAL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("Rentzy.DAL.Models.UserStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("UserStatuses");
-                });
-
             modelBuilder.Entity("Rentzy.DAL.Models.Admin", b =>
                 {
                     b.HasBaseType("Rentzy.DAL.Models.User");
@@ -741,17 +719,6 @@ namespace Rentzy.DAL.Migrations
                     b.Navigation("Property");
 
                     b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("Rentzy.DAL.Models.UserStatus", b =>
-                {
-                    b.HasOne("Rentzy.DAL.Models.User", "User")
-                        .WithOne()
-                        .HasForeignKey("Rentzy.DAL.Models.UserStatus", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Rentzy.DAL.Models.ApprovalStatus", b =>
