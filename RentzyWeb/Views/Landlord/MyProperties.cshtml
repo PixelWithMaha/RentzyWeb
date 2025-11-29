@@ -5,12 +5,12 @@
     ViewData["Title"] = "My Properties";
 }
 
-<div class="container mt-4">
+<div class="container mt-5">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-primary">My Properties</h2>
-        <a href="@Url.Action("AddProperty", "Landlord")" class="btn btn-primary btn-lg">
-            + Add New Property
+        <a href="@Url.Action("AddProperty", "Landlord")" class="btn btn-primary btn-lg shadow-sm">
+            <i class="fas fa-plus-circle me-2"></i>Add New Property
         </a>
     </div>
 
@@ -18,97 +18,98 @@
     {
             <div class="alert alert-info text-center p-4 shadow-sm rounded-3">
                 <h5>No properties added yet.</h5>
-                <p>Add your first property to start listing rentals.</p>
-                <a href="@Url.Action("AddProperty", "Landlord")" class="btn btn-success btn-lg mt-2">Add Property</a>
+                <p class="mb-2">Add your first property to start listing rentals.</p>
+                <a href="@Url.Action("AddProperty", "Landlord")" class="btn btn-success btn-lg mt-2 shadow-sm">
+                    Add Property
+                </a>
             </div>
     }
     else
     {
-            <div class="table-responsive">
-                <table class="table table-hover table-bordered shadow-sm rounded-3">
-                    <thead class="table-dark">
-                        <tr>
-                            <th style="width: 15%;">Title</th>
-                            <th style="width: 25%;">Description</th>
-                            <th>Rent</th>
-                            <th>City</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th style="width: 20%;">Images</th>
-                            <th style="width: 15%;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var prop in Model)
-                    {
-                                <tr>
-                                    <td class="fw-semibold">@prop.Title</td>
-                                    <td>@prop.Description</td>
-                                    <td class="text-success fw-bold">Rs @prop.Rent</td>
+            <table class="table table-striped table-hover shadow-sm rounded">
+                    <thead class="custom-blue-header text-white">
+        <tr>
+            <th>Property</th>
+            <th>Description</th>
+            <th>Rent</th>
+            <th>City</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Images</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
 
-                                    <td>
-                                        <span class="badge bg-primary">@prop.CityId</span>
-                                    </td>
-
-                                    <td>
-                                        <span class="badge bg-info text-dark">@prop.PropertyTypeId</span>
-                                    </td>
-
-                                    <!-- Approval Status Column -->
-                                    <td>
-                                @if (prop.StatusId == ApprovalStatusConstants.Pending)
-                                {
-                                                <span class="badge bg-warning text-dark">Pending</span>
-                                }
-                                else if (prop.StatusId == ApprovalStatusConstants.Approved)
-                                {
-                                                <span class="badge bg-success">Approved</span>
-                                }
-                                else if (prop.StatusId == ApprovalStatusConstants.Rejected)
-                                {
-                                                <span class="badge bg-danger">Rejected</span>
-                                }
-                                else if (prop.StatusId == ApprovalStatusConstants.Cancelled)
-                                {
-                                                <span class="badge bg-secondary">Cancelled</span>
-                                }
-                                else
-                                {
-                                                <span class="badge bg-info text-dark">Unknown</span>
-                                }
-                                    </td>
-
-                                    <td>
-                                @if (prop.Images != null && prop.Images.Any())
-                                {
+                <tbody>
+                @foreach (var prop in Model)
+                {
+                            <tr>
+                                <td>@prop.Title</td>
+                                <td class="text-truncate" style="max-width:350px;">@prop.Description</td>
+                                <td class="fw-bold">Rs @prop.Rent</td>
+                                <td>@prop.CityName</td>
+                                <td>@prop.PropertyTypeName</td>
+                                <td>
+                            @if (prop.StatusId == ApprovalStatusConstants.Pending)
+                            {
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                            }
+                            else if (prop.StatusId == ApprovalStatusConstants.Approved)
+                            {
+                                            <span class="badge bg-success">Approved</span>
+                            }
+                            else if (prop.StatusId == ApprovalStatusConstants.Rejected)
+                            {
+                                            <span class="badge bg-danger">Rejected</span>
+                            }
+                                </td>
+                                <td>
+                            @if (prop.Images != null && prop.Images.Any())
+                            {
+                                            <div class="d-flex flex-wrap gap-2">
                                     @foreach (var img in prop.Images)
                                     {
-                                                        <img src="@img.ImageUrl"
-                                                             style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px; margin-right: 5px; margin-bottom: 5px;"
-                                                             class="shadow-sm" />
+                                                        <img src="@img.ImageUrl" class="property-img" />
                                     }
-                                }
-                                else
-                                {
-                                                <span class="text-muted">No Images</span>
-                                }
-                                    </td>
-
-                                    <td>
-                                        <a href="@Url.Action("EditProperty", "Landlord", new { id = prop.Id })"
-                                           class="btn btn-warning btn-sm me-1">Edit</a>
-
-                                        <form method="post" asp-action="DeleteProperty" asp-controller="Landlord"
-                                              onsubmit="return confirm('Are you sure you want to delete this property?');"
-                                              style="display:inline;">
+                                            </div>
+                            }
+                            else
+                            {
+                                            <span>No Images</span>
+                            }
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a href="@Url.Action("EditProperty", "Landlord", new { id = prop.Id })" class="btn btn-sm btn-info">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" asp-action="DeleteProperty" asp-controller="Landlord" onsubmit="return confirm('Are you sure you want to delete this property?');">
                                             <input type="hidden" name="id" value="@prop.Id" />
-                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </form>
-                                    </td>
-                                </tr>
-                    }
-                    </tbody>
-                </table>
-            </div>
+                                    </div>
+                                </td>
+                            </tr>
+                }
+                </tbody>
+            </table>
     }
 </div>
+
+<style>
+.property-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid rgba(0,0,0,0.15);
+}
+
+/* Custom dark blue header */
+.custom-blue-header th {
+    background-color: #3E7BFF !important; /* Dark blue */
+    color: white !important;
+}
+</style>
