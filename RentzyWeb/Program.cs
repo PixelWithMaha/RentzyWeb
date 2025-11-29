@@ -19,6 +19,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 // DbContext
+builder.Services.AddSession();
+
+
+// Add DbContext
 builder.Services.AddDbContext<RentzyDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -32,6 +36,10 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ILandlordApprovalService, LandlordApprovalService>();
 builder.Services.AddScoped<ILandlordApprovalRepository, LandlordApprovalRepository>();
 
+builder.Services.AddScoped<IPropertyApprovalRequestsRepo, PropertyApprovalRequestsRepo>();
+builder.Services.AddScoped<IPropertyApprovalRequestService, PropertyApprovalRequestService>();
+
+// Add Services
 // Payment
 builder.Services.AddScoped<PaymentRepository>();
 builder.Services.AddScoped<PaymentService>();
@@ -40,6 +48,7 @@ builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
 
 builder.Services.AddScoped<ILandlordRepository, LandlordRepository>();
 builder.Services.AddScoped<LandlordService>();
+builder.Services.AddScoped<PropertyApprovalRequestService>();
 
 // Auth Service
 builder.Services.AddScoped<AuthService>();
@@ -79,6 +88,7 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
+app.UseSession();
 
 // Middleware
 if (!app.Environment.IsDevelopment())

@@ -21,6 +21,9 @@
                             <p class="text-blue-200">Tenant: @req.TenantName</p>
                             <p class="text-blue-100 text-sm">Status: @req.Status</p>
                             <p class="text-blue-100 text-sm">Requested At: @req.RequestedAt.ToString("g")</p>
+                            <p class="text-blue-100 text-sm">Start Date: @req.StartDate.ToString("d")</p>
+                            <p class="text-blue-100 text-sm">End Date: @req.EndDate.ToString("d")</p>
+
                         </div>
                         <div class="flex gap-3">
                             <button class="approve-btn px-4 py-2 rounded-lg font-semibold text-white shadow-md hover:scale-105 transition-transform bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"

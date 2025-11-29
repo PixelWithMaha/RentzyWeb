@@ -11,6 +11,7 @@ namespace Rentzy.DAL.Models
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty; // Pending, Approved, Rejected, Cancelled
         public ICollection<PropertyRentalRequest> RentalRequests { get; set; } = new List<PropertyRentalRequest>();
+        public ICollection<PropertyApprovalRequest> ApprovalRequests { get; set; } = new List<PropertyApprovalRequest>();
     }
 
 }

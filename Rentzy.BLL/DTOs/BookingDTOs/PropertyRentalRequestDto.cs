@@ -18,6 +18,9 @@ namespace Rentzy.BLL.DTOs.BookingDTOs
 
         public string Status { get; set; } = string.Empty;
         public DateTime RequestedAt { get; set; }
+
+        public DateTime StartDate { get; set; }  // Tenant-selected start
+        public DateTime EndDate { get; set; }    // Tenant-selected end
     }
 
 

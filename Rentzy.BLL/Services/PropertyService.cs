@@ -2,11 +2,13 @@
 using System;
 using Rentzy.BLL.DTOs;
 using Rentzy.DAL.Models;
+using Rentzy.DAL.Repository;
+using Rentzy.DAL.Repository.Approvals;
 using Rentzy.DAL.Repository.Landlord;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
-using Rentzy.DAL.Repository;
 
 namespace Rentzy.BLL.Services
 {
@@ -14,12 +16,14 @@ namespace Rentzy.BLL.Services
     {
         private readonly ILandlordRepository _repo;
         private readonly IPropertyRepository _propertyRepository;
+        private readonly IPropertyApprovalRequestsRepo _RequestRepo;
 
 
-        public PropertyService(ILandlordRepository repo,IPropertyRepository prepo)
+        public PropertyService(ILandlordRepository repo,IPropertyRepository prepo, IPropertyApprovalRequestsRepo rep )
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo));
             _propertyRepository= prepo ?? throw new ArgumentNullException(nameof(prepo));
+            _RequestRepo = rep;
         }
         public async Task<IEnumerable<PropertyDTO>> GetAllPropertiesAsync()
         {
@@ -58,18 +62,31 @@ namespace Rentzy.BLL.Services
         public async Task<List<PropertyDTO>> GetPropertiesByLandlordAsync(int landlordId)
         {
             var properties = await _repo.GetPropertiesByLandlordAsync(landlordId);
-            return properties.Select(p => new PropertyDTO
+
+            var result = new List<PropertyDTO>();
+
+            foreach (var p in properties)
             {
-                Id = p.Id,
-                Title = p.Title,
-                Description = p.Description,
-                Rent = p.MonthlyRent,
-                CityId = p.CityId,
-                PropertyTypeId = p.PropertyTypeId,
-                LandlordId = p.LandlordId,
-                Images = p.Images.ToList()
-            }).ToList();
+                // Fetch latest approval request for this property
+                var approvalRequest = await _RequestRepo.GetByPropertyIdAsync(p.Id);
+
+                result.Add(new PropertyDTO
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Description = p.Description,
+                    Rent = p.MonthlyRent,
+                    CityId = p.CityId,
+                    PropertyTypeId = p.PropertyTypeId,
+                    LandlordId = p.LandlordId,
+                    Images = p.Images.ToList(),
+                    StatusId = approvalRequest?.StatusId ?? ApprovalStatusConstants.Pending
+                });
+            }
+
+            return result;
         }
+
 
         public async Task<PropertyDTO> GetPropertyByIdAsync(int propertyId)
         {
@@ -99,7 +116,19 @@ namespace Rentzy.BLL.Services
                 PropertyTypeId = dto.PropertyTypeId,
                 LandlordId = dto.LandlordId
             };
+
             await _repo.AddPropertyAsync(property);
+
+            var request = new PropertyApprovalRequest
+            {
+                Comments = "Admin has not viewed yet.",
+                PropertyId = property.Id,
+                StatusId = ApprovalStatusConstants.Pending,
+                RequestedAt = DateTime.UtcNow,
+            };
+
+            await _RequestRepo.CreateAsync(request);
+            await _RequestRepo.SaveChangesAsync();
         }
 
         public async Task UpdatePropertyAsync(PropertyDTO dto)

@@ -52,12 +52,16 @@ namespace Rentzy.Web.Controllers
                 ViewBag.UserName = HttpContext.Session.GetString("UserName");
                 ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
 
-                // Get properties
-                var properties = await _propertyService.GetPropertiesByLandlordAsync(landlordId.Value);
+                // Get all properties for stats/cards
+                var allProperties = await _propertyService.GetPropertiesByLandlordAsync(landlordId.Value);
+                ViewBag.TotalProperties = allProperties.Count;
 
-                // Cards
-                ViewBag.TotalProperties = properties.Count;
-                ViewBag.Properties = properties;
+                // Only show approved properties in Dashboard section
+                var approvedProperties = allProperties.Where(p => p.StatusId == ApprovalStatusConstants.Approved).ToList();
+                ViewBag.Properties = approvedProperties;
+
+
+
                 ViewBag.MonthlyRevenue = await _landlordService.GetMonthlyRevenueAsync(landlordId.Value);
                 ViewBag.PendingRequests = await _landlordService.GetPendingRequestsCountAsync(landlordId.Value);
 
@@ -121,6 +125,7 @@ namespace Rentzy.Web.Controllers
 
             dto.LandlordId = landlordId.Value;
 
+            // Save property + trigger approval request
             await _propertyService.AddPropertyAsync(dto);
 
             var addedProperty = (await _propertyService.GetPropertiesByLandlordAsync(landlordId.Value))
@@ -129,7 +134,6 @@ namespace Rentzy.Web.Controllers
             if (addedProperty != null && images?.Count > 0)
             {
                 var imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/properties");
-
                 if (!Directory.Exists(imageFolder))
                     Directory.CreateDirectory(imageFolder);
 
@@ -150,9 +154,13 @@ namespace Rentzy.Web.Controllers
                 await _propertyService.UploadPropertyImagesAsync(addedProperty.Id, imageUrls);
             }
 
-            TempData["Success"] = "Property added successfully!";
+            // ✅ Only set success message after saving property
+            TempData["Success"] = "Property details have been sent to the admin for approval!";
+
+            // Redirect to MyProperties page to show the message
             return RedirectToAction("MyProperties");
         }
+
 
         // ------- REMAINING METHODS UNCHANGED ---------
 
@@ -239,6 +247,7 @@ namespace Rentzy.Web.Controllers
             var requests = await _landlordService.GetTenantRequestsAsync(landlordId.Value);
             return View(requests);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -5,6 +5,7 @@ using Rentzy.DAL.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Rentzy.DAL.Repository.Approvals;
 
 namespace RentzyWeb.Controllers
 {
