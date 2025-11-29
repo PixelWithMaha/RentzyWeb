@@ -51,7 +51,7 @@
                         <i class="fas fa-user-tie text-warning" style="font-size: 3rem;"></i>
                     </div>
                     <h5 class="card-title">Landlords</h5>
-                    <h2 class="text-warning mb-0">0</h2>
+                    <h2 class="text-warning mb-0">@ViewBag.ActiveLandlords</h2>
                     <p class="text-muted small">Active Landlords</p>
                 </div>
             </div>
@@ -97,8 +97,9 @@
 
                         </div>
                         <div class="col-md-3">
-                            <a href="#" class="btn btn-outline-warning w-100 py-3">
-                                <i class="fas fa-home d-block mb-2" style="font-size: 2rem;"></i>
+                            <a asp-controller="Admin" asp-action="PropertyApprovals"
+                               class="btn btn-outline-success w-100 py-3">
+                                <i class="fas fa-check-circle d-block mb-2" style="font-size: 2rem;"></i>
                                 Manage Properties
                             </a>
                         </div>

@@ -2,13 +2,14 @@
 using Rentzy.BLL.DTOs.BookingDTOs;
 using Rentzy.DAL;
 using Rentzy.DAL.Models;
+using Rentzy.DAL.Repositories;
 using Rentzy.DAL.Repository;
+using Rentzy.DAL.Repository;
+using Rentzy.DAL.Repository.Approvals;
 using Rentzy.DAL.Repository.Landlord;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Rentzy.DAL.Repository;
-using Rentzy.DAL.Repositories;
 
 namespace Rentzy.BLL.Services
 {
@@ -18,12 +19,13 @@ namespace Rentzy.BLL.Services
         private readonly PropertyService _propertyService;
         private readonly IPropertyRepository _propertyRepo;
         private readonly PaymentService _paymentService;
+        private readonly IPropertyApprovalRequestsRepo _RequestRepo;
 
-        public LandlordService(ILandlordRepository repo, IPropertyRepository propertyRepo, PaymentService paymentService)
+        public LandlordService(ILandlordRepository repo, IPropertyRepository propertyRepo, PaymentService paymentService, IPropertyApprovalRequestsRepo _Repo)
         {
             _repo = repo;
             _propertyRepo = propertyRepo;
-            _propertyService = new PropertyService(repo, propertyRepo); // reuse core property logic
+            _propertyService = new PropertyService(repo, propertyRepo, _Repo); // reuse core property logic
             _paymentService = paymentService;
         }
 

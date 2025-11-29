@@ -77,6 +77,35 @@ namespace Rentzy.DAL.Context
             });
 
             //-----------------------------------------------------------------------
+            modelBuilder.Entity<PropertyApprovalRequest>(entity =>
+            {
+                entity.ToTable("PropertyApprovalRequests");
+
+                entity.HasKey(e => e.Id);
+
+                // Property (One Approval Request -> One Property)
+                entity.HasOne(e => e.property)
+                      .WithMany(p => p.ApprovalRequests)
+                      .HasForeignKey(e => e.PropertyId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Admin (Nullable)
+                entity.HasOne(e => e.Admin)
+                      .WithMany(a => a.ApprovalRequests)
+                      .HasForeignKey(e => e.AdminId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                // Status
+                entity.HasOne(e => e.Status)
+                      .WithMany(s => s.ApprovalRequests)
+                      .HasForeignKey(e => e.StatusId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(e => e.Comments)
+                      .HasMaxLength(2000);
+            });
+
+            //-----------------------------------------------------------------------
             base.OnModelCreating(modelBuilder);
 
         }

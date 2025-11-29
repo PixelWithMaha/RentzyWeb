@@ -10,16 +10,12 @@ namespace Rentzy.DAL.Models
     public class PropertyApprovalRequest
     {
         public int Id { get; set; }
-        [ForeignKey(nameof(Property))]
         public int PropertyId { get; set; }
-        public Property Property { get; set; }
 
         [ForeignKey(nameof(Admin))]
         public int? AdminId { get; set; }
         public Admin? Admin { get; set; }
-
-
-
+        public Property? property { get; set; }
         [ForeignKey(nameof(Status))]
         public int StatusId { get; set; }
         public ApprovalStatus Status { get; set; }
