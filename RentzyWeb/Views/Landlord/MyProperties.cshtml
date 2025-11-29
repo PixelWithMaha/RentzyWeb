@@ -1,4 +1,5 @@
-﻿@model List<Rentzy.BLL.DTOs.PropertyDTO>
+﻿@using Rentzy.DAL.Models
+@model List<Rentzy.BLL.DTOs.PropertyDTO>
 
 @{
     ViewData["Title"] = "My Properties";
@@ -32,6 +33,7 @@
                             <th>Rent</th>
                             <th>City</th>
                             <th>Type</th>
+                            <th>Status</th>
                             <th style="width: 20%;">Images</th>
                             <th style="width: 15%;">Actions</th>
                         </tr>
@@ -45,15 +47,35 @@
                                     <td class="text-success fw-bold">Rs @prop.Rent</td>
 
                                     <td>
-                                        <span class="badge bg-primary">
-                                    @prop.CityId
-                                        </span>
+                                        <span class="badge bg-primary">@prop.CityId</span>
                                     </td>
 
                                     <td>
-                                        <span class="badge bg-info text-dark">
-                                    @prop.PropertyTypeId
-                                        </span>
+                                        <span class="badge bg-info text-dark">@prop.PropertyTypeId</span>
+                                    </td>
+
+                                    <!-- Approval Status Column -->
+                                    <td>
+                                @if (prop.StatusId == ApprovalStatusConstants.Pending)
+                                {
+                                                <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                                else if (prop.StatusId == ApprovalStatusConstants.Approved)
+                                {
+                                                <span class="badge bg-success">Approved</span>
+                                }
+                                else if (prop.StatusId == ApprovalStatusConstants.Rejected)
+                                {
+                                                <span class="badge bg-danger">Rejected</span>
+                                }
+                                else if (prop.StatusId == ApprovalStatusConstants.Cancelled)
+                                {
+                                                <span class="badge bg-secondary">Cancelled</span>
+                                }
+                                else
+                                {
+                                                <span class="badge bg-info text-dark">Unknown</span>
+                                }
                                     </td>
 
                                     <td>
@@ -74,9 +96,7 @@
 
                                     <td>
                                         <a href="@Url.Action("EditProperty", "Landlord", new { id = prop.Id })"
-                                           class="btn btn-warning btn-sm me-1">
-                                            Edit
-                                        </a>
+                                           class="btn btn-warning btn-sm me-1">Edit</a>
 
                                         <form method="post" asp-action="DeleteProperty" asp-controller="Landlord"
                                               onsubmit="return confirm('Are you sure you want to delete this property?');"

@@ -16,6 +16,10 @@ namespace Rentzy.BLL.DTOs
         public int LandlordId { get; set; }
         public string LandlordName { get; set; } = "N/A"; // Flattened
 
+        public int StatusId { get; set; }  // approval status
+        public string? StatusName { get; set; } // optional: for easier display
+
+
         // Flatten bookings to just tenant names
         public List<string> TenantNames { get; set; } = new List<string>();
 
