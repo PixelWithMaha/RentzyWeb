@@ -7,111 +7,63 @@
     var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 
-<h2 class="text-center my-4">Update Images for @Model.Title</h2>
+<h2 class="text-center my-4 fw-bold text-primary" style="font-size:2rem; letter-spacing:0.5px;">
+    Update Images for <span class="text-dark">@Model.Title</span>
+</h2>
 
 <div class="container">
-    <div class="mb-3">
-        <label for="imageFiles" class="form-label">Add Images</label>
-        <input type="file" id="imageFiles" class="form-control" multiple />
-    </div>
+   <div class="mb-4">
+    <label for="imageFiles"  class="form-label fw-semibold text-dark" style="font-size:1.1rem;">
+        Add Images
+    </label>
+    <input type="file" id="imageFiles" class="form-control shadow-sm" multiple />
+    <small class="text-muted">You can select multiple images (jpg, png)</small>
+</div>
 
-    <div id="previewImages" class="d-flex flex-wrap gap-3 mb-3">
+    <div id="previewImages" class="d-flex flex-wrap gap-3 mb-4">
         @if (Model.Images != null)
         {
             foreach (var img in Model.Images)
             {
-                    <div class="position-relative image-card" data-image-id="@img.Id">
-                        <img src="@img.ImageUrl" class="img-thumbnail image-thumb" />
-                        <button type="button"
-                                class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 delete-image-btn"
-                                data-url="@img.ImageUrl">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
+                        <div class="position-relative image-card" data-image-id="@img.Id">
+                            <img src="@img.ImageUrl" class="img-thumbnail image-thumb" />
+                            <button type="button"
+                                    class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 delete-image-btn"
+                                    data-url="@img.ImageUrl">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
             }
         }
-</div>
-
+    </div>
 
     <div class="d-flex justify-content-end">
-        <a asp-controller="Landlord" asp-action="EditProperty" asp-route-id="@propertyId" class="btn btn-success">
+        <a asp-controller="Landlord" asp-action="EditProperty" asp-route-id="@propertyId" 
+           class="btn btn-success btn-lg shadow-sm fw-semibold text-white px-4 py-2 hover-scale">
             Done
         </a>
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        const propertyId = @propertyId;
-        const token = '@token';
-
-        // Handle file uploads
-        document.getElementById('imageFiles').addEventListener('change', async function (e) {
-            const files = e.target.files;
-            if (!files.length) return;
-
-            const formData = new FormData();
-            for (let f of files) formData.append('imageFiles', f);
-            formData.append('__RequestVerificationToken', token);
-
-            const response = await fetch(`/Landlord/UploadNewImages?propertyId=${propertyId}`, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const previewDiv = document.getElementById('previewImages');
-
-                data.forEach(img => {
-                    const div = document.createElement('div');
-                    div.className = 'position-relative';
-                    div.style.width = '150px';
-                    div.style.height = '150px';
-                    div.dataset.imageId = img.id; // backend should return {id, url}
-
-                    div.innerHTML = `
-                        <img src="${img.url}" class="img-thumbnail" style="width:100%; height:100%; object-fit:cover;" />
-                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 delete-image-btn">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                    previewDiv.appendChild(div);
-                });
-            } else {
-                alert('Upload failed');
-            }
-        });
-
-        // Delete image
-        document.getElementById('previewImages').addEventListener('click', async function (e) {
-            if (e.target.closest('.delete-image-btn')) {
-                const btn = e.target.closest('.delete-image-btn');
-                const container = btn.parentElement;
-                const imageId = container.dataset.imageId;
-
-                if (!confirm('Delete this image?')) return;
-
-                const formData = new FormData();
-                formData.append('imageId', imageId);
-                formData.append('__RequestVerificationToken', token);
-
-                const response = await fetch(`/Landlord/DeletePropertyImage`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    container.remove();
-                } else {
-                    alert('Delete failed');
-                }
-            }
-        });
-    </script>
+<style>
+/* Header and labels improvements */
+h2 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.form-label {
+    letter-spacing: 0.3px;
+}
+small.text-muted {
+    font-size: 0.9rem;
 }
 
-<style>
+/* Buttons */
+.hover-scale:hover {
+    transform: scale(1.05);
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Keep existing image hover styles intact */
 .image-card {
     width: 180px;
     height: 180px;
@@ -139,6 +91,21 @@
 }
 .image-card:hover .delete-image-btn {
     opacity: 1;
+}
+#imageFiles::file-selector-button {
+    background-color: #0d6efd; /* Bootstrap primary blue */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    margin-right: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+#imageFiles::file-selector-button:hover {
+    background-color: #0b5ed7; /* Slightly darker blue on hover */
 }
 </style>
 

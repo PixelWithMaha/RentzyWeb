@@ -6,43 +6,51 @@
 @Html.AntiForgeryToken()
 
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl font-semibold text-gray-800 mb-6 text-center" 
-        style="text-shadow: 1px 1px 2px #A78BFA;">
-        Tenant Requests
-    </h1>
+   <h1 class="text-4xl font-extrabold mb-8 text-center" 
+    style="font-family: 'Poppins', sans-serif; color: #2563EB; text-shadow: 1px 1px 2px rgba(0,0,0,0.15);">
+    Tenant Requests
+</h1>
+
 
     <div class="grid gap-6">
         @foreach (var req in Model)
         {
-                <div class="request-card p-5 rounded-xl shadow-lg" id="row-@req.Id">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-white font-semibold text-lg mb-1">Property: @req.PropertyTitle</p>
-                            <p class="text-blue-200">Tenant: @req.TenantName</p>
-                            <p class="text-blue-100 text-sm">Status: @req.Status</p>
-                            <p class="text-blue-100 text-sm">Requested At: @req.RequestedAt.ToString("g")</p>
-                            <p class="text-blue-100 text-sm">Start Date: @req.StartDate.ToString("d")</p>
-                            <p class="text-blue-100 text-sm">End Date: @req.EndDate.ToString("d")</p>
+                  <div class="request-card p-5 rounded-xl shadow-lg" id="row-@req.Id">
+        <div class="flex justify-between items-center">
+            <!-- Left: Property & Tenant info -->
+            <div>
+                <p class="text-white font-semibold text-lg mb-2">Property: @req.PropertyTitle</p>
+                <p class="text-blue-200 font-medium text-base mb-1">Tenant: @req.TenantName</p>
+                <p class="text-blue-100 font-medium text-base mb-1">Requested At: @req.RequestedAt.ToString("g")</p>
+            </div>
 
-                        </div>
-                        <div class="flex gap-3">
-                            <button class="approve-btn px-4 py-2 rounded-lg font-semibold text-white shadow-md hover:scale-105 transition-transform bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
-                                    data-id="@req.Id">
-                                Approve
-                            </button>
-                            <button class="reject-btn px-4 py-2 rounded-lg font-semibold text-white shadow-md hover:scale-105 transition-transform bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
-                                    data-id="@req.Id">
-                                Reject
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            <!-- Right: Dates inline -->
+    <div class="date-box text-dark fw-bold text-lg text-center">
+                        @req.StartDate.ToString("dd MMM yyyy") — @req.EndDate.ToString("dd MMM yyyy")
+    </div>
+
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex gap-3 mt-4">
+            <button class="approve-btn px-4 py-2 rounded-lg font-semibold text-white shadow-md hover:scale-105 transition-transform bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+                    data-id="@req.Id">
+                Approve
+            </button>
+            <button class="reject-btn px-4 py-2 rounded-lg font-semibold text-white shadow-md hover:scale-105 transition-transform bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
+                    data-id="@req.Id">
+                Reject
+            </button>
+        </div>
+    </div>
+
+
+
         }
     </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
 <script>
     $(document).ready(function () {
         const token = $('input[name="__RequestVerificationToken"]').val();
@@ -78,7 +86,7 @@
 
 <style>
     body {
-        background: #ffffff;
+        background: #f8f9fa;
         font-family: "Poppins", sans-serif;
     }
 
@@ -86,12 +94,34 @@
         background: linear-gradient(135deg, #7C3AED, #3B82F6);
         transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
         cursor: pointer;
+        padding: 1.5rem;
     }
 
     .request-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 15px 25px rgba(0,0,0,0.25);
         background: linear-gradient(135deg, #9333EA, #2563EB);
+    }
+
+    .date-box {
+    background: #efe6ff;          /* light purple background */
+    padding: 8px 12px;
+    border-radius: 10px;
+    display: inline-block;
+    min-width: 140px;
+    font-size: 1.05rem;           /* slightly bigger than normal text */
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 0 6px rgba(120, 80, 255, 0.15);
+}
+
+
+    .dates-section {
+        border-left: 3px solid #fff;
+    }
+
+    .dates-section p {
+        margin: 0;
     }
 
     button:focus {
@@ -102,11 +132,7 @@
         transition: all 0.3s ease;
     }
 
-    button.approve-btn:hover {
-        transform: scale(1.08);
-    }
-
-    button.reject-btn:hover {
+    button.approve-btn:hover, button.reject-btn:hover {
         transform: scale(1.08);
     }
 </style>

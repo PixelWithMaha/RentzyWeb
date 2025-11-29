@@ -77,6 +77,8 @@ namespace Rentzy.BLL.Services
                     Description = p.Description,
                     Rent = p.MonthlyRent,
                     CityId = p.CityId,
+                    CityName=p.City.Name,
+                    PropertyTypeName=p.PropertyType.Name,
                     PropertyTypeId = p.PropertyTypeId,
                     LandlordId = p.LandlordId,
                     Images = p.Images.ToList(),

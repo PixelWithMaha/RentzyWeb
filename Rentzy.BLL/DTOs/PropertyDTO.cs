@@ -14,7 +14,10 @@ namespace Rentzy.BLL.DTOs
         public int Rent { get; set; }
 
         public int CityId { get; set; }
+        public string CityName { get; set; } = string.Empty;
+
         public int PropertyTypeId { get; set; }
+        public string PropertyTypeName { get; set; } = string.Empty;
 
         public int LandlordId { get; set; }
         public string LandlordName { get; set; } = "N/A"; // Flattened

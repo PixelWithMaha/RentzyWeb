@@ -34,18 +34,15 @@
                                         </p>
                                     </div>
 
-                                    <div class="right text-end">
+                                               <div class="right text-end">
                             @if (tp.Booking != null)
                             {
-                                                <div class="date-box fw-bold text-dark">
-                                    @tp.Booking.StartDate.ToString("dd MMM yyyy")
-                                                    <br />
-                                                    —
-                                                    <br />
-                                    @tp.Booking.EndDate.ToString("dd MMM yyyy")
-                                                </div>
+                        <div class="date-box fw-bold text-dark">
+                                    @tp.Booking.StartDate.ToString("dd MMM yyyy") — @tp.Booking.EndDate.ToString("dd MMM yyyy")
+                        </div>
                             }
-                                    </div>
+            </div>
+
 
                                 </div>
                 }
