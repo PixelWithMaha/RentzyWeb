@@ -191,27 +191,33 @@
                 var imageUrl = images.Any() ? images.First().ImageUrl : "/images/default-property.jpg";
 
                         <div class="col-md-4 mb-4">
-                            <div class="card shadow-sm border rounded-3 hover-shadow h-100">
-                                <img src="@imageUrl"
-                                     class="card-img-top"
-                                     alt="@property.Title"
-                                     style="height:200px; object-fit:cover;" />
+                                    <div class="card shadow-sm border rounded-3 hover-shadow h-100" style="background:#eaf6ff;">
+                                        <img src="@imageUrl"
+             alt="@property.Title"
+             style="height:200px; object-fit:cover;
+            border-radius:10px; margin:10px;"/>
+
                                 <div class="card-body">
                                     <h5 class="card-title">@property.Title</h5>
                                     <p class="card-text text-truncate">@property.Description</p>
                                     <p class="mb-1"><i class="fas fa-dollar-sign me-1"></i> @property.Rent</p>
-                                    <div class="d-flex justify-content-between">
-                                        <a asp-controller="Landlord" asp-action="EditProperty" asp-route-id="@property.Id"
-                                           class="btn btn-sm btn-outline-primary">Edit</a>
-                                        <form asp-controller="Landlord" asp-action="DeleteProperty"
-                                              asp-route-id="@property.Id" method="post"
-                                              onsubmit="return confirm('Are you sure?');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                                        </form>
-                                        <a asp-controller="Landlord" asp-action="UpdateImages"
-                                           asp-route-propertyId="@property.Id"
-                                           class="btn btn-sm btn-outline-success">Images</a>
-                                    </div>
+                                                  <div class="d-flex justify-content-end gap-2 mt-2">
+
+            <a asp-controller="Landlord" asp-action="EditProperty" asp-route-id="@property.Id"
+               class="btn btn-sm text-white" style="background:#1e3a8a;">View</a>
+
+            <a asp-controller="Landlord" asp-action="UpdateImages"
+               asp-route-propertyId="@property.Id"
+               class="btn btn-sm text-white" style="background:#3b82f6;">Images</a>
+
+            <form asp-controller="Landlord" asp-action="DeleteProperty"
+                  asp-route-id="@property.Id" method="post"
+                  onsubmit="return confirm('Are you sure?');">
+                <button type="submit" class="btn btn-sm text-white" style="background:#dc2626;">Delete</button>
+            </form>
+
+        </div>
+
                                 </div>
                             </div>
                         </div>
