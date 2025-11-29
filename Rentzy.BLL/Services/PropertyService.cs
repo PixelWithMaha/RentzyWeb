@@ -77,6 +77,8 @@ namespace Rentzy.BLL.Services
                     Description = p.Description,
                     Rent = p.MonthlyRent,
                     CityId = p.CityId,
+                    CityName=p.City.Name,
+                    PropertyTypeName=p.PropertyType.Name,
                     PropertyTypeId = p.PropertyTypeId,
                     LandlordId = p.LandlordId,
                     Images = p.Images.ToList(),
@@ -161,6 +163,12 @@ namespace Rentzy.BLL.Services
             return _repo.DeletePropertyImageAsync(imageId);
         }
         //NEWWW
+
+        public async Task<List<DateTime>> GetBookedDatesAsync(int propertyId)
+        {
+            return await _propertyRepository.GetBookedDatesForPropertyAsync(propertyId);
+        }
+
         public async Task<PropertyDTO> GetPropertyDetailsAsync(int propertyId)
         {
             var p = await _propertyRepository.GetPropertyDetailsAsync(propertyId);

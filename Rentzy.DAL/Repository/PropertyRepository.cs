@@ -173,5 +173,27 @@ namespace Rentzy.DAL.Repository
             await _context.SaveChangesAsync();
         }
 
+        public async Task<List<DateTime>> GetBookedDatesForPropertyAsync(int propertyId)
+        {
+            // Get all bookings for this property that are active or confirmed
+            var bookings = await _context.Bookings
+                .Where(b => b.PropertyId == propertyId && b.StatusId == 1) // assuming 1 = Active
+                .ToListAsync();
+
+            var bookedDates = new List<DateTime>();
+
+            foreach (var booking in bookings)
+            {
+                // Add each date between StartDate and EndDate to the list
+                for (var date = booking.StartDate.Date; date <= booking.EndDate.Date; date = date.AddDays(1))
+                {
+                    bookedDates.Add(date);
+                }
+            }
+
+            return bookedDates.Distinct().ToList();
+        }
+
+
     }
 }

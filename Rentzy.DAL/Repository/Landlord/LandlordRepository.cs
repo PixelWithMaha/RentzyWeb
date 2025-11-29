@@ -18,9 +18,11 @@ namespace Rentzy.DAL.Repository
             _context = context;
         }
 
-        public async Task<List<Property>> GetPropertiesByLandlordAsync(int landlordId)
+        public Task<List<Property>> GetPropertiesByLandlordAsync(int landlordId)
         {
-            return await _context.Properties
+            return _context.Properties
+                .Include(p => p.City)
+                .Include(p => p.PropertyType)
                 .Include(p => p.Images)
                 .Where(p => p.LandlordId == landlordId)
                 .ToListAsync();

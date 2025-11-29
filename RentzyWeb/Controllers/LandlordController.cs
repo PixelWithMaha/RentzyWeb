@@ -155,7 +155,7 @@ namespace Rentzy.Web.Controllers
             }
 
             // ✅ Only set success message after saving property
-            TempData["Success"] = "Property details have been sent to the admin for approval!";
+            TempData["SuccessMessage"] = "Property details have been sent to the admin for approval!";
 
             // Redirect to MyProperties page to show the message
             return RedirectToAction("MyProperties");
@@ -196,7 +196,7 @@ namespace Rentzy.Web.Controllers
         {
             await _propertyService.DeletePropertyAsync(id);
             TempData["SuccessMessage"] = "Property deleted successfully!";
-            return RedirectToAction("Dashboard");
+            return RedirectToAction("MyProperties");
         }
 
         // IMAGE UPLOADS

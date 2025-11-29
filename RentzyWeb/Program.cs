@@ -57,6 +57,20 @@ builder.Services.AddScoped<PropertyApprovalRequestService>();
 // Auth Service
 builder.Services.AddScoped<AuthService>();
 
+// Add these inside builder.Services
+builder.Services.AddScoped<IPaymentNotificationRepository, PaymentNotificationRepository>();
+builder.Services.AddScoped<IRentalRequestRepository, RentalRequestRepository>();
+
+builder.Services.AddScoped<ITenantBookingService, TenantBookingService>();
+
+
+// Your existing services
+builder.Services.AddScoped<RentalRequestService>();
+builder.Services.AddScoped<PaymentNotificationService>();
+builder.Services.AddScoped<PropertyService>();
+builder.Services.AddScoped<TenantPaymentService>();
+builder.Services.AddScoped<TenantBookingService>();
+
 // Email Service
 var emailSettings = builder.Configuration.GetSection("EmailSettings").Get<EmailSettings>();
 builder.Services.AddScoped<EmailService>();

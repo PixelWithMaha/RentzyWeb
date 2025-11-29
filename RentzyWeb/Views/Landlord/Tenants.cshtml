@@ -6,102 +6,540 @@
 
 <div class="container my-5">
 
-    <h1 class="mb-4 fw-bold" style="font-size: 2rem;">Tenants Overview</h1>
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="dashboard-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-users me-2"></i>Tenants Overview</h1>
+                    <p>Manage and view all your tenants across properties</p>
+                </div>
+                <div class="header-stats">
+                    @{
+                        var totalTenants = Model.Sum(g => g.Value?.Count ?? 0);
+                        var activeTenants = Model.ContainsKey("Active") ? Model["Active"].Count : 0;
+                    }
+                    <div class="stat-badge">
+                        <span class="stat-number">@totalTenants</span>
+                        <span class="stat-label">Total Tenants</span>
+                    </div>
+                    <div class="stat-badge">
+                        <span class="stat-number">@activeTenants</span>
+                        <span class="stat-label">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    @foreach (var group in Model)
-    {
-            <div class="status-section mb-5 p-3 rounded-4">
+    <!-- Tenants Grid -->
+    <div class="tenants-container">
+        @foreach (var group in Model)
+        {
+                <div class="tenant-group">
+                    <!-- Group Header -->
+                    <div class="group-header">
+                        <div class="group-title">
+                            <h3>@group.Key Tenants</h3>
+                            <span class="tenant-count">@(group.Value?.Count ?? 0) tenants</span>
+                        </div>
+                        <div class="group-indicator">
+                            <div class="status-indicator status-@group.Key.ToLower()"></div>
+                        </div>
+                    </div>
 
-                <!-- Heading smaller -->
-                <h3 class="fw-bold mb-3 text-primary" style="font-size: 1.5rem;">
-                @group.Key Tenants
-                </h3>
-
-            @if (group.Value != null && group.Value.Count > 0)
-            {
-                foreach (var tp in group.Value)
-                {
-                                <div class="tenant-row d-flex justify-content-between align-items-center mb-3 p-3 rounded-4 shadow-sm gradient-box">
-
-                                    <div class="left text-white" style="max-width: 65%;">
-                                        <h4 class="fw-bold mb-2" style="font-size: 1.1rem;">@tp.Tenant.FirstName</h4>
-
-                                        <p class="mb-1 opacity-75">Email: @tp.Tenant.Email</p>
-                                        <p class="mb-1 opacity-75">Phone: @tp.Tenant.Phone</p>
-
-                                        <p class="mb-1">
-                                            Property: <strong class="text-warning">@tp.Property.Title</strong>
-                                        </p>
-                                    </div>
-
-                                    <div class="right text-end">
-                            @if (tp.Booking != null)
-                            {
-                                                <div class="date-box fw-bold text-dark">
-                                    @tp.Booking.StartDate.ToString("dd MMM yyyy")
-                                                    <br />
-                                                    —
-                                                    <br />
-                                    @tp.Booking.EndDate.ToString("dd MMM yyyy")
+                    <!-- Tenants List -->
+                    <div class="tenants-grid">
+                    @if (group.Value != null && group.Value.Count > 0)
+                    {
+                        foreach (var tp in group.Value)
+                        {
+                                        <div class="tenant-card">
+                                            <!-- Tenant Header -->
+                                            <div class="tenant-header">
+                                                <div class="tenant-avatar">
+                                                    <i class="fas fa-user"></i>
                                                 </div>
-                            }
-                                    </div>
+                                                <div class="tenant-info">
+                                                    <h4 class="tenant-name">@tp.Tenant.FirstName @tp.Tenant.LastName</h4>
+                                                    <p class="tenant-property">@tp.Property.Title</p>
+                                                </div>
+                                                <div class="tenant-status">
+                                                    <span class="status-badge status-@group.Key.ToLower()">@group.Key</span>
+                                                </div>
+                                            </div>
 
+                                            <!-- Tenant Details -->
+                                            <div class="tenant-details">
+                                                <div class="detail-item">
+                                                    <i class="fas fa-envelope"></i>
+                                                    <span class="detail-text">@tp.Tenant.Email</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <i class="fas fa-phone"></i>
+                                                    <span class="detail-text">@tp.Tenant.Phone</span>
+                                                </div>
+                                    @if (tp.Booking != null)
+                                    {
+                                                        <div class="detail-item">
+                                                            <i class="fas fa-calendar-alt"></i>
+                                                            <span class="detail-text">
+                                                @tp.Booking.StartDate.ToString("dd MMM yyyy") — @tp.Booking.EndDate.ToString("dd MMM yyyy")
+                                                            </span>
+                                                        </div>
+                                    }
+                                            </div>
+
+                                            <!-- Property Info -->
+                                            <div class="property-info">
+                                                <div class="property-badge">
+                                                    <i class="fas fa-home"></i>
+                                                    <span>@tp.Property.Title</span>
+                                                </div>
+                                    @if (tp.Booking != null)
+                                    {
+                                                        <div class="booking-dates">
+                                                            <i class="fas fa-clock"></i>
+                                                            <span>@((tp.Booking.EndDate - tp.Booking.StartDate).Days) days</span>
+                                                        </div>
+                                    }
+                                            </div>
+
+                                           
+                                        </div>
+                        }
+                    }
+                    else
+                    {
+                                <div class="empty-group">
+                                    <i class="fas fa-users"></i>
+                                    <p>No tenants in this category</p>
                                 </div>
-                }
-            }
-            else
-            {
-                        <p class="text-muted">No tenants in this category.</p>
-            }
+                    }
+                    </div>
+                </div>
+        }
+    </div>
 
+    <!-- Empty State (if no tenants at all) -->
+    @if (!Model.Any() || Model.All(g => g.Value == null || !g.Value.Any()))
+    {
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <h3>No Tenants Found</h3>
+                <p>You don't have any tenants assigned to your properties yet</p>
             </div>
     }
 </div>
 
 <style>
-    /* --- COMPACT, PROFESSIONAL CARD STYLE --- */
-    .gradient-box {
-        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-        color: white;
-        border: none !important;
-        transition: 0.25s ease;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-        padding: 16px 18px !important; /* smaller card */
-        border-radius: 14px;
+    :root {
+        --primary-blue: #1e3a8a;
+        --medium-blue: #3b82f6;
+        --light-blue: #e0f2fe;
+        --purple: #6a11cb;
+        --accent-blue: #2575fc;
+        --white: #ffffff;
+        --light-bg: #f8fafc;
+        --dark-text: #1e293b;
+        --gray-text: #64748b;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --success: #10b981;
+        --warning: #f59e0b;
+        --active: #10b981;
+        --inactive: #6b7280;
+        --pending: #f59e0b;
     }
 
-    .gradient-box:hover {
+    /* Dashboard Header */
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--purple) 0%, var(--accent-blue) 100%);
+        border-radius: 16px;
+        padding: 30px;
+        color: var(--white);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    }
+
+    .header-content h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+    .header-content p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    /* Header Stats */
+    .header-stats {
+        display: flex;
+        gap: 20px;
+    }
+
+    .stat-badge {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        padding: 15px 20px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+    }
+
+    .stat-number {
+        display: block;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    /* Tenants Container */
+    .tenants-container {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    /* Tenant Group */
+    .tenant-group {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: var(--shadow);
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Group Header */
+    .group-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .group-title {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .group-title h3 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--dark-text);
+        margin: 0;
+    }
+
+    .tenant-count {
+        background: var(--light-bg);
+        color: var(--gray-text);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .status-active { background: var(--active); }
+    .status-inactive { background: var(--inactive); }
+    .status-pending { background: var(--pending); }
+
+    /* Tenants Grid */
+    .tenants-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+    }
+
+    /* Tenant Card */
+    .tenant-card {
+        background: var(--white);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: var(--shadow);
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tenant-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(to bottom, var(--purple), var(--accent-blue));
+    }
+
+    .tenant-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 10px 22px rgba(96, 60, 255, 0.38);
+        box-shadow: var(--shadow-lg);
     }
 
-    /* Date box cleaned + smaller */
-    .date-box {
-        background: #efe6ff;
-        padding: 10px 14px;
-        border-radius: 10px;
-        display: inline-block;
-        box-shadow: 0 0 6px rgba(120, 80, 255, 0.15);
-        min-width: 120px;
+    /* Tenant Header */
+    .tenant-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    .tenant-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--purple), var(--accent-blue));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .tenant-info {
+        flex: 1;
+    }
+
+    .tenant-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--dark-text);
+        margin: 0 0 4px 0;
+    }
+
+    .tenant-property {
+        font-size: 0.9rem;
+        color: var(--medium-blue);
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .tenant-status {
+        flex-shrink: 0;
+    }
+
+    /* Status Badge */
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: white;
+    }
+
+    .status-active { background: var(--active); }
+    .status-inactive { background: var(--inactive); }
+    .status-pending { background: var(--pending); }
+
+    /* Tenant Details */
+    .tenant-details {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
         font-size: 0.9rem;
     }
 
-    /* Section container */
-    .status-section {
-        background: #fafaff;
-        border-left: 6px solid #6a11cb;
-        padding-left: 20px;
-        border-radius: 12px;
+    .detail-item i {
+        color: var(--medium-blue);
+        width: 16px;
+        text-align: center;
     }
 
-    /* Smooth fade animation */
-    @@keyframes fadeIn {
-        from { opacity: 0; transform: translateY(6px); }
-        to { opacity: 1; transform: translateY(0); }
+    .detail-text {
+        color: var(--gray-text);
     }
 
-    .tenant-row {
-        animation: fadeIn 0.3s ease;
+    /* Property Info */
+    .property-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 12px;
+        background: var(--light-bg);
+        border-radius: 8px;
+    }
+
+    .property-badge, .booking-dates {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .property-badge {
+        color: var(--primary-blue);
+    }
+
+    .booking-dates {
+        color: var(--gray-text);
+    }
+
+    /* Tenant Actions */
+    .tenant-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-action {
+        flex: 1;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-message {
+        background: var(--medium-blue);
+        color: white;
+    }
+
+    .btn-view {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .btn-action:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    /* Empty States */
+    .empty-group {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--gray-text);
+    }
+
+    .empty-group i {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        opacity: 0.5;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--gray-text);
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        color: var(--dark-text);
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: var(--gray-text);
+        margin-bottom: 0;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .dashboard-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 20px;
+        }
+
+        .header-stats {
+            justify-content: center;
+        }
+
+        .tenants-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .group-header {
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+        }
+
+        .tenant-actions {
+            flex-direction: column;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .tenant-group {
+            padding: 20px;
+        }
+
+        .tenant-card {
+            padding: 15px;
+        }
+
+        .tenant-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 10px;
+        }
+
+        .property-info {
+            flex-direction: column;
+            gap: 8px;
+            text-align: center;
+        }
     }
 </style>
