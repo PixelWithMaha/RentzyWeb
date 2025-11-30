@@ -18,5 +18,7 @@ namespace Rentzy.BLL.Services.ApprovalServices
         Task ApproveAsync(int approvalId, int adminUserId, string? notes = null);
         Task RejectAsync(int approvalId, int adminUserId, string? notes = null);
         Task CancelAsync(int approvalId, int adminUserId, string? notes = null);
+
+        Task<LandlordApproval?> GetLandlordApprovalByLandlordIdAsync(int landlordId);
     }
 }
