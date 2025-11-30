@@ -12,4 +12,6 @@ public interface ITenantBookingService
     Task<Payment> GetPaymentByIdAsync(int paymentId);
 
     Task MarkPaymentAsPaidAsync(int paymentId);
+    Task<Payment> GetPaymentByRequestIdAsync(int requestId);
+    Task<Booking> GetBookingByPaymentIdAsync(int paymentId);
 }

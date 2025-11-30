@@ -1,17 +1,139 @@
 ﻿@model Rentzy.BLL.DTOs.PaymentDTO
-
 @{
     ViewData["Title"] = "Payment";
+
+    // Status mapping: 1=Pending, 2=Paid, 3=Failed
+    string statusText = Model.StatusId == 1 ? "Pending" : Model.StatusId == 2 ? "Paid" : "Failed";
+    string statusBadgeClass = Model.StatusId == 1 ? "bg-warning" : Model.StatusId == 2 ? "bg-success" : "bg-danger";
 }
 
-<h2>Pay for @Model.PropertyTitle</h2>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title mb-0">Payment for @Model.PropertyTitle</h2>
+                </div>
+                <div class="card-body">
+                    @if (Model.StatusId == 2) // Paid
+                    {
+                        <div class="alert alert-success">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check-circle fa-2x me-3"></i>
+                                <div>
+                                    <h4 class="alert-heading">Payment Completed</h4>
+                                    <p class="mb-2">This payment has already been processed successfully.</p>
+                                    <p class="mb-1"><strong>Amount Paid:</strong> @Model.Amount.ToString("C")</p>
+                                    <p class="mb-1"><strong>Payment Method:</strong> @Model.Method</p>
+                                    @if (Model.PaidAt != null)
+                                    {
+                                        <p class="mb-1"><strong>Paid On:</strong> @Model.PaidAt.Value.ToString("MMM dd, yyyy")</p>
+                                    }
+                                    <p class="mb-3"><strong>Status:</strong> <span class="badge @statusBadgeClass">@statusText</span></p>
+                                    <a href="@Url.Action("Receipt", new { paymentId = Model.Id })" class="btn btn-success">
+                                        <i class="fas fa-receipt me-2"></i>View Receipt
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (Model.StatusId == 3) // Failed
+                    {
+                        <div class="alert alert-danger">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-times-circle fa-2x me-3"></i>
+                                <div>
+                                    <h4 class="alert-heading">Payment Failed</h4>
+                                    <p class="mb-2">Your previous payment attempt failed. Please try again.</p>
+                                    <p class="mb-1"><strong>Amount Due:</strong> @Model.Amount.ToString("C")</p>
+                                    <p class="mb-3"><strong>Status:</strong> <span class="badge @statusBadgeClass">@statusText</span></p>
 
-<p>Amount: <strong>@Model.Amount.ToString("C")</strong></p>
+                                    <form asp-controller="Booking" asp-action="Pay" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="paymentId" value="@Model.Id" />
 
-<form asp-controller="Booking" asp-action="Pay" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="requestId" value="@Model.RequestId" />
-    <input type="hidden" name="amount" value="@Model.Amount" />
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-credit-card me-2"></i>Try Again
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else // Pending (StatusId = 1)
+                    {
+                        <div class="alert alert-warning">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                                <div>
+                                    <h4 class="alert-heading">Payment Required</h4>
+                                    <p class="mb-2">Please complete your payment for the rental property.</p>
+                                </div>
+                            </div>
+                        </div>
 
-    <button type="submit" class="btn btn-primary">Pay Now</button>
-</form>
+                        <div class="payment-details mb-4">
+                            <h5>Payment Information</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Property:</strong> @Model.PropertyTitle</p>
+                                    <p><strong>Amount Due:</strong> <span class="text-danger fw-bold">@Model.Amount.ToString("C")</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Status:</strong> <span class="badge @statusBadgeClass">@statusText</span></p>
+                                    <p><strong>Payment ID:</strong> #@Model.Id</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="payment-actions">
+                            <form asp-controller="Booking" asp-action="Pay" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="paymentId" value="@Model.Id" />
+
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-credit-card me-2"></i>Pay Now
+                                </button>
+                            </form>
+
+                            <a href="@Url.Action("Details", new { id = Model.PropertyId })" class="btn btn-outline-secondary btn-lg ms-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Property
+                            </a>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6>Accepted Payment Methods:</h6>
+                            <div class="d-flex gap-3 mt-2">
+                                <span class="badge bg-light text-dark p-2"><i class="fab fa-cc-visa me-1"></i> Visa</span>
+                                <span class="badge bg-light text-dark p-2"><i class="fab fa-cc-mastercard me-1"></i> Mastercard</span>
+                                <span class="badge bg-light text-dark p-2"><i class="fab fa-cc-paypal me-1"></i> PayPal</span>
+                                <span class="badge bg-light text-dark p-2"><i class="fas fa-university me-1"></i> Bank Transfer</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .payment-details {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #007bff;
+        }
+
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .alert {
+            border: none;
+            border-radius: 0.5rem;
+        }
+    </style>
+}

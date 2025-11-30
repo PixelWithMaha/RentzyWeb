@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Rentzy.BLL.DTOs;
 using Rentzy.DAL.Context;
 using Rentzy.DAL.Models;
+using Rentzy.DAL.Repositories;
+using Rentzy.DAL.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +15,19 @@ namespace Rentzy.BLL.Services
     {
         private readonly RentzyDBContext _db;
         private readonly PaymentNotificationService _notificationService;
+        private readonly IUserRepository _userRepository;
+        private readonly IPropertyRepository _propertyRepository;
 
-        public TenantPaymentService(RentzyDBContext db, PaymentNotificationService notificationService)
+        public TenantPaymentService(
+            RentzyDBContext db,
+            PaymentNotificationService notificationService,
+            IUserRepository userRepository,
+            IPropertyRepository propertyRepository)
         {
             _db = db;
             _notificationService = notificationService;
+            _userRepository = userRepository;
+            _propertyRepository = propertyRepository;
         }
 
         // Get a specific payment by ID
@@ -25,23 +36,120 @@ namespace Rentzy.BLL.Services
             return await _db.Payments
                 .Include(p => p.Booking)
                     .ThenInclude(b => b.Property)
+                        .ThenInclude(p => p.Landlord)
                 .Include(p => p.Status)
+                .Include(p => p.PaymentMethod)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        // Mark payment as paid
-        public async Task MarkAsPaid(int paymentId)
+        // Process payment with payment method
+        public async Task<bool> ProcessPaymentAsync(int paymentId, string paymentMethod)
         {
-            var payment = await _db.Payments.FindAsync(paymentId);
-            if (payment != null)
+            try
             {
-                payment.StatusId = 1; // Paid
+                var payment = await _db.Payments.FindAsync(paymentId);
+                if (payment == null || payment.StatusId == 1) return false; // Already paid
+
+                // Update payment status to Paid (StatusId = 1)
+                payment.StatusId = 1;
                 payment.PaidAt = DateTime.UtcNow;
+                payment.Method = GetPaymentMethodDisplayName(paymentMethod);
+
+                // Set PaymentMethodId based on the selected method
+                payment.PaymentMethodId = GetPaymentMethodId(paymentMethod);
+
                 await _db.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
 
-        // Get all paid payments for tenant
+        // Get payment history as DTOs - FIXED NULL ISSUE
+        public async Task<List<PaymentHistoryDTO>> GetPaymentHistoryAsync(int tenantId)
+        {
+            var paidPayments = await _db.Payments
+                .Include(p => p.Booking)
+                    .ThenInclude(b => b.Property)
+                        .ThenInclude(p => p.Landlord)
+                .Include(p => p.Status)
+                .Include(p => p.PaymentMethod)
+                .Where(p => p.Booking.TenantId == tenantId && p.StatusId == 1 && p.PaidAt != null) // Added null check
+                .OrderByDescending(p => p.PaidAt)
+                .ToListAsync();
+
+            var history = new List<PaymentHistoryDTO>();
+
+            foreach (var payment in paidPayments)
+            {
+                var booking = payment.Booking;
+                var property = booking.Property;
+
+                // FIX: Check for null values before accessing
+                if (property == null || payment.PaidAt == null) continue;
+
+                history.Add(new PaymentHistoryDTO
+                {
+                    PaymentId = payment.Id,
+                    PropertyTitle = property.Title ?? "Unknown Property",
+                    Amount = payment.Amount,
+                    PaymentDate = payment.PaidAt.Value, // Now safe because we filtered nulls
+                    PaymentMethod = payment.Method ?? "Credit Card",
+                    Status = "Paid",
+                    StartDate = booking.StartDate,
+                    EndDate = booking.EndDate,
+                    TransactionId = $"TXN_{payment.Id:000000}",
+                    LandlordName = property.Landlord != null
+                        ? $"{property.Landlord.FirstName} {property.Landlord.LastName}"
+                        : "Unknown Landlord"
+                });
+            }
+
+            return history;
+        }
+
+        // Get receipt data - FIXED NULL ISSUES
+        public async Task<ReceiptDTO> GetReceiptAsync(int paymentId)
+        {
+            var payment = await GetPaymentByIdAsync(paymentId);
+            if (payment == null) throw new Exception("Payment not found");
+            if (payment.PaidAt == null) throw new Exception("Payment date not found");
+
+            var booking = payment.Booking;
+            var property = booking.Property;
+            var tenant = await _userRepository.GetUserById(booking.TenantId);
+
+            // FIX: Check for null values
+            if (property == null) throw new Exception("Property not found");
+            if (tenant == null) throw new Exception("Tenant not found");
+
+            var bookingDays = (booking.EndDate - booking.StartDate).Days;
+
+            return new ReceiptDTO
+            {
+                PaymentId = payment.Id,
+                TransactionId = $"TXN_{payment.Id:000000}",
+                PropertyTitle = property.Title ?? "Unknown Property",
+                LandlordName = property.Landlord != null
+                    ? $"{property.Landlord.FirstName} {property.Landlord.LastName}"
+                    : "Unknown Landlord",
+                TenantName = $"{tenant.FirstName} {tenant.LastName}",
+                TenantEmail = tenant.Email,
+                Amount = payment.Amount,
+                PaymentMethod = payment.Method ?? "Credit Card",
+                PaymentDate = payment.PaidAt.Value, // Now safe
+                BookingStartDate = booking.StartDate,
+                BookingEndDate = booking.EndDate,
+                BookingDays = bookingDays,
+                PropertyAddress = await GetPropertyAddress(property.Id),
+                LandlordPhone = property.Landlord?.Phone ?? "N/A",
+                LandlordEmail = property.Landlord?.Email ?? "N/A"
+            };
+        }
+
+        // Get all paid payments for tenant (keep existing for compatibility)
         public async Task<List<Payment>> GetPaidPaymentsAsync(int tenantId)
         {
             return await _db.Payments
@@ -64,15 +172,6 @@ namespace Rentzy.BLL.Services
                 .OrderByDescending(p => p.Booking.StartDate)
                 .ToListAsync();
         }
-        public async Task<List<Payment>> GetPaidPaymentssAsync(int tenantId)
-        {
-            return await _db.Payments
-                .Include(p => p.Booking)
-                    .ThenInclude(b => b.Property)
-                .Where(p => p.Booking.TenantId == tenantId && p.StatusId == 1)
-                .OrderByDescending(p => p.PaidAt)
-                .ToListAsync();
-        }
 
         // Create initial payment when booking is approved + send notification
         public async Task CreateInitialPaymentAsync(int bookingId, decimal amount)
@@ -81,10 +180,10 @@ namespace Rentzy.BLL.Services
             {
                 BookingId = bookingId,
                 Amount = amount,
-                StatusId = 2, // Unpaid
+                StatusId = 2, // Unpaid/Pending
                 PaidAt = null,
-                Method = "Not Paid",
-                PaymentMethodId = 1
+                Method = "Pending",
+                PaymentMethodId = 1 // Default to Credit Card
             };
 
             await _db.Payments.AddAsync(payment);
@@ -94,13 +193,14 @@ namespace Rentzy.BLL.Services
             var notif = new PaymentNotification
             {
                 PaymentId = payment.Id,
-                Message = "Your booking is approved! Please pay now.",
+                Message = "Your booking is approved! Please complete the payment.",
                 SentAt = DateTime.UtcNow,
                 IsSeen = false
             };
 
             await _notificationService.AddAsync(notif);
         }
+
         // Count of rented properties
         public async Task<int> GetRentedPropertiesCountAsync(int tenantId)
         {
@@ -118,5 +218,78 @@ namespace Rentzy.BLL.Services
                 .CountAsync();
         }
 
+        public async Task<Payment> GetPaymentByRequestIdAsync(int requestId)
+        {
+            return await _db.Payments
+                .Include(p => p.Booking)
+                .ThenInclude(b => b.Property)
+                .ThenInclude(p => p.Landlord)
+                .FirstOrDefaultAsync(p => p.BookingId == requestId);
+        }
+
+        // Helper methods
+        private string GetPaymentMethodDisplayName(string method)
+        {
+            return method switch
+            {
+                "credit_card" => "Credit Card",
+                "paypal" => "PayPal",
+                "bank_transfer" => "Bank Transfer",
+                "digital_wallet" => "Digital Wallet",
+                _ => "Credit Card"
+            };
+        }
+
+        private int GetPaymentMethodId(string method)
+        {
+            return method switch
+            {
+                "credit_card" => 1,
+                "paypal" => 2,
+                "bank_transfer" => 3,
+                "digital_wallet" => 4,
+                _ => 1
+            };
+        }
+
+        private async Task<string> GetPropertyAddress(int propertyId)
+        {
+            var property = await _propertyRepository.GetPropertyDetailsAsync(propertyId);
+            return property != null ? $"{property.Address}, {property.City}" : "Address not available";
+        }
+
+        // Keep existing MarkAsPaid for compatibility
+        public async Task MarkAsPaid(int paymentId)
+        {
+            var payment = await _db.Payments.FindAsync(paymentId);
+            if (payment != null)
+            {
+                payment.StatusId = 1; // Paid
+                payment.PaidAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync();
+            }
+        }
+
+        public async Task<bool> UpdatePaymentStatusAsync(int paymentId, int statusId)
+        {
+            try
+            {
+                var payment = await _db.Payments.FindAsync(paymentId);
+                if (payment == null) return false;
+
+                payment.StatusId = statusId;
+                if (statusId == 2) // Paid
+                {
+                    payment.PaidAt = DateTime.Now;
+                }
+
+                await _db.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 }

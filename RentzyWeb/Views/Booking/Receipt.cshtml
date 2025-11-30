@@ -1,8 +1,259 @@
-﻿@{
-    ViewData["Title"] = "Receipt";
+﻿@model Rentzy.BLL.DTOs.ReceiptDTO
+@{
+    ViewData["Title"] = "Payment Receipt";
 }
 
-<h2>Payment Successful!</h2>
+<style>
+    .receipt-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
 
-<p>Your booking request id: <strong>@ViewBag.RequestId</strong></p>
-<p>We created a booking and processed your payment.</p>
+    .receipt-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .receipt-body {
+        padding: 2rem;
+    }
+
+    .receipt-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #f8f9fa;
+    }
+
+    .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+    }
+
+    .receipt-label {
+        font-weight: 600;
+        color: #6c757d;
+    }
+
+    .receipt-value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .amount-highlight {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #51cf66;
+        text-align: center;
+        margin: 1rem 0;
+    }
+
+    .status-badge {
+        background: #51cf66;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    .print-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 12px 30px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+    .back-btn {
+        border: 2px solid #667eea;
+        border-radius: 10px;
+        padding: 10px 25px;
+        color: #667eea;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+
+        .back-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+    @@media print {
+        .no-print {
+            display: none !important;
+        }
+
+        .receipt-container {
+            box-shadow: none;
+            border: 1px solid #ddd;
+        }
+
+        .receipt-header {
+            background: #667eea !important;
+            -webkit-print-color-adjust: exact;
+        }
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <div class="receipt-container">
+        <!-- Header -->
+        <div class="receipt-header">
+            <h1 class="display-6 fw-bold mb-2">
+                <i class="fas fa-receipt me-3"></i>Payment Receipt
+            </h1>
+            <p class="lead mb-0 opacity-75">Transaction Confirmation</p>
+        </div>
+
+        <!-- Body -->
+        <div class="receipt-body">
+            <!-- Status & Amount -->
+            <div class="receipt-section text-center">
+                <div class="status-badge d-inline-block mb-3">
+                    <i class="fas fa-check-circle me-2"></i>Payment Successful
+                </div>
+                <div class="amount-highlight">
+                    @Model.Amount.ToString("C")
+                </div>
+                <p class="text-muted mb-0">Transaction ID: @Model.TransactionId</p>
+            </div>
+
+            <!-- Payment Details -->
+            <div class="receipt-section">
+                <h4 class="fw-bold mb-3 text-primary">
+                    <i class="fas fa-credit-card me-2"></i>Payment Details
+                </h4>
+
+                <div class="receipt-row">
+                    <span class="receipt-label">Payment ID:</span>
+                    <span class="receipt-value">#@Model.PaymentId</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Transaction ID:</span>
+                    <span class="receipt-value">@Model.TransactionId</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Payment Method:</span>
+                    <span class="receipt-value">@Model.PaymentMethod</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Payment Date:</span>
+                    <span class="receipt-value">@Model.PaymentDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</span>
+                </div>
+            </div>
+
+            <!-- Property Details -->
+            <div class="receipt-section">
+                <h4 class="fw-bold mb-3 text-primary">
+                    <i class="fas fa-home me-2"></i>Property Details
+                </h4>
+
+                <div class="receipt-row">
+                    <span class="receipt-label">Property:</span>
+                    <span class="receipt-value">@Model.PropertyTitle</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Address:</span>
+                    <span class="receipt-value">@Model.PropertyAddress</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Booking Period:</span>
+                    <span class="receipt-value">@Model.BookingStartDate.ToString("MMM dd, yyyy") - @Model.BookingEndDate.ToString("MMM dd, yyyy")</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Duration:</span>
+                    <span class="receipt-value">@Model.BookingDays days</span>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="receipt-section">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold mb-3 text-success">
+                            <i class="fas fa-user me-2"></i>Tenant Information
+                        </h5>
+                        <div class="receipt-row">
+                            <span class="receipt-label">Name:</span>
+                            <span class="receipt-value">@Model.TenantName</span>
+                        </div>
+                        <div class="receipt-row">
+                            <span class="receipt-label">Email:</span>
+                            <span class="receipt-value">@Model.TenantEmail</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold mb-3 text-info">
+                            <i class="fas fa-user-tie me-2"></i>Landlord Information
+                        </h5>
+                        <div class="receipt-row">
+                            <span class="receipt-label">Name:</span>
+                            <span class="receipt-value">@Model.LandlordName</span>
+                        </div>
+                        <div class="receipt-row">
+                            <span class="receipt-label">Email:</span>
+                            <span class="receipt-value">@Model.LandlordEmail</span>
+                        </div>
+                        <div class="receipt-row">
+                            <span class="receipt-label">Phone:</span>
+                            <span class="receipt-value">@Model.LandlordPhone</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="receipt-section text-center no-print">
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <button onclick="window.print()" class="btn print-btn">
+                        <i class="fas fa-print me-2"></i>Print Receipt
+                    </button>
+                    <a href="@Url.Action("PaymentHistory", "Tenant")" class="btn back-btn">
+                        <i class="fas fa-history me-2"></i>Payment History
+                    </a>
+                    <a href="@Url.Action("Dashboard", "Tenant")" class="btn back-btn">
+                        <i class="fas fa-home me-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- Footer Note -->
+            <div class="text-center text-muted mt-4">
+                <p class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This receipt is proof of your payment. Please keep it for your records.
+                </p>
+                <small>Generated on @DateTime.Now.ToString("MMM dd, yyyy 'at' hh:mm tt")</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-print option (optional)
+        @if (TempData["AutoPrint"] != null && (bool)TempData["AutoPrint"])
+        {
+                <text>
+                window.onload = function() {
+                    window.print();
+                };
+                </text>
+        }
+    </script>
+}
