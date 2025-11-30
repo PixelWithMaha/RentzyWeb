@@ -1,0 +1,104 @@
+﻿@model IEnumerable<Rentzy.BLL.DTOs.PaymentDTO>
+@{
+    ViewData["Title"] = "Payment Notifications";
+
+    // Filter only pending payments (StatusId = 1)
+    var pendingPayments = Model?.Where(p => p.StatusId == 1).ToList() ?? Enumerable.Empty<Rentzy.BLL.DTOs.PaymentDTO>();
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Payment Notifications</h2>
+                <span class="badge bg-primary fs-6">@pendingPayments.Count() Notifications</span>
+            </div>
+
+            @if (!pendingPayments.Any())
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                        <h4 class="text-success">All Caught Up!</h4>
+                        <p class="text-muted">You have no pending payments at the moment.</p>
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-primary mt-3">Back to Home</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="notification-list">
+                    @foreach (var payment in pendingPayments)
+                    {
+                        string statusText = payment.StatusId == 1 ? "Pending" : payment.StatusId == 2 ? "Paid" : "Failed";
+                        string statusBadgeClass = payment.StatusId == 1 ? "bg-warning" : payment.StatusId == 2 ? "bg-success" : "bg-danger";
+
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0 text-primary">@payment.PropertyTitle</h5>
+                                <span class="badge @statusBadgeClass fs-6">@statusText</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-2"><strong>Amount Due:</strong> <span class="text-danger fw-bold fs-5">@payment.Amount.ToString("C")</span></p>
+                                        <p class="mb-0"><strong>Request ID:</strong> #@payment.RequestId</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2"><strong>Payment ID:</strong> #@payment.Id</p>
+                                        <p class="mb-2"><strong>Method:</strong> @payment.Method</p>
+                                        @if (payment.PaidAt != null)
+                                        {
+                                            <p class="mb-0"><strong>Last Attempt:</strong> @payment.PaidAt.Value.ToString("MMM dd, yyyy")</p>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    @if (payment.StatusId == 1) // Pending
+                                    {
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("PayFromNotification", "Notification", new { paymentId = payment.Id })"
+                                               class="btn btn-primary btn-lg">
+                                                <i class="fas fa-credit-card me-2"></i>Pay Now
+                                            </a>
+                                            <a href="@Url.Action("PaymentDetails", "Notification", new { paymentId = payment.Id })"
+                                               class="btn btn-outline-secondary btn-lg">
+                                                <i class="fas fa-info-circle me-2"></i>Details
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .notification-list .card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: none;
+            border-radius: 0.5rem;
+        }
+
+            .notification-list .card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+            }
+
+        .btn-group .btn {
+            border-radius: 0.375rem;
+            margin-right: 0.5rem;
+        }
+
+        .card-header {
+            border-bottom: 2px solid #e9ecef;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+    </style>
+}

@@ -173,27 +173,125 @@ namespace Rentzy.DAL.Repository
             await _context.SaveChangesAsync();
         }
 
+        //public async Task<List<DateTime>> GetBookedDatesForPropertyAsync(int propertyId)
+        //{
+        //    // Get all bookings for this property that are active or confirmed
+        //    var bookings = await _context.Bookings
+        //        .Where(b => b.PropertyId == propertyId && b.StatusId == 1) // assuming 1 = Active
+        //        .ToListAsync();
+
+        //    var bookedDates = new List<DateTime>();
+
+        //    foreach (var booking in bookings)
+        //    {
+        //        // Add each date between StartDate and EndDate to the list
+        //        for (var date = booking.StartDate.Date; date <= booking.EndDate.Date; date = date.AddDays(1))
+        //        {
+        //            bookedDates.Add(date);
+        //        }
+        //    }
+
+        //    return bookedDates.Distinct().ToList();
+        //}
+        //CHANGEEE
+        //public async Task<List<DateTime>> GetBookedDatesForPropertyAsync(int propertyId)
+        //{
+        //    var bookedDates = new List<DateTime>();
+
+        //    // Get dates from APPROVED rental requests (StatusId == 2 = Approved)
+        //    var approvedRequests = await _context.PropertyRentalRequests
+        //        .Where(r => r.PropertyId == propertyId && r.StatusId == 2) // Only this property, only approved
+        //        .Select(r => new { r.StartDate, r.EndDate })
+        //        .ToListAsync();
+
+        //    foreach (var request in approvedRequests)
+        //    {
+        //        for (var date = request.StartDate.Date; date <= request.EndDate.Date; date = date.AddDays(1))
+        //        {
+        //            bookedDates.Add(date);
+        //        }
+        //    }
+
+        //    // Get dates from CONFIRMED bookings (StatusId == 1 = Active/Confirmed)
+        //    var confirmedBookings = await _context.Bookings
+        //        .Where(b => b.PropertyId == propertyId && b.StatusId == 1) // Only this property, only confirmed
+        //        .Select(b => new { b.StartDate, b.EndDate })
+        //        .ToListAsync();
+
+        //    foreach (var booking in confirmedBookings)
+        //    {
+        //        for (var date = booking.StartDate.Date; date <= booking.EndDate.Date; date = date.AddDays(1))
+        //        {
+        //            bookedDates.Add(date);
+        //        }
+        //    }
+
+        //    return bookedDates.Distinct().OrderBy(d => d).ToList();
+        //}
         public async Task<List<DateTime>> GetBookedDatesForPropertyAsync(int propertyId)
         {
-            // Get all bookings for this property that are active or confirmed
-            var bookings = await _context.Bookings
-                .Where(b => b.PropertyId == propertyId && b.StatusId == 1) // assuming 1 = Active
-                .ToListAsync();
-
             var bookedDates = new List<DateTime>();
 
-            foreach (var booking in bookings)
+            Console.WriteLine($"=== CALCULATING BOOKED DATES FOR PROPERTY {propertyId} ===");
+
+            // Get dates from APPROVED rental requests (StatusId == 2 = Approved)
+            var approvedRequests = await _context.PropertyRentalRequests
+                .Where(r => r.PropertyId == propertyId && r.StatusId == 2)
+                .Select(r => new { r.StartDate, r.EndDate })
+                .ToListAsync();
+
+            Console.WriteLine($"Found {approvedRequests.Count} approved rental requests");
+
+            foreach (var request in approvedRequests)
             {
-                // Add each date between StartDate and EndDate to the list
-                for (var date = booking.StartDate.Date; date <= booking.EndDate.Date; date = date.AddDays(1))
+                Console.WriteLine($"Processing approved request: {request.StartDate:yyyy-MM-dd} to {request.EndDate:yyyy-MM-dd}");
+
+                // FIX: Use Date only (no time component) and include ALL dates in the range
+                var currentDate = request.StartDate.Date;
+                var endDate = request.EndDate.Date;
+
+                while (currentDate <= endDate)
                 {
-                    bookedDates.Add(date);
+                    bookedDates.Add(currentDate);
+                    Console.WriteLine($"  Adding booked date: {currentDate:yyyy-MM-dd}");
+                    currentDate = currentDate.AddDays(1);
                 }
             }
 
-            return bookedDates.Distinct().ToList();
+            // Get dates from CONFIRMED bookings (StatusId == 1 = Active/Confirmed)
+            var confirmedBookings = await _context.Bookings
+                .Where(b => b.PropertyId == propertyId && b.StatusId == 1)
+                .Select(b => new { b.StartDate, b.EndDate })
+                .ToListAsync();
+
+            Console.WriteLine($"Found {confirmedBookings.Count} confirmed bookings");
+
+            foreach (var booking in confirmedBookings)
+            {
+                Console.WriteLine($"Processing confirmed booking: {booking.StartDate:yyyy-MM-dd} to {booking.EndDate:yyyy-MM-dd}");
+
+                // FIX: Use Date only (no time component) and include ALL dates in the range
+                var currentDate = booking.StartDate.Date;
+                var endDate = booking.EndDate.Date;
+
+                while (currentDate <= endDate)
+                {
+                    bookedDates.Add(currentDate);
+                    Console.WriteLine($"  Adding booked date: {currentDate:yyyy-MM-dd}");
+                    currentDate = currentDate.AddDays(1);
+                }
+            }
+
+            var result = bookedDates.Distinct().OrderBy(d => d).ToList();
+            Console.WriteLine($"Returning {result.Count} distinct booked dates for property {propertyId}");
+
+            // Debug: Show final result
+            foreach (var date in result)
+            {
+                Console.WriteLine($"  Final booked date: {date:yyyy-MM-dd}");
+            }
+
+            return result;
         }
-
-
     }
 }

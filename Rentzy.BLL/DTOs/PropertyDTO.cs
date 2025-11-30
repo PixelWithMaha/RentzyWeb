@@ -30,5 +30,6 @@ namespace Rentzy.BLL.DTOs
         public List<string> TenantNames { get; set; } = new List<string>();
 
         public List<PropertyImage> Images { get; set; } = new List<PropertyImage>();
+        public bool IsApproved { get; set; }
     }
 }

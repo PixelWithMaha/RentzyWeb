@@ -1,0 +1,217 @@
+﻿@model Rentzy.DAL.Models.PropertyRentalRequest
+@{
+    ViewData["Title"] = "Booking Details";
+}
+
+<style>
+    .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .detail-card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .property-image {
+        height: 300px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .status-badge {
+        padding: 10px 20px;
+        border-radius: 25px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #ffd93d 0%, #ff9a3d 100%);
+    }
+
+    .status-approved {
+        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+    }
+
+    .status-cancelled {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+    }
+
+    .status-completed {
+        background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%);
+    }
+</style>
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card gradient-bg text-white shadow-lg border-0">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="display-6 fw-bold mb-2">
+                                <i class="fas fa-info-circle me-3"></i>Booking Details
+                            </h1>
+                            <p class="lead mb-0 opacity-75">Complete information about your booking</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a asp-action="MyBookings" class="btn btn-light btn-lg rounded-pill">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Bookings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Property Information -->
+        <div class="col-lg-6">
+            <div class="card detail-card h-100">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h4 class="fw-bold mb-0">
+                        <i class="fas fa-home me-2 text-primary"></i>Property Information
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (Model.Property?.Images?.Any() == true)
+                    {
+                        <img src="@Model.Property.Images.First().ImageUrl"
+                             class="property-image w-100 mb-4"
+                             alt="@Model.Property.Title">
+                    }
+                    else
+                    {
+                        <div class="property-image w-100 bg-light d-flex align-items-center justify-content-center rounded mb-4">
+                            <i class="fas fa-home fa-4x text-muted"></i>
+                        </div>
+                    }
+
+                    <h3 class="fw-bold text-dark mb-3">@Model.Property?.Title</h3>
+                    <p class="text-muted mb-4">@Model.Property?.Description</p>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-dollar-sign text-success fa-lg me-3"></i>
+                                <div>
+                                    <small class="text-muted d-block">Monthly Rent</small>
+                                    <strong class="text-dark">$@(Model.Property?.MonthlyRent ?? 0)</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-user text-info fa-lg me-3"></i>
+                                <div>
+                                    <small class="text-muted d-block">Landlord</small>
+                                    <strong class="text-dark">@Model.Property?.Landlord?.FirstName @Model.Property?.Landlord?.LastName</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Information -->
+        <div class="col-lg-6">
+            <div class="card detail-card h-100">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h4 class="fw-bold mb-0">
+                        <i class="fas fa-calendar-alt me-2 text-primary"></i>Booking Information
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Status -->
+                    @{
+                        var statusClass = Model.StatusId switch
+                        {
+                            1 => "status-pending",
+                            2 => "status-approved",
+                            3 => "status-cancelled",
+                            4 => "status-completed",
+                            _ => "status-pending"
+                        };
+                        var statusText = Model.StatusId switch
+                        {
+                            1 => "PENDING APPROVAL",
+                            2 => "APPROVED",
+                            3 => "CANCELLED",
+                            4 => "COMPLETED",
+                            _ => "PENDING"
+                        };
+                    }
+                    <div class="status-badge @statusClass mb-4 text-center">
+                        @statusText
+                    </div>
+
+                    <!-- Booking Details -->
+                    <div class="booking-info">
+                        <div class="d-flex align-items-center mb-3 p-3 bg-light rounded">
+                            <i class="fas fa-calendar-check text-primary fa-lg me-3"></i>
+                            <div>
+                                <small class="text-muted d-block">Booking Period</small>
+                                <strong class="text-dark">@Model.StartDate.ToString("MMM dd, yyyy") - @Model.EndDate.ToString("MMM dd, yyyy")</strong>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-3 p-3 bg-light rounded">
+                            <i class="fas fa-clock text-info fa-lg me-3"></i>
+                            <div>
+                                <small class="text-muted d-block">Request Date</small>
+                                <strong class="text-dark">@Model.RequestedAt.ToString("MMM dd, yyyy 'at' hh:mm tt")</strong>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-3 p-3 bg-light rounded">
+                            <i class="fas fa-map-marker-alt text-warning fa-lg me-3"></i>
+                            <div>
+                                <small class="text-muted d-block">Property Location</small>
+                                <strong class="text-dark">@Model.Property?.City?.Name</strong>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                            <i class="fas fa-home text-success fa-lg me-3"></i>
+                            <div>
+                                <small class="text-muted d-block">Property Type</small>
+                                <strong class="text-dark">@Model.Property?.PropertyType?.Name</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-4 pt-3 border-top">
+                        @if (Model.StatusId != 3 && Model.StatusId != 4) // Not cancelled or completed
+                        {
+                            <form asp-action="CancelBooking" method="post" class="d-inline w-100">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="requestId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-danger btn-lg w-100"
+                                        onclick="return confirm('Are you sure you want to cancel this booking? This action cannot be undone.')">
+                                    <i class="fas fa-times me-2"></i>Cancel Booking
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary btn-lg w-100" disabled>
+                                <i class="fas fa-ban me-2"></i>
+                                @(Model.StatusId == 3 ? "Booking Cancelled" : "Booking Completed")
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Font Awesome -->
+<script src="https://kit.fontawesome.com/your-font-awesome-kit.js" crossorigin="anonymous"></script>
