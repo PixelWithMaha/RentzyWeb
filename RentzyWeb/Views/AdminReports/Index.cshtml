@@ -1,0 +1,131 @@
+﻿@model Rentzy.Web.Models.ReportsVM
+@{
+    ViewData["Title"] = "Admin Reports Dashboard";
+}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .dashboard-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 25px;
+        padding: 20px;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform .2s ease-in-out;
+    }
+
+        .chart-card:hover {
+            transform: scale(1.02);
+        }
+
+    h2 {
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #444;
+    }
+</style>
+
+<h1 class="text-center mt-3 mb-4">📊 Admin Reports Dashboard</h1>
+
+<div class="dashboard-container">
+
+    <!-- USERS CHART -->
+    <div class="chart-card">
+        <h2>Users Overview</h2>
+        <canvas id="usersChart"></canvas>
+    </div>
+
+    <!-- PROPERTIES CHART -->
+    <div class="chart-card">
+        <h2>Properties Overview</h2>
+        <canvas id="propertiesChart"></canvas>
+    </div>
+
+    <!-- LANDLORD APPROVAL CHART -->
+    <div class="chart-card">
+        <h2>Landlord Approvals</h2>
+        <canvas id="landlordChart"></canvas>
+    </div>
+
+</div>
+
+<script>
+    /**********************
+     *  USERS CHART
+     **********************/
+    new Chart(document.getElementById('usersChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Total Users', 'Active Users'],
+            datasets: [{
+                label: 'Users',
+                data: [@Model.TotalUsers, @Model.ActiveUsers],
+                backgroundColor: ['#4e73df', '#1cc88a'],
+                borderColor: '#2c3e50',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: { duration: 1500 },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    /**********************
+     *  PROPERTIES CHART
+     **********************/
+    new Chart(document.getElementById('propertiesChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Total', 'Pending', 'Approved'],
+            datasets: [{
+                data: [
+                    @Model.TotalProperties,
+                    @Model.PendingProperties,
+                    @Model.ApprovedProperties
+                ],
+                backgroundColor: ['#36b9cc', '#f6c23e', '#1cc88a'],
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: { duration: 1500 }
+        }
+    });
+
+    /*********************************
+     *  LANDLORD APPROVAL CHART
+     *********************************/
+    new Chart(document.getElementById('landlordChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'Approved'],
+            datasets: [{
+                data: [
+                    @Model.LandlordPending,
+                    @Model.LandlordApproved
+                ],
+                backgroundColor: ['#e74a3b', '#1cc88a'],
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: { duration: 1500 }
+        }
+    });
+</script>

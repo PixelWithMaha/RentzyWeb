@@ -29,10 +29,18 @@ namespace Rentzy.Web.Controllers
         {
             var userName = HttpContext.Session.GetString("UserName");
             var userEmail = HttpContext.Session.GetString("UserEmail");
-            var totalUsers = _context.Users.Count();   
-            var ActiveLandlord = _context.LandlordApprovals.Count(x => x.ApprovalStatusId == 2); 
-            var totalPrpperties= _context.PropertyApprovalRequests.Count(x => x.StatusId == 2); 
-            
+
+           
+            var totalUsers = _context.Users.Count();
+            var ActiveLandlord = _context.UserStatuses
+                .Include(x => x.User)  
+                .Count(x => x.IsActive == true && EF.Property<string>(x.User, "Discriminator") == "Landlord");
+
+            var totalPrpperties = _context.PropertyApprovalRequests.Count();
+
+            var Activetenants = _context.UserStatuses
+                .Include(x => x.User) 
+                .Count(x => x.IsActive == true && EF.Property<string>(x.User, "Discriminator") == "Tenant");
 
 
             ViewBag.TotalUsers = totalUsers;
@@ -40,6 +48,24 @@ namespace Rentzy.Web.Controllers
             ViewBag.TotalProperties = totalPrpperties;
             ViewBag.UserName = userName;
             ViewBag.UserEmail = userEmail;
+            ViewBag.ActiveTenants = Activetenants;
+
+            // Recent users (last 2 days)
+            ViewBag.RecentUsers = _context.Users
+                .Where(u => u.CreatedAt >= DateTime.Now.AddDays(-2))
+                .OrderByDescending(u => u.CreatedAt)
+                .Take(5)
+                .ToList();
+
+            // Pending landlord approvals
+            ViewBag.PendingActions = _context.LandlordApprovals
+                .Where(x => x.ApprovalStatusId == 1) // Pending
+                .Take(5)
+                .Select(x => new {
+                    LandlordName = (x.Landlord.FirstName ?? "") + (string.IsNullOrWhiteSpace(x.Landlord.LastName) ? "" : " " + x.Landlord.LastName),
+                    x.Id
+                })
+                .ToList();
 
             return View();
         }
@@ -216,7 +242,7 @@ namespace Rentzy.Web.Controllers
             
                 return View(Approval);
         }
-      
+
 
         //================================================================================================
         //  Landlord Approvals
@@ -224,6 +250,76 @@ namespace Rentzy.Web.Controllers
 
 
         // New: list approvals (filter optional)
+
+        [HttpGet]
+        public async Task<IActionResult> EditLandlordApprovalStatus(int id)
+        {
+            var request = await _context.LandlordApprovals
+                .Include(x => x.Landlord)
+                .Include(x => x.ApprovalStatus)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (request == null) return NotFound();
+
+            ViewBag.Statuses = await _context.ApprovalStatuses.ToListAsync();
+            return View(request);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditLandlordApprovalStatus(int id, int statusId, string notes)
+        {
+            var request = await _context.LandlordApprovals
+                .Include(x => x.Landlord)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (request == null) return NotFound();
+
+            request.ApprovalStatusId = statusId;
+            if (statusId == ApprovalStatusConstants.Approved)
+            {
+                request.Landlord.IsVerified =true;
+            }
+            else
+                request.Landlord.IsVerified = false;
+            request.AdminNotes = notes;
+            request.ReviewedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("LandlordApprovals");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditPropertyStatus(int id)
+        {
+            var req = await _context.PropertyApprovalRequests
+                .Include(x => x.property)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (req == null)
+                return NotFound();
+
+            return View(req);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditPropertyStatus(int id, int statusId)
+        {
+            var req = await _context.PropertyApprovalRequests.FindAsync(id);
+            if (req == null) return NotFound();
+
+            req.StatusId = statusId;
+            req.ReviewedAt = DateTime.UtcNow;
+
+            _context.PropertyApprovalRequests.Update(req);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("PropertyApprovals");
+        }
+
+
+
         [HttpGet]
         public async Task<IActionResult> LandlordApprovals(int? statusId)
         {
