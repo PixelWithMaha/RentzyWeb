@@ -1,11 +1,12 @@
-﻿using Rentzy.DAL.Models;
-using Rentzy.DAL.Repositories;
+﻿using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.DTOs;
-using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.Exceptions;
+using Rentzy.BLL.Factory;
+using Rentzy.DAL.Models;
+using Rentzy.DAL.Repositories;
+using Rentzy.DAL.Repository.Approvals;
 using System;
 using System.Threading.Tasks;
-using Rentzy.DAL.Repository.Approvals;
 using Rentzy.BLL.Services.ApprovalServices;
 
 namespace Rentzy.BLL.Services
@@ -46,14 +47,7 @@ namespace Rentzy.BLL.Services
                 throw new InvalidOperationException("Email already exists");
             }
 
-            // Create the appropriate user type
-            User newUser = dto.UserType.ToLower() switch
-            {
-                "tenant" => new Tenant() { Role = "Tenant" },
-                "landlord" => new Landlord { IsVerified = false, Role = "Landlord" },
-                "admin" => new Admin { Role = "Admin" },
-                _ => throw new ArgumentException("Invalid user type. Must be 'tenant', 'landlord', or 'admin'")
-            };
+            var newUser = UserFactory.CreateUser(dto.UserType);
 
             // Set common properties
             newUser.Email = dto.Email;

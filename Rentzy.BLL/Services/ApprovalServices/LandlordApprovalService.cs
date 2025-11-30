@@ -101,6 +101,16 @@ namespace Rentzy.BLL.Services.ApprovalServices
             await _repo.UpdateAsync(item);
             await _repo.SaveChangesAsync();
         }
+
+        public async Task<LandlordApproval?> GetLandlordApprovalByLandlordIdAsync(int landlordId)
+        {
+            var approvals = await _repo.GetAllAsync();
+            return approvals
+                .Where(la => la.LandlordId == landlordId && !la.IsDeleted)
+                .OrderByDescending(la => la.SubmittedAt)
+                .FirstOrDefault();
+        }
+
+
     }
-  
 }
