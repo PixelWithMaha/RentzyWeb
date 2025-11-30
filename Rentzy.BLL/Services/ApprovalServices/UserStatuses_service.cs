@@ -39,6 +39,26 @@ namespace Rentzy.BLL.Services.ApprovalServices
             return status;
         }
 
+        public async Task AddInUserStatus(int userId)
+        {
+            var status = await _repo.GetByUserIdAsync(userId);
+
+            // Agar status exist nahi karta (new user)
+            if (status == null)
+            {
+                status = new UserStatus
+                {
+                    UserId = userId,
+                    IsActive = true,
+                    IsDeleted = false
+                };
+
+                await _repo.AddAsync(status);
+                await _repo.SaveChangesAsync();
+            }
+
+        }
+
         public async Task<bool> IsBlockedAsync(int userId)
         {
             var status = await GetStatusAsync(userId);

@@ -2,8 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.DTOs;
 using Rentzy.BLL.Services;
-using Rentzy.DAL.Models;
+using Rentzy.BLL.Services.ApprovalServices;
 using Rentzy.BLL.Services.ReportsServices;
+using Rentzy.DAL.Models;
 using Rentzy.Web.Authorization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -18,19 +19,22 @@ namespace Rentzy.Web.Controllers
         private readonly PaymentService _paymentService;
         private readonly ReportsService _reportsService;
         private readonly AuthService _authService;
+        private readonly ILandlordApprovalService _landlordApprovalService;
 
         public LandlordController(
             AuthService authService,
             PropertyService propertyService,
             LandlordService landlordService,
             PaymentService payservice,
-            ReportsService reportsService)
+            ReportsService reportsService,
+            ILandlordApprovalService landlordApprovalService) // Add this
         {
             _propertyService = propertyService;
             _landlordService = landlordService;
             _paymentService = payservice;
             _reportsService = reportsService;
             _authService = authService;
+            _landlordApprovalService = landlordApprovalService; // Add this
         }
 
         // LANDLORD DASHBOARD
@@ -59,8 +63,6 @@ namespace Rentzy.Web.Controllers
                 // Only show approved properties in Dashboard section
                 var approvedProperties = allProperties.Where(p => p.StatusId == ApprovalStatusConstants.Approved).ToList();
                 ViewBag.Properties = approvedProperties;
-
-
 
                 ViewBag.MonthlyRevenue = await _landlordService.GetMonthlyRevenueAsync(landlordId.Value);
                 ViewBag.PendingRequests = await _landlordService.GetPendingRequestsCountAsync(landlordId.Value);
@@ -92,10 +94,17 @@ namespace Rentzy.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult PendingApproval()
+        public async Task<IActionResult> PendingApproval()
         {
+            var landlordId = HttpContext.Session.GetInt32("UserId");
+            if (landlordId == null) return RedirectToAction("Login", "Account");
+
             ViewBag.UserName = HttpContext.Session.GetString("UserName");
-            return View();
+
+            // Get the landlord approval record with status and admin notes
+            var approvalRecord = await _landlordApprovalService.GetLandlordApprovalByLandlordIdAsync(landlordId.Value);
+
+            return View(approvalRecord);
         }
 
         // ADD PROPERTY PAGE
