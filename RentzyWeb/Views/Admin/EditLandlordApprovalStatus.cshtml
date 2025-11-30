@@ -1,0 +1,31 @@
+﻿@model Rentzy.DAL.Models.LandlordApproval
+@{
+    var statuses = ViewBag.Statuses as List<Rentzy.DAL.Models.ApprovalStatus>;
+}
+
+<h3>Edit Landlord Approval Status</h3>
+
+<form method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label>Status</label>
+        <select name="statusId" class="form-select">
+            @foreach (var s in statuses)
+            {
+                <option value="@s.Id" selected="@(s.Id == Model.ApprovalStatusId)">
+                    @s.Name
+                </option>
+
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Notes</label>
+        <textarea class="form-control" name="notes"></textarea>
+    </div>
+
+    <button class="btn btn-success">Save</button>
+    <a class="btn btn-secondary" href="@Url.Action("LandlordApprovals", "Admin")">Cancel</a>
+</form>

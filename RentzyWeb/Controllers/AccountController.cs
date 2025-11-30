@@ -55,6 +55,7 @@ namespace Rentzy.Web.Controllers
                 };
 
                 var userDto = await _authService.RegisterUserAsync(dto);
+                
 
                 _ = Task.Run(() =>
                  _authService.SendWelcomeEmailAsync(userDto.Email, userDto.FullName)
