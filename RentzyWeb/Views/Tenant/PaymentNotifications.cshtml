@@ -1,24 +1,313 @@
-﻿@model List<Rentzy.DAL.Models.PaymentNotification>
-
+﻿@model IEnumerable<Rentzy.BLL.DTOs.PaymentNotificationDTO>
 @{
-    ViewData["Title"] = "Notifications";
+    ViewData["Title"] = "Payment Notifications";
 }
 
-<h2>Payment Notifications</h2>
+<style>
+    .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
 
-@if (Model.Count == 0)
-{
-    <div class="alert alert-info">No notifications yet.</div>
-}
-else
-{
-    <ul class="list-group">
-        @foreach (var n in Model)
-        {
-            <li class="list-group-item @(n.IsSeen ? "" : "list-group-item-warning")">
-                <a asp-action="OpenNotification" asp-route-id="@n.Id">@n.Message</a>
-                <small class="text-muted float-end">@n.SentAt.ToString("dd/MM/yyyy HH:mm")</small>
-            </li>
+    .notification-card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+    }
+
+        .notification-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
-    </ul>
-}
+
+    .notification-unread {
+        border-left: 5px solid #667eea;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    }
+
+    .notification-read {
+        border-left: 5px solid #e9ecef;
+        background: #ffffff;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-paid {
+        background: #d1edff;
+        color: #0c5460;
+    }
+
+    .status-overdue {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .pay-btn {
+        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 10px 25px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .pay-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+            color: white;
+        }
+
+    .view-btn {
+        border: 2px solid #667eea;
+        border-radius: 10px;
+        padding: 8px 20px;
+        color: #667eea;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+
+        .view-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .amount-display {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .due-date {
+        background: #fff3cd;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        color: #856404;
+    }
+
+    .new-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: linear-gradient(135deg, #f8f9ff 0%, #e9ecef 100%);
+        border-radius: 20px;
+    }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+    .property-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 10px;
+        object-fit: cover;
+        margin-right: 1rem;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card gradient-bg text-white shadow-lg border-0">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="display-6 fw-bold mb-2">
+                                <i class="fas fa-bell me-3"></i>Payment Notifications
+                            </h1>
+                            <p class="lead mb-0 opacity-75">Manage your pending payments and payment reminders</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="bg-white rounded-pill px-4 py-2 d-inline-block shadow">
+                                <small class="fw-bold text-primary">
+                                    <i class="fas fa-bell me-1"></i>
+                                    @Model.Count() Notifications
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Summary -->
+    @if (Model.Any())
+    {
+        var pendingCount = Model.Count(n => n.Status == "Pending");
+        var overdueCount = Model.Count(n => n.Status == "Overdue");
+        var totalAmount = Model.Where(n => n.Status != "Paid").Sum(n => n.Amount);
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number text-warning">@pendingCount</div>
+                    <p class="text-muted mb-0">Pending Payments</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number text-danger">@overdueCount</div>
+                    <p class="text-muted mb-0">Overdue</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number text-success">@totalAmount.ToString("C")</div>
+                    <p class="text-muted mb-0">Total Due</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Notifications List -->
+    <div class="row">
+        <div class="col-12">
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <i class="fas fa-bell-slash"></i>
+                    <h3 class="text-muted">No Notifications</h3>
+                    <p class="text-muted mb-4">You're all caught up! No payment notifications at the moment.</p>
+                    <a href="@Url.Action("Dashboard", "Tenant")" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            }
+            else
+            {
+                foreach (var notification in Model.OrderByDescending(n => n.CreatedDate))
+                {
+                    <div class="card notification-card @(!notification.IsSeen ? "notification-unread" : "notification-read")">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-1">
+                                    <img src="@notification.PropertyImage" alt="@notification.PropertyTitle" class="property-image">
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="d-flex align-items-start">
+                                        <div class="me-3">
+                                            @if (!notification.IsSeen)
+                                            {
+                                                <span class="new-badge">NEW</span>
+                                            }
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="fw-bold text-dark mb-1">
+                                                    <i class="fas fa-home me-2 text-primary"></i>
+                                                    @notification.PropertyTitle
+                                                </h5>
+                                                <span class="status-badge status-@notification.Status.ToLower()">
+                                                    @notification.Status
+                                                </span>
+                                            </div>
+
+                                            <p class="text-muted mb-3">@notification.Message</p>
+
+                                            <div class="d-flex flex-wrap gap-4 align-items-center">
+                                                <div class="amount-display text-success">
+                                                    @notification.Amount.ToString("C")
+                                                </div>
+                                                <div class="due-date">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    Due: @notification.DueDate.ToString("MMM dd, yyyy")
+                                                </div>
+                                                <div class="text-muted">
+                                                    <small>
+                                                        <i class="fas fa-user me-1"></i>
+                                                        Landlord: @notification.LandlordName
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="d-flex gap-2 justify-content-end flex-wrap">
+                                        @if (notification.Status == "Pending" || notification.Status == "Overdue")
+                                        {
+                                            <a asp-controller="Booking" asp-action="ConfirmPayment"
+                                               asp-route-paymentId="@notification.PaymentId"
+                                               class="btn pay-btn">
+                                                <i class="fas fa-lock me-2"></i>Pay Now
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-controller="Booking" asp-action="Receipt"
+                                               asp-route-paymentId="@notification.PaymentId"
+                                               class="btn pay-btn" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">
+                                                <i class="fas fa-receipt me-2"></i>View Receipt
+                                            </a>
+                                        }
+
+                                        <a asp-action="OpenNotification" asp-route-id="@notification.Id"
+                                           class="btn view-btn">
+                                            <i class="fas fa-eye me-2"></i>Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

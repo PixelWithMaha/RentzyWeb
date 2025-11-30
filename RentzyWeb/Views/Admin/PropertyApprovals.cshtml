@@ -102,7 +102,7 @@
                                                       item.StatusId == 1 ? "secondary" :
                                                       item.StatusId == 2 ? "success" :
                                                       item.StatusId == 3 ? "danger" : "warning"
-                                                                                                )">
+                                                                                                                                                                                                )">
                                             @(item.Status?.Name ?? "Unknown")
                                         </span>
                                     </td>
@@ -120,44 +120,37 @@
                                                     <!-- Pending -->
                                                     <div class="d-flex justify-content-end gap-2">
 
-                                                        <!-- Approve -->
-                                                        <form asp-action="ApproveProperty" asp-controller="Admin" method="post" class="d-inline">
-                                                            @Html.AntiForgeryToken()
-                                                            <input type="hidden" name="id" value="@item.Id" />
-                                                            <button type="submit" class="btn btn-sm btn-success"
-                                                                    onclick="return confirm('Approve this property?');">
-                                                                <i class="fas fa-check me-1"></i>Approve
-                                                            </button>
-                                                        </form>
+                                                        <!-- Approve Button -->
+                                                        <button class="btn btn-sm btn-success"
+                                                                onclick="openPropertyNotes(@item.Id, 'approve')">
+                                                            <i class="fas fa-check me-1"></i>Approve
+                                                        </button>
 
-                                                        <!-- Reject -->
-                                                        <form asp-action="RejectProperty" asp-controller="Admin" method="post" class="d-inline">
-                                                            @Html.AntiForgeryToken()
-                                                            <input type="hidden" name="id" value="@item.Id" />
-                                                            <button type="submit" class="btn btn-sm btn-danger"
-                                                                    onclick="return confirm('Reject this request?');">
-                                                                <i class="fas fa-times me-1"></i>Reject
-                                                            </button>
-                                                        </form>
-
-                                                        <!-- Cancel -->
-                                                        <form asp-action="CancelPropertyRequest" asp-controller="Admin" method="post" class="d-inline">
-                                                            @Html.AntiForgeryToken()
-                                                            <input type="hidden" name="id" value="@item.Id" />
-                                                            <button type="submit" class="btn btn-sm btn-warning"
-                                                                    onclick="return confirm('Cancel this request?');">
-                                                                <i class="fas fa-ban me-1"></i>Cancel
-                                                            </button>
-                                                        </form>
+                                                        <!-- Reject Button -->
+                                                        <button class="btn btn-sm btn-danger"
+                                                                onclick="openPropertyNotes(@item.Id, 'reject')">
+                                                            <i class="fas fa-times me-1"></i>Reject
+                                                        </button>
 
                                                     </div>
                                                 }
                                                 else
                                                 {
-                                                    <a class="btn btn-sm btn-outline-primary"
-                                                       href="@Url.Action("PropertyApprovalDetails", "Admin", new { id = item.Id })">
-                                                        <i class="fas fa-eye me-1"></i>View
-                                                    </a>
+                                                    <div class="d-flex justify-content-end gap-2">
+
+                                                        <!-- View Button -->
+                                                        <a class="btn btn-sm btn-outline-primary"
+                                                           href="@Url.Action("PropertyApprovalDetails", "Admin", new { id = item.Id })">
+                                                            <i class="fas fa-eye me-1"></i>View
+                                                        </a>
+
+                                                        <!-- EDIT STATUS BUTTON -->
+                                                        <a class="btn btn-sm btn-outline-warning"
+                                                           href="@Url.Action("EditPropertyStatus", "Admin", new { id = item.Id })">
+                                                            <i class="fas fa-edit me-1"></i>Edit Status
+                                                        </a>
+
+                                                    </div>
                                                 }
 
                                             </td>
@@ -175,8 +168,60 @@
 
 </div>
 
+
+<!-- 🌟 NOTES MODAL FOR APPROVE / REJECT -->
+<div class="modal fade" id="propertyNotesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form method="post" id="propertyNotesForm">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="propertyModalTitle">Add Notes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" name="id" id="propertyApprovalId" />
+
+                    <textarea name="notes" class="form-control" rows="4"
+                              placeholder="Write notes here..." required></textarea>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
 @section Scripts {
     <script>
-        // future enhancements
+
+        function openPropertyNotes(id, type) {
+
+            document.getElementById("propertyApprovalId").value = id;
+
+            if (type === "approve") {
+                document.getElementById("propertyModalTitle").innerText = "Approve Property - Add Notes";
+                document.getElementById("propertyNotesForm").action = "/Admin/ApproveProperty";
+            }
+            else {
+                document.getElementById("propertyModalTitle").innerText = "Reject Property - Add Notes";
+                document.getElementById("propertyNotesForm").action = "/Admin/RejectProperty";
+            }
+
+            let modal = new bootstrap.Modal(document.getElementById('propertyNotesModal'));
+            modal.show();
+        }
+
     </script>
 }

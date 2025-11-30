@@ -1,378 +1,227 @@
-﻿@model List<Rentzy.DAL.Models.Payment>
-
+﻿@model IEnumerable<Rentzy.BLL.DTOs.PaymentHistoryDTO>
 @{
     ViewData["Title"] = "Payment History";
 }
 
 <style>
-    .payment-history-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-
-    .page-header {
+    .gradient-bg {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 20px;
-        padding: 2.5rem;
-        color: white;
-        margin-bottom: 2rem;
-        text-align: center;
     }
 
-    .page-title {
-        font-size: 2.5rem;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-    }
-
-    .page-subtitle {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        margin-bottom: 0;
-    }
-
-    .stats-card {
-        background: white;
+    .history-card {
         border-radius: 15px;
-        padding: 1.5rem;
-        box-shadow: 0 5px 25px rgba(0,0,0,0.08);
-        margin-bottom: 2rem;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .stat-item {
-        text-align: center;
-        padding: 1.5rem;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    }
-
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-    }
-
-    .stat-label {
-        font-size: 0.9rem;
-        color: #6c757d;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .payment-card {
-        background: white;
-        border-radius: 15px;
-        padding: 1.5rem;
-        box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+        border: none;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
         margin-bottom: 1.5rem;
-        border-left: 4px solid #667eea;
+    }
+
+        .history-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+    .payment-completed {
+        border-left: 5px solid #51cf66;
+    }
+
+    .receipt-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 8px 20px;
+        color: white;
+        font-weight: 600;
         transition: all 0.3s ease;
     }
 
-        .payment-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        .receipt-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
         }
 
-    .payment-header {
-        display: flex;
-        justify-content: between;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .property-title {
-        font-size: 1.2rem;
+    .amount-paid {
+        font-size: 1.25rem;
         font-weight: 700;
-        color: #2c3e50;
-        margin: 0;
-    }
-
-    .payment-amount {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: #667eea;
-    }
-
-    .payment-details {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .detail-item {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .detail-label {
-        font-size: 0.8rem;
-        color: #6c757d;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.25rem;
-    }
-
-    .detail-value {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #2c3e50;
-    }
-
-    .status-badge {
-        padding: 0.5rem 1rem;
-        border-radius: 25px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        display: inline-block;
-    }
-
-    .status-paid {
-        background: rgba(81, 207, 102, 0.15);
         color: #51cf66;
-        border: 1px solid rgba(81, 207, 102, 0.3);
     }
 
-    .status-pending {
-        background: rgba(255, 193, 7, 0.15);
-        color: #ffc107;
-        border: 1px solid rgba(255, 193, 7, 0.3);
-    }
-
-    .no-payments {
+    .empty-state {
         text-align: center;
         padding: 4rem 2rem;
-        color: #6c757d;
-        background: white;
+        background: linear-gradient(135deg, #f8f9ff 0%, #e9ecef 100%);
         border-radius: 20px;
-        box-shadow: 0 5px 25px rgba(0,0,0,0.08);
     }
 
-        .no-payments i {
+        .empty-state i {
             font-size: 4rem;
+            color: #6c757d;
             margin-bottom: 1rem;
-            opacity: 0.5;
         }
 
-    .payment-date {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #6c757d;
-        font-size: 0.9rem;
-    }
-
-        .payment-date i {
-            color: #667eea;
-        }
-
-    .total-amount {
+    .stats-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        border-radius: 12px;
-        padding: 1rem 1.5rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 600;
-        margin-top: 1rem;
-    }
-
-    .filter-section {
-        background: white;
         border-radius: 15px;
         padding: 1.5rem;
-        box-shadow: 0 5px 25px rgba(0,0,0,0.08);
-        margin-bottom: 2rem;
+        text-align: center;
     }
 
-    .filter-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-    }
-
-    .form-group {
-        margin-bottom: 0;
-    }
-
-    .form-label {
-        font-weight: 600;
-        color: #2c3e50;
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
         margin-bottom: 0.5rem;
     }
 
-    .form-control {
-        border: 2px solid #e9ecef;
-        border-radius: 10px;
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-    }
-
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-
-    @@media (max-width: 768px) {
-        .payment-history-container {
-            padding: 1rem;
-        }
-
-        .page-header {
-            padding: 2rem 1.5rem;
-        }
-
-        .page-title {
-            font-size: 2rem;
-        }
-
-        .payment-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-
-        .payment-amount {
-            font-size: 1.3rem;
-        }
+    .payment-method-badge {
+        background: #e9ecef;
+        color: #495057;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
     }
 </style>
 
-<div class="payment-history-container">
-    <!-- Page Header -->
-    <div class="page-header">
-        <h1 class="page-title">Payment History</h1>
-        <p class="page-subtitle">Track all your rental payments and transactions</p>
-    </div>
-
-    @if (Model == null || Model.Count == 0)
-    {
-        <!-- No Payments State -->
-        <div class="no-payments">
-            <i class="fas fa-receipt"></i>
-            <h3>No Payments Made Yet</h3>
-            <p>Your payment history will appear here once you make your first payment.</p>
-            <a href="/Property" class="btn btn-primary mt-3">
-                <i class="fas fa-search me-2"></i>Browse Properties
-            </a>
-        </div>
-    }
-    else
-    {
-        <!-- Statistics -->
-        <div class="stats-card">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-value">@Model.Count</div>
-                    <div class="stat-label">Total Payments</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">@Model.Count(p => p.StatusId == 1)</div>
-                    <div class="stat-label">Completed</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">@Model.Count(p => p.StatusId != 1)</div>
-                    <div class="stat-label">Pending</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">@Model.Where(p => p.StatusId == 1).Sum(p => p.Amount).ToString("C")</div>
-                    <div class="stat-label">Total Paid</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Payment List -->
-        <div class="payments-list">
-            @foreach (var payment in Model)
-            {
-                <div class="payment-card">
-                    <div class="payment-header">
-                        <div>
-                            <h3 class="property-title">@payment.Booking.Property.Title</h3>
-                            <div class="payment-date">
-                                <i class="fas fa-calendar"></i>
-                                @if (payment.StatusId == 1 && payment.PaidAt.HasValue)
-                                {
-                                    <span>Paid on @payment.PaidAt.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")</span>
-                                }
-                                else
-                                {
-                                    <span>Payment pending</span>
-                                }
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card gradient-bg text-white shadow-lg border-0">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="display-6 fw-bold mb-2">
+                                <i class="fas fa-history me-3"></i>Payment History
+                            </h1>
+                            <p class="lead mb-0 opacity-75">Your completed payment transactions</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="bg-white rounded-pill px-4 py-2 d-inline-block shadow">
+                                <small class="fw-bold text-primary">
+                                    <i class="fas fa-receipt me-1"></i>
+                                    @Model.Count() Payments
+                                </small>
                             </div>
                         </div>
-                        <div class="text-end">
-                            <div class="payment-amount">@payment.Amount.ToString("C")</div>
-                            <span class="status-badge @(payment.StatusId == 1 ? "status-paid" : "status-pending")">
-                                <i class="fas @(payment.StatusId == 1 ? "fa-check-circle" : "fa-clock") me-1"></i>
-                                @(payment.StatusId == 1 ? "Paid" : "Pending")
-                            </span>
-                        </div>
                     </div>
-
-                    <div class="payment-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Payment ID</span>
-                            <span class="detail-value">#@payment.Id.ToString("D6")</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Property</span>
-                            <span class="detail-value">@payment.Booking.Property.Title</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Payment Method</span>
-                            <span class="detail-value">Credit Card</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Due Date</span>
-                            <span class="detail-value">
-                                @if (payment.PaidAt.HasValue)
-                                {
-                                    @payment.PaidAt.Value.ToString("MMM dd, yyyy")
-                                }
-                                else
-                                {
-                                    <text>-</text>
-                                }
-                            </span>
-                        </div>
-                    </div>
-
-                    @if (payment.StatusId != 1)
-                    {
-                        <div class="text-end">
-                            <button class="btn btn-primary btn-sm">
-                                <i class="fas fa-credit-card me-2"></i>Pay Now
-                            </button>
-                        </div>
-                    }
                 </div>
-            }
+            </div>
         </div>
+    </div>
 
-        <!-- Total Summary -->
-        <div class="text-center mt-4">
-            <div class="total-amount">
-                <i class="fas fa-wallet"></i>
-                Total Amount Paid: @Model.Where(p => p.StatusId == 1).Sum(p => p.Amount).ToString("C")
+    <!-- Stats -->
+    @if (Model.Any())
+    {
+        var totalPaid = Model.Sum(p => p.Amount);
+        var totalPayments = Model.Count();
+        var averagePayment = totalPayments > 0 ? totalPaid / totalPayments : 0;
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stats-card shadow">
+                    <div class="stats-number">@totalPayments</div>
+                    <p class="mb-0 opacity-75">Total Payments</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card shadow">
+                    <div class="stats-number">@totalPaid.ToString("C")</div>
+                    <p class="mb-0 opacity-75">Total Amount Paid</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card shadow">
+                    <div class="stats-number">@averagePayment.ToString("C")</div>
+                    <p class="mb-0 opacity-75">Average Payment</p>
+                </div>
             </div>
         </div>
     }
-</div>
 
-<!-- Add Font Awesome for icons -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- Payment History -->
+    <div class="row">
+        <div class="col-12">
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <i class="fas fa-receipt"></i>
+                    <h3 class="text-muted">No Payment History</h3>
+                    <p class="text-muted mb-4">You haven't made any payments yet. Payments will appear here once completed.</p>
+                    <a href="@Url.Action("PaymentNotifications", "Tenant")" class="btn btn-primary">
+                        <i class="fas fa-credit-card me-2"></i>View Pending Payments
+                    </a>
+                </div>
+            }
+            else
+            {
+                foreach (var payment in Model.OrderByDescending(p => p.PaymentDate))
+                {
+                    <div class="card history-card payment-completed">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="fw-bold text-dark mb-1">
+                                                    <i class="fas fa-home me-2 text-primary"></i>
+                                                    @payment.PropertyTitle
+                                                </h5>
+                                                <div class="d-flex gap-2 align-items-center">
+                                                    <span class="payment-method-badge">
+                                                        <i class="fas fa-credit-card me-1"></i>
+                                                        @payment.PaymentMethod
+                                                    </span>
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>Paid
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <p class="text-muted mb-3">
+                                                <i class="fas fa-user me-2 text-info"></i>
+                                                Landlord: @payment.LandlordName
+                                            </p>
+
+                                            <div class="d-flex flex-wrap gap-4 align-items-center">
+                                                <div class="amount-paid">
+                                                    @payment.Amount.ToString("C")
+                                                </div>
+                                                <div class="text-muted">
+                                                    <i class="fas fa-calendar-alt me-1"></i>
+                                                    Booking: @payment.StartDate.ToString("MMM dd") - @payment.EndDate.ToString("MMM dd, yyyy")
+                                                </div>
+                                                <div class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    Paid: @payment.PaymentDate.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                                                </div>
+                                                @if (!string.IsNullOrEmpty(payment.TransactionId))
+                                                {
+                                                    <div class="text-muted">
+                                                        <i class="fas fa-receipt me-1"></i>
+                                                        TXN: @payment.TransactionId
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a asp-controller="Booking" asp-action="Receipt"
+                                           asp-route-paymentId="@payment.PaymentId"
+                                           class="btn receipt-btn">
+                                            <i class="fas fa-receipt me-2"></i>View Receipt
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

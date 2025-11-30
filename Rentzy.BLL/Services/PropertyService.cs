@@ -25,16 +25,81 @@ namespace Rentzy.BLL.Services
             _propertyRepository= prepo ?? throw new ArgumentNullException(nameof(prepo));
             _RequestRepo = rep;
         }
+        //public async Task<IEnumerable<PropertyDTO>> GetAllPropertiesAsync()
+        //{
+        //    var properties = await _propertyRepository.GetAllPropertiesAsync();
+        //    return properties.Select(MapToDTO).ToList();
+        //}
         public async Task<IEnumerable<PropertyDTO>> GetAllPropertiesAsync()
         {
             var properties = await _propertyRepository.GetAllPropertiesAsync();
-            return properties.Select(MapToDTO).ToList();
+
+            var result = new List<PropertyDTO>();
+            foreach (var p in properties)
+            {
+                // get latest approval request for this property (may be null)
+                var approvalRequest = await _RequestRepo.GetByPropertyIdAsync(p.Id);
+
+                var dto = new PropertyDTO
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Description = p.Description,
+                    Rent = (int)p.MonthlyRent,
+                    CityId = p.CityId,
+                    PropertyTypeId = p.PropertyTypeId,
+                    LandlordId = p.LandlordId,
+                    LandlordName = p.Landlord != null ? p.Landlord.FirstName + " " + p.Landlord.LastName : "N/A",
+                    TenantNames = p.Bookings?.Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName).ToList() ?? new List<string>(),
+                    Images = p.Images?.ToList() ?? new List<PropertyImage>(),
+                    StatusId = approvalRequest?.StatusId ?? ApprovalStatusConstants.Pending,
+                    IsApproved = (approvalRequest?.StatusId == ApprovalStatusConstants.Approved)
+                };
+
+                // Only include approved properties for tenant listings/search.
+                if (dto.IsApproved)
+                    result.Add(dto);
+            }
+
+            return result;
         }
+
+        //public async Task<IEnumerable<PropertyDTO>> SearchPropertiesByTypeAsync(string typeName)
+        //{
+        //    var properties = await _propertyRepository.SearchByPropertyType(typeName);
+        //    return properties.Select(MapToDTO).ToList();
+        //}
 
         public async Task<IEnumerable<PropertyDTO>> SearchPropertiesByTypeAsync(string typeName)
         {
             var properties = await _propertyRepository.SearchByPropertyType(typeName);
-            return properties.Select(MapToDTO).ToList();
+
+            var result = new List<PropertyDTO>();
+            foreach (var p in properties)
+            {
+                var approvalRequest = await _RequestRepo.GetByPropertyIdAsync(p.Id);
+
+                var dto = new PropertyDTO
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Description = p.Description,
+                    Rent = (int)p.MonthlyRent,
+                    CityId = p.CityId,
+                    PropertyTypeId = p.PropertyTypeId,
+                    LandlordId = p.LandlordId,
+                    LandlordName = p.Landlord != null ? p.Landlord.FirstName + " " + p.Landlord.LastName : "N/A",
+                    TenantNames = p.Bookings?.Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName).ToList() ?? new List<string>(),
+                    Images = p.Images?.ToList() ?? new List<PropertyImage>(),
+                    StatusId = approvalRequest?.StatusId ?? ApprovalStatusConstants.Pending,
+                    IsApproved = (approvalRequest?.StatusId == ApprovalStatusConstants.Approved)
+                };
+
+                if (dto.IsApproved)
+                    result.Add(dto);
+            }
+
+            return result;
         }
 
         private PropertyDTO MapToDTO(Rentzy.DAL.Models.Property p)
@@ -169,24 +234,47 @@ namespace Rentzy.BLL.Services
             return await _propertyRepository.GetBookedDatesForPropertyAsync(propertyId);
         }
 
+        //public async Task<PropertyDTO> GetPropertyDetailsAsync(int propertyId)
+        //{
+        //    var p = await _propertyRepository.GetPropertyDetailsAsync(propertyId);
+        //    if (p == null) return null;
+
+        //    return new PropertyDTO
+        //    {
+        //        Id = p.Id,
+        //        Title = p.Title,
+        //        Description = p.Description,
+        //        // p.MonthlyRent is your model field — cast/convert to int if DTO expects int
+        //        Rent = (int)p.MonthlyRent,
+        //        CityId = p.CityId,
+        //        PropertyTypeId = p.PropertyTypeId,
+        //        LandlordId = p.LandlordId,
+        //        LandlordName = p.Landlord != null ? p.Landlord.FirstName + " " + p.Landlord.LastName : "N/A",
+        //        TenantNames = p.Bookings?.Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName).ToList() ?? new List<string>(),
+        //        Images = p.Images?.ToList() ?? new List<PropertyImage>()
+        //    };
+        //}
         public async Task<PropertyDTO> GetPropertyDetailsAsync(int propertyId)
         {
             var p = await _propertyRepository.GetPropertyDetailsAsync(propertyId);
             if (p == null) return null;
+
+            var approvalRequest = await _RequestRepo.GetByPropertyIdAsync(p.Id);
 
             return new PropertyDTO
             {
                 Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
-                // p.MonthlyRent is your model field — cast/convert to int if DTO expects int
                 Rent = (int)p.MonthlyRent,
                 CityId = p.CityId,
                 PropertyTypeId = p.PropertyTypeId,
                 LandlordId = p.LandlordId,
                 LandlordName = p.Landlord != null ? p.Landlord.FirstName + " " + p.Landlord.LastName : "N/A",
                 TenantNames = p.Bookings?.Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName).ToList() ?? new List<string>(),
-                Images = p.Images?.ToList() ?? new List<PropertyImage>()
+                Images = p.Images?.ToList() ?? new List<PropertyImage>(),
+                StatusId = approvalRequest?.StatusId ?? ApprovalStatusConstants.Pending,
+                IsApproved = (approvalRequest?.StatusId == ApprovalStatusConstants.Approved)
             };
         }
 

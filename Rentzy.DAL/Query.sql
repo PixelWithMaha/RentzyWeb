@@ -106,8 +106,34 @@ INSERT INTO PaymentMethods (Name) VALUES ('Cash');
 
 INSERT INTO PaymentStatuses (Name) VALUES ('Paid');
 INSERT INTO PaymentStatuses (Name) VALUES ('UnPaid');
+INSERT INTO PaymentStatuses (Name) VALUES ('Failed');
 
 INSERT INTO Payments 
     (Amount, Method, PaidAt, BookingId, StatusId, PaymentMethodId)
 VALUES 
     (55000, 'Credit Card', '2025-11-28 00:50:28', 1, 1, 1);
+INSERT INTO Users (
+    Phone,
+    PasswordHash,
+    Role,
+    CreatedAt,
+    Discriminator,
+    Email,
+    FirstName,
+    IsVerified,
+    LastName
+)
+VALUES
+(
+    '03001234560',
+    '$2a$11$kcmtKfQ4cRW6OXa7dR1P0e1V.5kI6WoZuNpf4gO/iIfLSyJzCzWvC',
+    'Admin',
+    GETUTCDATE(),
+    'Admin',
+    'ali.umer@example.com',
+    'Ali',
+    1,
+    'Umer'
+);
+INSERT INTO UserStatuses ( UserId,IsActive,IsDeleted) VALUES (5,1,0);
+INSERT INTO UserStatuses ( UserId,IsActive,IsDeleted) VALUES (3,1,0);

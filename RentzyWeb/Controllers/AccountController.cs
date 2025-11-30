@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Rentzy.BLL.DTOs;
 using Rentzy.BLL.Exceptions;
 using Rentzy.BLL.Services;
+using Rentzy.BLL.Services.ApprovalServices;
 using Rentzy.DAL.Models;
 using Rentzy.Web.Models;
 using System;
@@ -16,10 +17,12 @@ namespace Rentzy.Web.Controllers
     public class AccountController : Controller
     {
         private readonly AuthService _authService;
+        private readonly IUserStatuses_service _statusService;
 
-        public AccountController(AuthService authService)
+        public AccountController(AuthService authService, IUserStatuses_service service)
         {
             _authService = authService;
+            _statusService = service;
         }
 
         // ✅ REGISTER - Use ViewModel
@@ -52,6 +55,7 @@ namespace Rentzy.Web.Controllers
                 };
 
                 var userDto = await _authService.RegisterUserAsync(dto);
+                
 
                 _ = Task.Run(() =>
                  _authService.SendWelcomeEmailAsync(userDto.Email, userDto.FullName)
@@ -112,6 +116,11 @@ namespace Rentzy.Web.Controllers
 
                 if( userDto.UserType == "Admin")
                     HttpContext.Session.SetString("Id",userDto.Id.ToString());
+
+                if( await _statusService.IsBlockedAsync(userDto.Id))
+                {
+                    throw (new ValidationException("Your account is currently blocked by Admin!"));
+                }
 
                 return userDto.UserType switch
                 {

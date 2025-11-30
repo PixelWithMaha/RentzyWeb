@@ -1,11 +1,13 @@
-﻿using Rentzy.DAL.Models;
-using Rentzy.DAL.Repositories;
+﻿using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.DTOs;
-using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.Exceptions;
+using Rentzy.BLL.Factory;
+using Rentzy.DAL.Models;
+using Rentzy.DAL.Repositories;
+using Rentzy.DAL.Repository.Approvals;
 using System;
 using System.Threading.Tasks;
-using Rentzy.DAL.Repository.Approvals;
+using Rentzy.BLL.Services.ApprovalServices;
 
 namespace Rentzy.BLL.Services
 {
@@ -13,13 +15,16 @@ namespace Rentzy.BLL.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly ILandlordApprovalRepository _landlordApprovalRepository;
+        private readonly IUserStatuses_service _UserStatusService;
+
         private readonly EmailService _emailService;
 
-        public AuthService(IUserRepository userRepository, ILandlordApprovalRepository _repo, EmailService emailService) 
+        public AuthService(IUserRepository userRepository, ILandlordApprovalRepository _repo, EmailService emailService, IUserStatuses_service service) 
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _landlordApprovalRepository = _repo ?? throw new ArgumentNullException(nameof(_repo));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+            _UserStatusService = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         public async Task<UserDTO> RegisterUserAsync(RegisterDTO dto)
@@ -42,14 +47,7 @@ namespace Rentzy.BLL.Services
                 throw new InvalidOperationException("Email already exists");
             }
 
-            // Create the appropriate user type
-            User newUser = dto.UserType.ToLower() switch
-            {
-                "tenant" => new Tenant() { Role = "Tenant" },
-                "landlord" => new Landlord { IsVerified = false, Role = "Landlord" },
-                "admin" => new Admin { Role = "Admin" },
-                _ => throw new ArgumentException("Invalid user type. Must be 'tenant', 'landlord', or 'admin'")
-            };
+            var newUser = UserFactory.CreateUser(dto.UserType);
 
             // Set common properties
             newUser.Email = dto.Email;
@@ -73,11 +71,14 @@ namespace Rentzy.BLL.Services
                         SubmittedAt = DateTime.UtcNow,
                         DocumentUrl = "N/A",         // Ya jo bhi file ho
                         ApprovalStatusId = 1,  // Set Pending
-                        IsDeleted = false
+                        IsDeleted = false,
                     };
                     await _landlordApprovalRepository.AddAsync(approval);
                     await _landlordApprovalRepository.SaveChangesAsync();
                 }
+
+                await _UserStatusService.AddInUserStatus(newUser.Id);
+
                 return user;
             }
             catch (DbUpdateException ex)

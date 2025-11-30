@@ -1,0 +1,237 @@
+﻿@model IEnumerable<Rentzy.DAL.Models.PropertyRentalRequest>
+@{
+    ViewData["Title"] = "My Bookings";
+}
+
+<style>
+    .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #ffd93d 0%, #ff9a3d 100%);
+    }
+
+    .status-approved {
+        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+    }
+
+    .status-cancelled {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+    }
+
+    .status-completed {
+        background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%);
+    }
+
+    .booking-card {
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        border: none;
+        overflow: hidden;
+    }
+
+        .booking-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+
+    .property-image {
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    .action-btn {
+        border-radius: 10px;
+        padding: 8px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .cancel-btn {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+        color: white;
+        border: none;
+    }
+
+        .cancel-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+    .details-btn {
+        background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%);
+        color: white;
+        border: none;
+    }
+
+        .details-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(77, 171, 247, 0.4);
+        }
+</style>
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card gradient-bg text-white shadow-lg border-0">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="display-6 fw-bold mb-2">
+                                <i class="fas fa-calendar-check me-3"></i>My Bookings
+                            </h1>
+                            <p class="lead mb-0 opacity-75">Manage your property rental requests</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="bg-white rounded-pill px-4 py-2 d-inline-block">
+                                <small class="fw-bold text-primary">@Model.Count() Total Bookings</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Bookings List -->
+    <div class="row g-4">
+        @if (!Model.Any())
+        {
+            <div class="col-12">
+                <div class="card text-center border-0 shadow-sm">
+                    <div class="card-body py-5">
+                        <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                        <h4 class="text-muted">No Bookings Found</h4>
+                        <p class="text-muted">You haven't made any booking requests yet.</p>
+                        <a asp-controller="Property" asp-action="Index" class="btn btn-primary btn-lg rounded-pill">
+                            <i class="fas fa-search me-2"></i>Browse Properties
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var booking in Model)
+            {
+                <div class="col-lg-6">
+                    <div class="card booking-card shadow-sm border-0 h-100">
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <!-- Property Image -->
+                                <div class="col-md-4 mb-3 mb-md-0">
+                                    @if (booking.Property?.Images?.Any() == true)
+                                    {
+                                        <img src="@booking.Property.Images.First().ImageUrl"
+                                             class="property-image w-100"
+                                             alt="@booking.Property.Title">
+                                    }
+                                    else
+                                    {
+                                        <div class="property-image w-100 bg-light d-flex align-items-center justify-content-center rounded">
+                                            <i class="fas fa-home fa-3x text-muted"></i>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Booking Details -->
+                                <div class="col-md-8">
+                                    <h5 class="fw-bold text-dark mb-2">@booking.Property?.Title</h5>
+
+                                    <!-- Status Badge -->
+                                    @{
+                                        var statusClass = booking.StatusId switch
+                                        {
+                                            1 => "status-pending",
+                                            2 => "status-approved",
+                                            3 => "status-cancelled",
+                                            4 => "status-completed",
+                                            _ => "status-pending"
+                                        };
+                                        var statusText = booking.StatusId switch
+                                        {
+                                            1 => "PENDING",
+                                            2 => "APPROVED",
+                                            3 => "CANCELLED",
+                                            4 => "COMPLETED",
+                                            _ => "PENDING"
+                                        };
+                                    }
+                                    <div class="status-badge @statusClass mb-3 d-inline-block">
+                                        @statusText
+                                    </div>
+
+                                    <div class="booking-details">
+                                        <p class="mb-2">
+                                            <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                                            <strong>Dates:</strong> @booking.StartDate.ToString("MMM dd, yyyy") - @booking.EndDate.ToString("MMM dd, yyyy")
+                                        </p>
+                                        <p class="mb-2">
+                                            <i class="fas fa-dollar-sign me-2 text-success"></i>
+                                            <strong>Rent:</strong> $@(booking.Property?.MonthlyRent ?? 0)/month
+                                        </p>
+                                        <p class="mb-3">
+                                            <i class="fas fa-clock me-2 text-info"></i>
+                                            <strong>Requested:</strong> @booking.RequestedAt.ToString("MMM dd, yyyy")
+                                        </p>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <a asp-action="BookingDetails" asp-route-id="@booking.Id"
+                                           class="btn details-btn action-btn">
+                                            <i class="fas fa-eye me-1"></i>Details
+                                        </a>
+
+                                        @if (booking.StatusId != 3 && booking.StatusId != 4) // Not cancelled or completed
+                                        {
+                                            <form asp-action="CancelBooking" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="requestId" value="@booking.Id" />
+                                                <button type="submit" class="btn cancel-btn action-btn"
+                                                        onclick="return confirm('Are you sure you want to cancel this booking?')">
+                                                    <i class="fas fa-times me-1"></i>Cancel
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- Add Font Awesome -->
+<script src="https://kit.fontawesome.com/your-font-awesome-kit.js" crossorigin="anonymous"></script>

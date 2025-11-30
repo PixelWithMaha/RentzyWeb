@@ -36,6 +36,8 @@ namespace Rentzy.DAL.Context
         public DbSet<PropertyApprovalRequest> PropertyApprovalRequests { get; set; }
         public DbSet<ApprovalStatus> ApprovalStatuses { get; set; }
         public DbSet<PaymentNotification> PaymentNotifications { get; set; }
+        public DbSet<UserStatus> UserStatuses { get; set; }
+
 
         // Reviews
         public DbSet<Review> Reviews { get; set; }
@@ -104,6 +106,14 @@ namespace Rentzy.DAL.Context
                 entity.Property(e => e.Comments)
                       .HasMaxLength(2000);
             });
+            //-----------------------------------------------------------------------
+            modelBuilder.Entity<UserStatus>()
+                .HasOne(us => us.User)
+                .WithOne() // because one user has one status
+                .HasForeignKey<UserStatus>(us => us.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
 
             //-----------------------------------------------------------------------
             base.OnModelCreating(modelBuilder);

@@ -1,45 +1,43 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Rentzy.BLL.Services;
 using Rentzy.Web.Authorization;
+using Rentzy.DAL.Models;
+using Rentzy.DAL.Repository;
+using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace RentzyWeb.Controllers
 {
-    [AuthorizeRole("Tenant")] // Only Tenants can access this controller
-
+    [AuthorizeRole("Tenant")]
     public class TenantController : Controller
     {
         private readonly PaymentNotificationService _notifService;
-        private readonly TenantPaymentService _Service;
+        private readonly TenantPaymentService _paymentService;
+        private readonly IRentalRequestRepository _rentalRequestRepo;
+        private readonly IPropertyRepository _propertyRepo;
 
-        public TenantController(PaymentNotificationService notifService, TenantPaymentService service)
+        public TenantController(
+            PaymentNotificationService notifService,
+            TenantPaymentService paymentService,
+            IRentalRequestRepository rentalRequestRepo,
+            IPropertyRepository propertyRepo)
         {
             _notifService = notifService;
-            _Service = service;
+            _paymentService = paymentService;
+            _rentalRequestRepo = rentalRequestRepo;
+            _propertyRepo = propertyRepo;
         }
 
-        // Dashboard action you already have
-        //[HttpGet]
-        //public IActionResult DashboardStats()
-        //{
-        //    var userName = HttpContext.Session.GetString("UserName");
-        //    var userEmail = HttpContext.Session.GetString("UserEmail");
-
-        //    ViewBag.UserName = userName;
-        //    ViewBag.UserEmail = userEmail;
-
-        //    return View();
-
-        //}
+        // GET: Tenant/Dashboard
         [HttpGet]
         public async Task<IActionResult> Dashboard()
         {
             var tenantId = HttpContext.Session.GetInt32("UserId");
             if (tenantId == null) return RedirectToAction("Login", "Account");
 
-            var rentedPropertiesCount = await _Service.GetRentedPropertiesCountAsync(tenantId.Value);
-            var activeContractsCount = await _Service.GetActiveContractsCountAsync(tenantId.Value);
+            var rentedPropertiesCount = await _paymentService.GetRentedPropertiesCountAsync(tenantId.Value);
+            var activeContractsCount = await _paymentService.GetActiveContractsCountAsync(tenantId.Value);
 
             ViewBag.UserName = HttpContext.Session.GetString("UserName");
             ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
@@ -49,7 +47,7 @@ namespace RentzyWeb.Controllers
             return View();
         }
 
-        // ✅ This is the action for payment notifications
+        // GET: Tenant/PaymentNotifications - UPDATED
         public async Task<IActionResult> PaymentNotifications()
         {
             var tenantId = HttpContext.Session.GetInt32("UserId");
@@ -59,44 +57,104 @@ namespace RentzyWeb.Controllers
             return View(notifications);
         }
 
-        // ✅ Open specific notification and redirect to payment
+        // GET: Tenant/OpenNotification/{id} - UPDATED
         public async Task<IActionResult> OpenNotification(int id)
         {
             await _notifService.MarkAsSeenAsync(id);
 
             var tenantId = HttpContext.Session.GetInt32("UserId");
-            var notifications = await _notifService.GetTenantNotificationsAsync(tenantId.Value);
-            var notif = notifications.FirstOrDefault(n => n.Id == id);
-            if (notif == null) return NotFound();
+            var notification = await _notifService.GetNotificationByIdAsync(id);
 
-            return RedirectToAction("Payment", "Booking", new { paymentId = notif.PaymentId });
+            if (notification == null) return NotFound();
+
+            return RedirectToAction("ConfirmPayment", "Booking", new { paymentId = notification.PaymentId });
         }
+
+        // GET: Tenant/PaymentHistory - UPDATED
         [HttpGet]
         public async Task<IActionResult> PaymentHistory()
         {
             var tenantId = HttpContext.Session.GetInt32("UserId");
             if (tenantId == null) return RedirectToAction("Login", "Account");
 
-            var history = await _Service.GetPaidPaymentsAsync(tenantId.Value); // only paid payments
+            var history = await _paymentService.GetPaymentHistoryAsync(tenantId.Value);
             return View(history);
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> Dashboard([FromServices] TenantPaymentService paymentService)
-        //{
-        //    var tenantId = HttpContext.Session.GetInt32("UserId");
-        //    if (tenantId == null) return RedirectToAction("Login", "Account");
+        // GET: Tenant/MyBookings
+        public async Task<IActionResult> MyBookings()
+        {
+            var tenantId = HttpContext.Session.GetInt32("UserId");
+            if (tenantId == null) return RedirectToAction("Login", "Account");
 
-        //    var rentedPropertiesCount = await paymentService.GetRentedPropertiesCountAsync(tenantId.Value);
-        //    var activeContractsCount = await paymentService.GetActiveContractsCountAsync(tenantId.Value);
+            var bookings = await _rentalRequestRepo.GetRequestsForTenantAsync(tenantId.Value);
 
-        //    ViewBag.UserName = HttpContext.Session.GetString("UserName");
-        //    ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail");
-        //    ViewBag.MyPropertiesCount = rentedPropertiesCount;
-        //    ViewBag.ActiveAgreementsCount = activeContractsCount;
+            foreach (var booking in bookings)
+            {
+                if (booking.Property != null)
+                {
+                    var propertyDetails = await _propertyRepo.GetPropertyDetailsAsync(booking.Property.Id);
+                    booking.Property.Images = propertyDetails?.Images;
+                }
+            }
 
-        //    return View();
-        //}
+            return View(bookings);
+        }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelBooking(int requestId)
+        {
+            var tenantId = HttpContext.Session.GetInt32("UserId");
+            if (tenantId == null) return RedirectToAction("Login", "Account");
+
+            var booking = await _rentalRequestRepo.GetRequestByIdAsync(requestId);
+
+            if (booking == null || booking.TenantId != tenantId.Value)
+            {
+                TempData["Error"] = "Booking not found or you don't have permission to cancel this booking.";
+                return RedirectToAction("MyBookings");
+            }
+
+            if (booking.StatusId == 3)
+            {
+                TempData["Error"] = "This booking is already cancelled.";
+                return RedirectToAction("MyBookings");
+            }
+
+            if (booking.StatusId == 4)
+            {
+                TempData["Error"] = "Completed bookings cannot be cancelled.";
+                return RedirectToAction("MyBookings");
+            }
+
+            booking.StatusId = 3;
+            await _rentalRequestRepo.UpdateRequestAsync(booking);
+
+            TempData["Success"] = "Booking cancelled successfully!";
+            return RedirectToAction("MyBookings");
+        }
+
+        public async Task<IActionResult> BookingDetails(int id)
+        {
+            var tenantId = HttpContext.Session.GetInt32("UserId");
+            if (tenantId == null) return RedirectToAction("Login", "Account");
+
+            var booking = await _rentalRequestRepo.GetRequestByIdAsync(id);
+
+            if (booking == null || booking.TenantId != tenantId.Value)
+            {
+                TempData["Error"] = "Booking not found.";
+                return RedirectToAction("MyBookings");
+            }
+
+            if (booking.Property != null)
+            {
+                var propertyDetails = await _propertyRepo.GetPropertyDetailsAsync(booking.Property.Id);
+                booking.Property.Images = propertyDetails?.Images;
+            }
+
+            return View(booking);
+        }
     }
 }
