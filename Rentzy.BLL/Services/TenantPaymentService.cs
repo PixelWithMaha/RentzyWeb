@@ -48,10 +48,10 @@ namespace Rentzy.BLL.Services
             try
             {
                 var payment = await _db.Payments.FindAsync(paymentId);
-                if (payment == null || payment.StatusId == 1) return false; // Already paid
+                if (payment == null || payment.StatusId == 2) return false; // Already paid
 
-                // Update payment status to Paid (StatusId = 1)
-                payment.StatusId = 1;
+                // Update payment status to Paid (StatusId = 2)
+                payment.StatusId = 2; // Paid
                 payment.PaidAt = DateTime.UtcNow;
                 payment.Method = GetPaymentMethodDisplayName(paymentMethod);
 
@@ -63,11 +63,19 @@ namespace Rentzy.BLL.Services
             }
             catch (Exception)
             {
+                // Update status to failed on error
+                var failedPayment = await _db.Payments.FindAsync(paymentId);
+                if (failedPayment != null)
+                {
+                    failedPayment.StatusId = 3; // Failed
+                    await _db.SaveChangesAsync();
+                }
                 return false;
             }
         }
 
         // Get payment history as DTOs - FIXED NULL ISSUE
+        // Get payment history as DTOs - FIXED STATUS ID
         public async Task<List<PaymentHistoryDTO>> GetPaymentHistoryAsync(int tenantId)
         {
             var paidPayments = await _db.Payments
@@ -76,7 +84,7 @@ namespace Rentzy.BLL.Services
                         .ThenInclude(p => p.Landlord)
                 .Include(p => p.Status)
                 .Include(p => p.PaymentMethod)
-                .Where(p => p.Booking.TenantId == tenantId && p.StatusId == 1 && p.PaidAt != null) // Added null check
+                .Where(p => p.Booking.TenantId == tenantId && p.StatusId == 2 && p.PaidAt != null) // StatusId = 2 for Paid
                 .OrderByDescending(p => p.PaidAt)
                 .ToListAsync();
 
@@ -95,7 +103,7 @@ namespace Rentzy.BLL.Services
                     PaymentId = payment.Id,
                     PropertyTitle = property.Title ?? "Unknown Property",
                     Amount = payment.Amount,
-                    PaymentDate = payment.PaidAt.Value, // Now safe because we filtered nulls
+                    PaymentDate = payment.PaidAt.Value,
                     PaymentMethod = payment.Method ?? "Credit Card",
                     Status = "Paid",
                     StartDate = booking.StartDate,
@@ -109,6 +117,7 @@ namespace Rentzy.BLL.Services
 
             return history;
         }
+
 
         // Get receipt data - FIXED NULL ISSUES
         public async Task<ReceiptDTO> GetReceiptAsync(int paymentId)
@@ -156,7 +165,7 @@ namespace Rentzy.BLL.Services
                 .Include(p => p.Booking)
                     .ThenInclude(b => b.Property)
                 .Include(p => p.Status)
-                .Where(p => p.Booking.TenantId == tenantId && p.StatusId == 1) // Paid
+                .Where(p => p.Booking.TenantId == tenantId && p.StatusId == 2) // Paid = 2
                 .OrderByDescending(p => p.PaidAt)
                 .ToListAsync();
         }
@@ -168,10 +177,11 @@ namespace Rentzy.BLL.Services
                 .Include(p => p.Booking)
                     .ThenInclude(b => b.Property)
                 .Include(p => p.Status)
-                .Where(p => p.Booking.TenantId == tenantId && p.StatusId != 1) // Not Paid
+                .Where(p => p.Booking.TenantId == tenantId && p.StatusId == 1) // Pending = 1
                 .OrderByDescending(p => p.Booking.StartDate)
                 .ToListAsync();
         }
+
 
         // Create initial payment when booking is approved + send notification
         public async Task CreateInitialPaymentAsync(int bookingId, decimal amount)
@@ -180,7 +190,7 @@ namespace Rentzy.BLL.Services
             {
                 BookingId = bookingId,
                 Amount = amount,
-                StatusId = 2, // Unpaid/Pending
+                StatusId = 1, // Pending (was 2, now 1)
                 PaidAt = null,
                 Method = "Pending",
                 PaymentMethodId = 1 // Default to Credit Card
@@ -264,7 +274,7 @@ namespace Rentzy.BLL.Services
             var payment = await _db.Payments.FindAsync(paymentId);
             if (payment != null)
             {
-                payment.StatusId = 1; // Paid
+                payment.StatusId = 2; // Paid
                 payment.PaidAt = DateTime.UtcNow;
                 await _db.SaveChangesAsync();
             }
