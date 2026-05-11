@@ -109,19 +109,27 @@ namespace Rentzy.BLL.Services
                 throw new ValidationException("Email and password are required");
             }
 
+            dto.Email = dto.Email.Trim();
+            dto.Password = dto.Password.Trim();
+
+            Console.WriteLine($"[LOGIN ATTEMPT] Email: '{dto.Email}'");
+
             // Get user by email
             var user = await _userRepository.GetUserByEmail(dto.Email);
 
             if (user is NoUser)
             {
-                // Don't reveal if email exists - security best practice
+                Console.WriteLine($"[LOGIN FAILED] User not found in DB for email: '{dto.Email}'");
                 throw new AuthenticationException("Invalid email or password");
             }
 
             // Verify password
-            if (!VerifyPassword(dto.Password, user.PasswordHash))
+            Console.WriteLine($"[LOGIN VERIFY] Checking password against Hash: '{user.PasswordHash}'");
+            bool isValid = VerifyPassword(dto.Password, user.PasswordHash);
+            Console.WriteLine($"[LOGIN RESULT] Password valid: {isValid}");
+            
+            if (!isValid)
             {
-                // Wrong password
                 throw new AuthenticationException("Invalid email or password");
             }
 

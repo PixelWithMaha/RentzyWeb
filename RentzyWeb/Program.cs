@@ -129,32 +129,48 @@ using (var scope = app.Services.CreateScope())
             bool modified = false;
 
             // ==========================================
-            // DIAGNOSTIC RE-SEED: Absolute Force
+            // SEEDING CORE DATA
             // ==========================================
             context.Database.OpenConnection();
             
             try 
             {
-                // Force wipe
-                context.Database.ExecuteSqlRaw("DELETE FROM ApprovalStatus;");
-                context.Database.ExecuteSqlRaw("DBCC CHECKIDENT ('ApprovalStatus', RESEED, 0);");
-                
-                // Force insert
-                context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT ApprovalStatus ON;");
-                context.Database.ExecuteSqlRaw("INSERT INTO ApprovalStatus (Id, Name) VALUES (1, 'Pending'), (2, 'Approved'), (3, 'Rejected'), (4, 'Cancelled');");
-                context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT ApprovalStatus OFF;");
-                
-                // Verify
-                var check = context.ApprovalStatuses.ToList();
-                Console.WriteLine(">>> CRITICAL DIAGNOSTIC: ApprovalStatus table contents:");
-                foreach(var item in check)
+                // Verify Admin User
+                var existingAdmin = context.Users.FirstOrDefault(u => u.Email == "admin@rentzy.com");
+                if (existingAdmin == null)
                 {
-                    Console.WriteLine($"    ID: {item.Id}, Name: {item.Name}");
+                    Console.WriteLine(">>> CREATING NEW ADMIN USER...");
+                    var adminUser = new Rentzy.DAL.Models.Admin
+                    {
+                        FirstName = "System",
+                        LastName = "Admin",
+                        Email = "admin@rentzy.com",
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!", 8),
+                        Phone = "0000000000",
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    context.Users.Add(adminUser);
+                    context.SaveChanges();
+                    Console.WriteLine(">>> Default Admin user created successfully (admin@rentzy.com / Admin123!).");
+                    existingAdmin = adminUser;
                 }
+                else
+                {
+                    Console.WriteLine(">>> ADMIN USER DETECTED. Resetting password hash to confirm match...");
+                    existingAdmin.PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!", 8);
+                    context.SaveChanges();
+                    Console.WriteLine(">>> Admin password hash forcibly synchronized.");
+                }
+
+                // DIAGNOSTIC CHECK
+                Console.WriteLine($">>> DIAGNOSTIC: Admin Email in DB: '{existingAdmin.Email}'");
+                Console.WriteLine($">>> DIAGNOSTIC: Admin Hash in DB: '{existingAdmin.PasswordHash}'");
+                bool isValid = BCrypt.Net.BCrypt.Verify("Admin123!", existingAdmin.PasswordHash);
+                Console.WriteLine($">>> DIAGNOSTIC: Verify 'Admin123!' against DB hash: {isValid}");
             } 
             catch (Exception ex)
             {
-                Console.WriteLine($">>> ERROR FORCE SEEDING: {ex.Message}");
+                Console.WriteLine($">>> ERROR INITIALIZING ADMIN: {ex.Message}");
             }
             finally
             {
