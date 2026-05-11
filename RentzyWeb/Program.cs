@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.Configuration;
 using Rentzy.BLL.Services;
 using Rentzy.BLL.Services.ApprovalServices;
@@ -112,5 +112,60 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// ==========================================
+//  AUTO-SEEDER: Ensure lookup data exists
+// ==========================================
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<RentzyDBContext>();
+        var dbCreated = context.Database.CanConnect();
+        
+        if (dbCreated)
+        {
+            bool modified = false;
+
+            // ==========================================
+            // DIAGNOSTIC RE-SEED: Absolute Force
+            // ==========================================
+            context.Database.OpenConnection();
+            
+            try 
+            {
+                // Force wipe
+                context.Database.ExecuteSqlRaw("DELETE FROM ApprovalStatus;");
+                context.Database.ExecuteSqlRaw("DBCC CHECKIDENT ('ApprovalStatus', RESEED, 0);");
+                
+                // Force insert
+                context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT ApprovalStatus ON;");
+                context.Database.ExecuteSqlRaw("INSERT INTO ApprovalStatus (Id, Name) VALUES (1, 'Pending'), (2, 'Approved'), (3, 'Rejected'), (4, 'Cancelled');");
+                context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT ApprovalStatus OFF;");
+                
+                // Verify
+                var check = context.ApprovalStatuses.ToList();
+                Console.WriteLine(">>> CRITICAL DIAGNOSTIC: ApprovalStatus table contents:");
+                foreach(var item in check)
+                {
+                    Console.WriteLine($"    ID: {item.Id}, Name: {item.Name}");
+                }
+            } 
+            catch (Exception ex)
+            {
+                Console.WriteLine($">>> ERROR FORCE SEEDING: {ex.Message}");
+            }
+            finally
+            {
+                context.Database.CloseConnection();
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($">>> Warning: Failed to initialize lookup seeds on startup: {ex.Message}");
+    }
+}
 
 app.Run();

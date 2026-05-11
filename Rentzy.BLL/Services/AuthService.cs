@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.DTOs;
 using Rentzy.BLL.Exceptions;
 using Rentzy.BLL.Factory;
@@ -83,7 +83,21 @@ namespace Rentzy.BLL.Services
             }
             catch (DbUpdateException ex)
             {
+                Console.WriteLine($"CRITICAL DB ERROR IN REGISTRATION: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"INNER EXCEPTION: {ex.InnerException.Message}");
+                }
                 throw new InvalidOperationException("Unable to complete registration. Please try again later.", ex);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"UNEXPECTED ERROR IN REGISTRATION: {ex.GetType().Name} - {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"INNER EXCEPTION: {ex.InnerException.Message}");
+                }
+                throw;
             }
         }
 
