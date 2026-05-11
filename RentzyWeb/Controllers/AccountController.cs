@@ -38,7 +38,7 @@ namespace Rentzy.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(model); // ✅ Return ViewModel
+                return View(model); 
             }
 
             try
@@ -67,7 +67,7 @@ namespace Rentzy.Web.Controllers
             catch (BusinessException ex)
             {
                 ModelState.AddModelError("", ex.Message);
-                return View(model); // ✅ Return ViewModel
+                return View(model); 
             }
             catch (ValidationException ex)
             {
@@ -81,7 +81,6 @@ namespace Rentzy.Web.Controllers
             }
         }
 
-        // ✅ LOGIN - Use ViewModel (Already correct!)
         [HttpGet]
         public IActionResult Login()
         {
@@ -90,7 +89,7 @@ namespace Rentzy.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model) // ✅ ViewModel
+        public async Task<IActionResult> Login(LoginViewModel model) 
         {
             if (!ModelState.IsValid)
             {
@@ -125,7 +124,7 @@ namespace Rentzy.Web.Controllers
                 return userDto.UserType switch
                 {
                     "Admin" => RedirectToAction("Dashboard", "Admin"),
-                    "Landlord" => RedirectToAction("Dashboard", "Landlord"), // Will redirect to PendingApproval if not verified
+                    "Landlord" => RedirectToAction("Dashboard", "Landlord"), 
                     "Tenant" => RedirectToAction("Dashboard", "Tenant"),
                     _ => RedirectToAction("Index", "Home")
                 };
@@ -142,13 +141,11 @@ namespace Rentzy.Web.Controllers
             }
             catch (Exception ex)
             {
-                // Temporary debugging
                 ModelState.AddModelError("", $"Error: {ex.Message}");
                 return View(model);
             }
         }
 
-        // ✅ LOGOUT - No parameters needed
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Logout()
@@ -158,7 +155,6 @@ namespace Rentzy.Web.Controllers
             return RedirectToAction("Login");
         }
 
-        // ✅ PROFILE - No parameters (just display)
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
@@ -173,7 +169,7 @@ namespace Rentzy.Web.Controllers
             try
             {
                 var userDto = await _authService.GetUserByIdAsync(userId.Value);
-                return View(userDto); // ✅ Can pass DTO to view for display only
+                return View(userDto);
             }
             catch (NotFoundException ex)
             {
@@ -182,7 +178,6 @@ namespace Rentzy.Web.Controllers
             }
         }
 
-        // ✅ EDIT PROFILE - Use ViewModel
         [HttpGet]
         public async Task<IActionResult> EditProfile()
         {
@@ -198,7 +193,7 @@ namespace Rentzy.Web.Controllers
             {
                 var userDto = await _authService.GetUserByIdAsync(userId.Value);
 
-                var model = new UpdateProfileViewModel // ✅ ViewModel
+                var model = new UpdateProfileViewModel 
                 {
                     FirstName = userDto.FirstName,
                     LastName = userDto.LastName,
@@ -216,7 +211,7 @@ namespace Rentzy.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditProfile(UpdateProfileViewModel model) // ✅ ViewModel
+        public async Task<IActionResult> EditProfile(UpdateProfileViewModel model) 
         {
             var userId = HttpContext.Session.GetInt32("UserId");
 
@@ -233,7 +228,6 @@ namespace Rentzy.Web.Controllers
 
             try
             {
-                // Convert ViewModel → DTO
                 var dto = new UpdateProfileDto
                 {
                     FirstName = model.FirstName,
@@ -260,14 +254,11 @@ namespace Rentzy.Web.Controllers
             }
         }
 
-        // ✅ FORGOT PASSWORD - Use ViewModel
         [HttpGet]
         public IActionResult ForgotPassword()
         {
             return View();
         }
-
-        // POST: /Account/ForgotPassword
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(forgotPasswordDTO dto)
@@ -277,7 +268,6 @@ namespace Rentzy.Web.Controllers
                 var viewModel = new ForgotPasswordViewModel
                 {
                     Email = dto.Email
-                    // map other properties if needed
                 };
                 return View(viewModel);
             }
@@ -309,7 +299,6 @@ namespace Rentzy.Web.Controllers
             return View();
         }
 
-        // ✅ RESET PASSWORD - Use ViewModel
         [HttpGet]
         public IActionResult ResetPassword(string token, string email)
         {
@@ -339,7 +328,6 @@ namespace Rentzy.Web.Controllers
 
             try
             {
-                // Convert ViewModel → DTO
                 var dto = new resetPasswordDTO
                 {
                     Token = model.Token,
@@ -363,7 +351,6 @@ namespace Rentzy.Web.Controllers
             }
         }
 
-        // GET: /Account/ChangePassword
         [HttpGet]
         public IActionResult ChangePassword()
         {
@@ -378,7 +365,6 @@ namespace Rentzy.Web.Controllers
             return View();
         }
 
-        // POST: /Account/ChangePassword
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
@@ -398,7 +384,6 @@ namespace Rentzy.Web.Controllers
 
             try
             {
-                // Convert ViewModel → DTO
                 var dto = new ChangePasswordDTO
                 {
                     UserId = userId.Value,

@@ -134,7 +134,7 @@ namespace Rentzy.Web.Controllers
                 Email = user.Email,
                 PhoneNumber = user.Phone
             };
-            return View(vm); // yahan Edit.cshtml load hogi
+            return View(vm); 
         }
 
         [HttpPost]

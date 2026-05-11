@@ -107,9 +107,10 @@ namespace Rentzy.BLL.Services
         // Helper method to determine payment status
         private string GetPaymentStatus(Payment payment)
         {
-            if (payment.StatusId == 1) return "Paid";
-            if (DateTime.Now > payment.Booking.StartDate.AddDays(-7) && payment.StatusId != 1) return "Overdue";
-            return "Pending";
+            if (payment.StatusId == 2) return "Paid"; // 2 = Paid
+            if (payment.StatusId == 3) return "Failed"; // 3 = Failed
+            if (DateTime.Now > payment.Booking.StartDate.AddDays(-7) && payment.StatusId == 1) return "Overdue";
+            return "Pending"; // 1 = Pending
         }
 
         // Keep existing method for compatibility
