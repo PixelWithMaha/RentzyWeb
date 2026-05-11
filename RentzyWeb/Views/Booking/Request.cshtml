@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Request Property";
     var bookedDatesJson = Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.BookedDates ?? new List<string>());
 }
@@ -6,7 +6,8 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
     .calendar-section {
-        background: white;
+        background: var(--theme-card-bg);
+        border: 1px solid var(--theme-border);
         border-radius: 15px;
         padding: 2rem;
         box-shadow: 0 5px 25px rgba(0,0,0,0.1);
@@ -83,7 +84,7 @@
     }
 
     .flatpickr-weekdays {
-        background: #f8f9fa !important;
+        background: var(--theme-hero-bg) !important;
         padding: 10px 0 !important;
     }
 
@@ -138,7 +139,7 @@
 
     .form-label {
         font-weight: 600;
-        color: #2c3e50;
+        color: var(--theme-text);
         margin-bottom: 0.5rem;
     }
 
@@ -167,7 +168,7 @@
     <h3 class="text-center mb-4">Select Your Dates</h3>
 
     <!-- Debug Info -->
-    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 14px;">
+    <div style="background: var(--theme-hero-bg); color: var(--theme-text); padding: 15px; border: 1px solid var(--theme-border); border-radius: 10px; margin-bottom: 20px; font-size: 14px;">
         <h5>Calendar Status:</h5>
         <p><strong>Property:</strong> @ViewBag.PropertyTitle</p>
         <p><strong>Booked Dates Count:</strong> <span id="bookedCount">@(ViewBag.BookedDates?.Count ?? 0)</span></p>
