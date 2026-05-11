@@ -65,6 +65,25 @@ body {
     box-shadow: 0 0 0 0.1rem var(--theme-bg), 0 0 0 0.25rem #258cfb;
 }
 
+/* Global Component Standardizations for System Safety */
+.card {
+    background-color: var(--theme-card-bg) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--theme-text);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.form-control, .form-select {
+    background-color: var(--theme-input-bg);
+    border-color: var(--theme-input-border);
+    color: var(--theme-text);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--theme-input-bg);
+    color: var(--theme-text);
+}
+
 
 /* ----------------------------------------------------------------------------------
    2. CUSTOM RENTZY HERO STYLES (Previously added)

@@ -1,4 +1,4 @@
-﻿@using Rentzy.Web.Models
+@using Rentzy.Web.Models
 @model LoginViewModel
 
 @{
@@ -12,6 +12,8 @@
     /* -------------------------------------- */
 
     .login-card {
+        background: var(--theme-card-bg);
+        border: 1px solid var(--theme-border) !important;
         border-radius: 1.5rem;
         box-shadow: var(--theme-shadow);
         padding: 2rem !important;
@@ -87,7 +89,8 @@
 
 </style>
 
-<div class="container">
+<div class="d-flex justify-content-center py-3" style="background-color: var(--theme-bg); width: 100%;">
+    <div class="container">
     <div class="row justify-content-center mt-4">
         <div class="col-md-6">
             <div class="card shadow-sm border-0 login-card">
@@ -173,6 +176,7 @@
                 </p>
             </div>
         </div>
+    </div>
     </div>
 </div>
 
