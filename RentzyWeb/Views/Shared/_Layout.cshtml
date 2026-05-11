@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Http
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +6,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Rentzy</title>
 
+    <!-- Theme Initialize Script (Immediate) -->
+    <script>
+        (function () {
+            const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Extend Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        themeBase: 'var(--theme-bg)',
+                        themeNav: 'var(--theme-nav-bg)',
+                        themeCard: 'var(--theme-card-bg)',
+                        themeText: 'var(--theme-text)',
+                        themeMuted: 'var(--theme-text-muted)',
+                        themeBorder: 'var(--theme-border)'
+                    }
+                }
+            }
+        }
+    </script>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -37,42 +65,43 @@
 
         /* --- MODERN NAVBAR STYLING (REVISED) --- */
         .navbar-modern {
-            background-color: white;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06); /* Lighter shadow */
-            padding: 0.75rem 0; /* REDUCED THICKNESS: 1.5rem -> 0.75rem */
-            position: sticky; /* Helps keep content below visible */
+            background-color: var(--theme-nav-bg);
+            border-bottom: 1px solid var(--theme-nav-border);
+            box-shadow: 0 1px 4px var(--theme-nav-border);
+            padding: 0.75rem 0;
+            position: sticky;
             top: 0;
             z-index: 1030;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .navbar-brand-modern {
-            font-size: 1.8rem; /* Slightly smaller logo text */
+            font-size: 1.8rem;
             font-weight: 700;
             color: #3B82F6;
             text-decoration: none;
-            /* Removed cursor and pointer-events so it is clickable */
         }
 
         .nav-link-modern {
-            color: #4B5563;
+            color: var(--theme-text-muted);
             font-weight: 500;
-            padding: 0.4rem 0.8rem; /* Reduced link padding */
+            padding: 0.4rem 0.8rem;
             text-decoration: none;
             transition: all 0.3s;
             border-radius: 0.5rem;
-            font-size: 1rem; /* Slightly smaller link text */
+            font-size: 1rem;
         }
 
             .nav-link-modern:hover {
                 color: #3B82F6;
-                background-color: #EFF6FF;
+                background-color: rgba(59, 130, 246, 0.1); /* Dynamic transparency */
             }
 
         .btn-login-modern, .btn-register-modern {
             padding: 0.5rem 1.25rem;
             font-size: 1rem;
             line-height: 1.5;
-            border-radius: 0.75rem; /* Increased border-radius for more rounded corners */
+            border-radius: 0.75rem;
         }
 
         .btn-login-modern {
@@ -86,13 +115,13 @@
         }
 
             .btn-login-modern:hover {
-                background-color: #EFF6FF;
+                background-color: rgba(59, 130, 246, 0.1);
                 color: #2563EB;
             }
 
         .btn-register-modern {
             background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-            color: white;
+            color: white !important; /* Force white text for dark gradients */
             font-weight: 600;
             border: none;
             box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
@@ -103,10 +132,33 @@
 
             .btn-register-modern:hover {
                 background: linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);
-                transform: none; /* Removed translateY for simpler hover */
                 box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
-                color: white;
             }
+
+        /* --- THEME TOGGLE PILL --- */
+        .theme-toggle-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.85rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--theme-border);
+            background: transparent;
+            color: var(--theme-text-muted);
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .theme-toggle-pill:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+            border-color: #3B82F6;
+            color: #3B82F6;
+        }
+
+        .dark-icon, .light-icon { display: none; }
+        [data-bs-theme='dark'] .dark-icon { display: inline-block; }
+        [data-bs-theme='light'] .light-icon { display: inline-block; }
 
 
         /* Fixed Dropdown - No Gap */
@@ -118,24 +170,22 @@
             display: none;
             position: absolute;
             right: 0;
-            top: calc(100% + 2px); /* Small gap but still hoverable */
-            background: white;
-            min-width: 200px; /* Slightly smaller dropdown */
+            top: calc(100% + 2px);
+            background: var(--theme-card-bg);
+            min-width: 200px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 1px solid var(--theme-border);
             border-radius: 0.5rem;
             z-index: 1000;
             padding: 0.5rem 0;
+            transition: background-color 0.3s ease;
         }
 
-
-            /* Show dropdown on hover - covers the gap */
             .user-dropdown:hover .dropdown-menu-custom,
             .dropdown-menu-custom:hover {
                 display: block;
             }
 
-
-        /* Add invisible bridge to prevent gap issues */
         .user-dropdown::after {
             content: '';
             position: absolute;
@@ -148,33 +198,38 @@
 
         .dropdown-item-custom {
             display: block;
-            padding: 0.6rem 1rem; /* Reduced dropdown item padding */
-            color: #4B5563;
+            padding: 0.6rem 1rem;
+            color: var(--theme-text-muted);
             text-decoration: none;
             transition: all 0.2s;
             font-size: 0.95rem;
         }
 
             .dropdown-item-custom:hover {
-                background-color: #EFF6FF;
+                background-color: rgba(59, 130, 246, 0.1);
                 color: #3B82F6;
             }
 
         .dropdown-divider-custom {
             height: 1px;
-            background-color: #E5E7EB;
+            background-color: var(--theme-border);
             margin: 0.5rem 0;
         }
 
         .user-badge {
             display: inline-block;
-            padding: 0.2rem 0.6rem; /* Reduced badge padding */
+            padding: 0.2rem 0.6rem;
             font-size: 0.7rem;
             font-weight: 600;
             border-radius: 1rem;
             background-color: #DBEAFE;
             color: #1E40AF;
         }
+        
+        /* Simple overrides for common Bootstrap components to integrate with CSS variables cleanly */
+        .alert { background-color: var(--theme-card-bg); border-color: var(--theme-border); color: var(--theme-text); }
+        .alert-success { border-left: 4px solid #10b981; }
+        .alert-danger { border-left: 4px solid #ef4444; }
 
 
         /* Footer */
@@ -213,6 +268,11 @@
                     </div>
 
                     <div class="d-flex align-items-center" style="gap: 1rem;">
+                        <!-- Theme Toggle Button -->
+                        <button onclick="toggleTheme()" class="theme-toggle-pill" aria-label="Toggle theme">
+                            <span class="light-icon"><i class="fas fa-sun me-2"></i>Light</span>
+                            <span class="dark-icon"><i class="fas fa-moon me-2"></i>Dark</span>
+                        </button>
                         @if (Context.Session.GetInt32("UserId") != null)
                         {
                             var userType = Context.Session.GetString("UserType");
@@ -363,6 +423,24 @@
                     });
             }
         });
+
+        // --- Dynamic Theme Toggle Logic ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            // 1. Apply to DOM
+            html.setAttribute('data-bs-theme', newTheme);
+            if (newTheme === 'dark') {
+                html.classList.add('dark');
+            } else {
+                html.classList.remove('dark');
+            }
+
+            // 2. Persist in localStorage
+            localStorage.setItem('theme', newTheme);
+        }
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

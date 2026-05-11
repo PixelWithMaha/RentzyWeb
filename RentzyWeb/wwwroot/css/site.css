@@ -1,4 +1,30 @@
 /* ----------------------------------------------------------------------------------
+   0. THEME VARIABLES (Modular & Theme-Aware)
+---------------------------------------------------------------------------------- */
+:root {
+    --theme-bg: #ffffff;
+    --theme-text: #1f2937;
+    --theme-text-muted: #6b7280;
+    --theme-nav-bg: #ffffff;
+    --theme-nav-border: rgba(0,0,0,0.06);
+    --theme-card-bg: #ffffff;
+    --theme-hero-bg: #f7f9fc;
+    --theme-border: #e5e7eb;
+}
+
+/* Specific dark overrides - aligned with professional slate palette */
+[data-bs-theme='dark'] {
+    --theme-bg: #0f172a; /* Slate-900 */
+    --theme-text: #f1f5f9; /* Slate-100 */
+    --theme-text-muted: #94a3b8; /* Slate-400 */
+    --theme-nav-bg: #1e293b; /* Slate-800 */
+    --theme-nav-border: rgba(255,255,255,0.06);
+    --theme-card-bg: #1e293b; /* Slate-800 */
+    --theme-hero-bg: #020617; /* Slate-950 */
+    --theme-border: #334155; /* Slate-700 */
+}
+
+/* ----------------------------------------------------------------------------------
    1. GLOBAL LAYOUT AND TYPOGRAPHY (From default template)
 ---------------------------------------------------------------------------------- */
 
@@ -19,11 +45,14 @@ html {
 body {
     /* Creates space at the bottom for the fixed-height footer (60px) */
     margin-bottom: 30px;
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Custom focus styles to match Bootstrap defaults */
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem var(--theme-bg), 0 0 0 0.25rem #258cfb;
 }
 
 
@@ -32,9 +61,10 @@ body {
 ---------------------------------------------------------------------------------- */
 
 .hero-section {
-    background-color: #f7f9fc;
+    background-color: var(--theme-hero-bg);
     padding-top: 2rem;
     padding-bottom: 4rem;
+    transition: background-color 0.2s ease;
 }
 
 .hero-content {
