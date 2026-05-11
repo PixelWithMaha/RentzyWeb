@@ -10,6 +10,11 @@
     --theme-card-bg: #ffffff;
     --theme-hero-bg: #f7f9fc;
     --theme-border: #e5e7eb;
+    --theme-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+    --theme-shadow-lg: 0 15px 40px rgba(0, 0, 0, 0.15);
+    --theme-input-bg: #ffffff;
+    --theme-input-border: #e9ecef;
+    --theme-muted-bg: #f3f4f6;
 }
 
 /* Specific dark overrides - aligned with professional slate palette */
@@ -22,6 +27,11 @@
     --theme-card-bg: #1e293b; /* Slate-800 */
     --theme-hero-bg: #020617; /* Slate-950 */
     --theme-border: #334155; /* Slate-700 */
+    --theme-shadow: 0 5px 25px rgba(0, 0, 0, 0.35);
+    --theme-shadow-lg: 0 15px 40px rgba(0, 0, 0, 0.55);
+    --theme-input-bg: #0f172a; /* Darker Slate */
+    --theme-input-border: #334155;
+    --theme-muted-bg: #1e293b;
 }
 
 /* ----------------------------------------------------------------------------------

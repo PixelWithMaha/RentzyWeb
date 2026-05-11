@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Rentzy.BLL.DTOs.PropertyDTO>
+@model IEnumerable<Rentzy.BLL.DTOs.PropertyDTO>
 
 <style>
     .properties-grid {
@@ -9,9 +9,9 @@
     }
 
     .property-card {
-        background: white;
+        background: var(--theme-card-bg);
         border-radius: 20px;
-        box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+        box-shadow: var(--theme-shadow);
         transition: all 0.3s ease;
         border: none;
         overflow: hidden;
@@ -20,7 +20,7 @@
 
         .property-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            box-shadow: var(--theme-shadow-lg);
         }
 
     .property-image {
@@ -48,7 +48,7 @@
     .property-title {
         font-size: 1.3rem;
         font-weight: 700;
-        color: #2c3e50;
+        color: var(--theme-text);
         margin-bottom: 0.5rem;
         line-height: 1.3;
     }
@@ -62,7 +62,7 @@
 
     .property-price-period {
         font-size: 0.9rem;
-        color: #6c757d;
+        color: var(--theme-text-muted);
         font-weight: 500;
     }
 
@@ -72,8 +72,8 @@
         align-items: center;
         margin: 1.5rem 0;
         padding: 1rem 0;
-        border-top: 1px solid #e9ecef;
-        border-bottom: 1px solid #e9ecef;
+        border-top: 1px solid var(--theme-border);
+        border-bottom: 1px solid var(--theme-border);
     }
 
     .detail-item {
@@ -84,7 +84,7 @@
     .detail-label {
         display: block;
         font-size: 0.8rem;
-        color: #6c757d;
+        color: var(--theme-text-muted);
         text-transform: uppercase;
         letter-spacing: 0.5px;
         margin-bottom: 0.25rem;
@@ -94,7 +94,7 @@
         display: block;
         font-size: 1rem;
         font-weight: 600;
-        color: #2c3e50;
+        color: var(--theme-text);
     }
 
     .landlord-info {
@@ -119,12 +119,12 @@
 
     .landlord-details h6 {
         margin: 0;
-        color: #2c3e50;
+        color: var(--theme-text);
         font-weight: 600;
     }
 
     .landlord-details small {
-        color: #6c757d;
+        color: var(--theme-text-muted);
     }
 
     .badge-available {
@@ -172,10 +172,10 @@
         }
 
     .search-section {
-        background: white;
+        background: var(--theme-card-bg);
         border-radius: 20px;
         padding: 2rem;
-        box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+        box-shadow: var(--theme-shadow);
         margin-bottom: 2rem;
     }
 
@@ -191,12 +191,14 @@
 
     .form-label {
         font-weight: 600;
-        color: #2c3e50;
+        color: var(--theme-text);
         margin-bottom: 0.5rem;
     }
 
     .form-control {
-        border: 2px solid #e9ecef;
+        background-color: var(--theme-input-bg);
+        color: var(--theme-text);
+        border: 2px solid var(--theme-input-border);
         border-radius: 12px;
         padding: 0.75rem 1rem;
         font-size: 1rem;
@@ -246,21 +248,21 @@
     }
 
     .properties-count {
-        background: white;
+        background: var(--theme-card-bg);
         border-radius: 15px;
         padding: 1rem 1.5rem;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
         font-weight: 600;
-        color: #2c3e50;
+        color: var(--theme-text);
         margin-top: 1rem;
     }
 
     .no-properties {
         text-align: center;
         padding: 4rem 2rem;
-        color: #6c757d;
+        color: var(--theme-text-muted);
     }
 
         .no-properties i {
