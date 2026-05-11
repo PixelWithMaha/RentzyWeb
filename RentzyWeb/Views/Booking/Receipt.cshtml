@@ -1,4 +1,4 @@
-﻿@model Rentzy.BLL.DTOs.ReceiptDTO
+@model Rentzy.BLL.DTOs.ReceiptDTO
 @{
     ViewData["Title"] = "Payment Receipt";
 }
@@ -7,7 +7,8 @@
     .receipt-container {
         max-width: 800px;
         margin: 0 auto;
-        background: white;
+        background: var(--theme-card-bg);
+        border: 1px solid var(--theme-border);
         border-radius: 15px;
         box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         overflow: hidden;
@@ -27,7 +28,7 @@
     .receipt-section {
         margin-bottom: 2rem;
         padding-bottom: 1.5rem;
-        border-bottom: 2px solid #f8f9fa;
+        border-bottom: 2px solid var(--theme-border);
     }
 
     .receipt-row {
@@ -39,12 +40,12 @@
 
     .receipt-label {
         font-weight: 600;
-        color: #6c757d;
+        color: var(--theme-text-muted);
     }
 
     .receipt-value {
         font-weight: 600;
-        color: #2c3e50;
+        color: var(--theme-text);
     }
 
     .amount-highlight {

@@ -6,7 +6,7 @@
 
 <style>
     .admin-notes-box {
-        background: white;
+        background: var(--theme-card-bg);
         border-radius: 0.75rem;
         padding: 1.5rem;
         border-left: 4px solid #EF4444;
@@ -21,7 +21,7 @@
             @if (Model?.ApprovalStatusId == 3) 
             {
                 <!-- Rejection Card -->
-                <div class="card shadow-lg border-0 text-center border-danger">
+                <div class="card shadow-sm border-0 text-center border-danger">
                     <div class="card-body p-5">
 
                         <!-- Icon -->
@@ -81,7 +81,7 @@
             else  
             {
                 <!-- Pending Approval Card -->
-                <div class="card shadow-lg border-0 text-center">
+                <div class="card shadow-sm border-0 text-center">
                     <div class="card-body p-5">
 
                         <!-- Icon -->

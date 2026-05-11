@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Landlord Dashboard";
 }
 
@@ -33,7 +33,7 @@
     <!-- LEFT: Tall Bar Chart -->
     <div class="col-lg-8 col-12">
         <div class="card shadow-sm border-0 rounded-3 p-3 reports-card-compact h-100">
-            <h6 class="card-title text-center mb-2 text-dark">Bookings per Month</h6>
+            <h6 class="card-title text-center mb-2">Bookings per Month</h6>
 
             <!-- Height = 360px so it matches the two right charts combined -->
             <div style="height:360px;">
@@ -47,7 +47,7 @@
 
         <!-- Top: Pie Chart -->
         <div class="card shadow-sm border-0 rounded-3 p-3 reports-card-compact mb-3">
-            <h6 class="card-title text-center mb-2 text-dark">Bookings by Status</h6>
+            <h6 class="card-title text-center mb-2">Bookings by Status</h6>
 
             <!-- Height = 180px -->
             <div style="height:180px;">
@@ -57,7 +57,7 @@
 
         <!-- Bottom: Line Chart -->
         <div class="card shadow-sm border-0 rounded-3 p-3 reports-card-compact">
-            <h6 class="card-title text-center mb-2 text-dark">Revenue per Month</h6>
+            <h6 class="card-title text-center mb-2">Revenue per Month</h6>
 
             <!-- Height = 180px -->
             <div style="height:180px;">
@@ -82,27 +82,27 @@
     <!-- QUICK STATS (original visuals restored) -->
     <div class="row g-4 mb-4">
         <div class="col-md-3 col-6">
-            <div class="card stats-card shadow-sm border-0 rounded-3 text-center p-3 h-100 bg-white">
+            <div class="card stats-card shadow-sm border-0 rounded-3 text-center p-3 h-100">
                 <i class="fas fa-home text-primary mb-2" style="font-size:2.5rem;"></i>
-                <h5 class="text-dark">Total Properties</h5>
-                <h3 class="text-dark">@ViewBag.TotalProperties</h3>
+                <h5>Total Properties</h5>
+                <h3>@ViewBag.TotalProperties</h3>
             </div>
         </div>
 
         <div class="col-md-3 col-6">
-            <div class="card stats-card shadow-sm border-0 rounded-3 text-center p-3 h-100 bg-white">
+            <div class="card stats-card shadow-sm border-0 rounded-3 text-center p-3 h-100">
                 <i class="fas fa-users text-success mb-2" style="font-size:2.5rem;"></i>
-                <h5 class="text-dark">Active Tenants</h5>
-                <h3 class="text-dark">@ViewBag.ActiveTenants</h3>
+                <h5>Active Tenants</h5>
+                <h3>@ViewBag.ActiveTenants</h3>
             </div>
         </div>
 
         <div class="col-md-3 col-6">
             <a asp-controller="Landlord" asp-action="TenantRequests" class="text-decoration-none">
-                <div class="card stats-card shadow-sm border-0 rounded-3 text-center p-3 h-100 bg-white position-relative">
+                <div class="card stats-card shadow-sm border-0 rounded-3 text-center p-3 h-100 position-relative">
                     <i class="fas fa-clipboard-list text-info mb-2" style="font-size:2.5rem;"></i>
-                    <h5 class="text-dark">Pending Requests</h5>
-                    <h3 class="text-dark">@ViewBag.PendingRequests</h3>
+                    <h5>Pending Requests</h5>
+                    <h3>@ViewBag.PendingRequests</h3>
                     @if ((ViewBag.PendingRequests ?? 0) > 0)
                     {
                             <span class="pending-dot"></span>
@@ -112,10 +112,10 @@
         </div>
 
         <div class="col-md-3 col-6">
-            <div class="card stats-card shadow-sm border-0 rounded-3 text-center p-3 h-100 bg-white">
+            <div class="card stats-card shadow-sm border-0 rounded-3 text-center p-3 h-100">
                 <i class="fas fa-dollar-sign text-warning mb-2" style="font-size:2.5rem;"></i>
-                <h5 class="text-dark">Monthly Revenue</h5>
-                <h3 class="text-dark">$@ViewBag.MonthlyRevenue</h3>
+                <h5>Monthly Revenue</h5>
+                <h3>$@ViewBag.MonthlyRevenue</h3>
             </div>
         </div>
     </div>
@@ -191,7 +191,7 @@
                 var imageUrl = images.Any() ? images.First().ImageUrl : "/images/default-property.jpg";
 
                         <div class="col-md-4 mb-4">
-                                    <div class="card shadow-sm border rounded-3 hover-shadow h-100" style="background:#eaf6ff;">
+                                    <div class="card shadow-sm border rounded-3 hover-shadow h-100" style="background:var(--theme-card-bg); border: 1px solid var(--theme-border);">
                                         <img src="@imageUrl"
              alt="@property.Title"
              style="height:200px; object-fit:cover;
@@ -262,11 +262,13 @@
 
 /* --- 3D Quick Stats Cards --- */
 .stats-card {
-    background: #ffffff;
+    background: var(--theme-card-bg);
+    color: var(--theme-text);
     border-radius: 14px;
     padding: 20px;
     text-align: center;
     transition: all 0.25s ease-in-out;
+    border: 1px solid var(--theme-border);
     
     /* Stronger 3D shadow base */
     box-shadow:
@@ -312,7 +314,9 @@
 /* Header ribbon */
 .header-ribbon {
     display:inline-block;
-    background:#f6f7fb;
+    background:var(--theme-hero-bg);
+    color: var(--theme-text);
+    border: 1px solid var(--theme-border);
     padding: 8px 14px;
     border-radius: 30px;
     font-weight:600;
@@ -321,7 +325,8 @@
 
 /* Reports card (compact) - keep theme localized so other elements are unaffected */
 .reports-card-compact {
-    background: #eaf6ff;            /* very light blue background */
+    background: var(--theme-card-bg);            /* Dynamic theme bg */
+    border: 1px solid var(--theme-border);
     border-left: 4px solid #3b82f6; /* accent stripe */
     border-radius: 10px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.06);
