@@ -1,4 +1,4 @@
-﻿@using Rentzy.Web.Models
+@using Rentzy.Web.Models
 @model LoginViewModel
 
 @{
@@ -12,8 +12,10 @@
     /* -------------------------------------- */
 
     .login-card {
+        background: var(--theme-card-bg);
+        border: 1px solid var(--theme-border) !important;
         border-radius: 1.5rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        box-shadow: var(--theme-shadow);
         padding: 2rem !important;
     }
 
@@ -26,8 +28,11 @@
     .form-control {
         border-radius: 0.5rem;
         padding: 0.5rem 1rem;
-        border: 1px solid #D1D5DB;
+        border: 1px solid var(--theme-input-border);
         transition: all 0.2s;
+        background-color: var(--theme-input-bg);
+        color: var(--theme-text);
+        border: 1px solid var(--theme-input-border) !important;
     }
 
         .form-control:focus {
@@ -37,7 +42,7 @@
 
     .form-label {
         font-weight: 600;
-        color: #4B5563;
+        color: var(--theme-text);
         margin-bottom: 0.4rem;
     }
 
@@ -68,7 +73,7 @@
         transform: translateY(-50%);
         background: none;
         border: none;
-        color: #6B7280;
+        color: var(--theme-text-muted);
         cursor: pointer;
         padding: 0.25rem 0.5rem;
         transition: color 0.2s;
@@ -84,10 +89,11 @@
 
 </style>
 
-<div class="container">
+<div class="d-flex justify-content-center py-3" style="background-color: var(--theme-bg); width: 100%;">
+    <div class="container">
     <div class="row justify-content-center mt-4">
         <div class="col-md-6">
-            <div class="card shadow-lg border-0 login-card">
+            <div class="card shadow-sm border-0 login-card">
                 <div class="card-body p-4">
 
                     <div class="text-center mb-3">
@@ -170,6 +176,7 @@
                 </p>
             </div>
         </div>
+    </div>
     </div>
 </div>
 

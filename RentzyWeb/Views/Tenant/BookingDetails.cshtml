@@ -1,4 +1,4 @@
-﻿@model Rentzy.DAL.Models.PropertyRentalRequest
+@model Rentzy.DAL.Models.PropertyRentalRequest
 @{
     ViewData["Title"] = "Booking Details";
 }
@@ -92,7 +92,7 @@
                         </div>
                     }
 
-                    <h3 class="fw-bold text-dark mb-3">@Model.Property?.Title</h3>
+                    <h3 class="fw-bold text-body mb-3">@Model.Property?.Title</h3>
                     <p class="text-muted mb-4">@Model.Property?.Description</p>
 
                     <div class="row">
@@ -101,7 +101,7 @@
                                 <i class="fas fa-dollar-sign text-success fa-lg me-3"></i>
                                 <div>
                                     <small class="text-muted d-block">Monthly Rent</small>
-                                    <strong class="text-dark">$@(Model.Property?.MonthlyRent ?? 0)</strong>
+                                    <strong class="text-body">$@(Model.Property?.MonthlyRent ?? 0)</strong>
                                 </div>
                             </div>
                         </div>
@@ -110,7 +110,7 @@
                                 <i class="fas fa-user text-info fa-lg me-3"></i>
                                 <div>
                                     <small class="text-muted d-block">Landlord</small>
-                                    <strong class="text-dark">@Model.Property?.Landlord?.FirstName @Model.Property?.Landlord?.LastName</strong>
+                                    <strong class="text-body">@Model.Property?.Landlord?.FirstName @Model.Property?.Landlord?.LastName</strong>
                                 </div>
                             </div>
                         </div>
@@ -157,7 +157,7 @@
                             <i class="fas fa-calendar-check text-primary fa-lg me-3"></i>
                             <div>
                                 <small class="text-muted d-block">Booking Period</small>
-                                <strong class="text-dark">@Model.StartDate.ToString("MMM dd, yyyy") - @Model.EndDate.ToString("MMM dd, yyyy")</strong>
+                                <strong class="text-body">@Model.StartDate.ToString("MMM dd, yyyy") - @Model.EndDate.ToString("MMM dd, yyyy")</strong>
                             </div>
                         </div>
 
@@ -165,7 +165,7 @@
                             <i class="fas fa-clock text-info fa-lg me-3"></i>
                             <div>
                                 <small class="text-muted d-block">Request Date</small>
-                                <strong class="text-dark">@Model.RequestedAt.ToString("MMM dd, yyyy 'at' hh:mm tt")</strong>
+                                <strong class="text-body">@Model.RequestedAt.ToString("MMM dd, yyyy 'at' hh:mm tt")</strong>
                             </div>
                         </div>
 
@@ -173,7 +173,7 @@
                             <i class="fas fa-map-marker-alt text-warning fa-lg me-3"></i>
                             <div>
                                 <small class="text-muted d-block">Property Location</small>
-                                <strong class="text-dark">@Model.Property?.City?.Name</strong>
+                                <strong class="text-body">@Model.Property?.City?.Name</strong>
                             </div>
                         </div>
 
@@ -181,7 +181,7 @@
                             <i class="fas fa-home text-success fa-lg me-3"></i>
                             <div>
                                 <small class="text-muted d-block">Property Type</small>
-                                <strong class="text-dark">@Model.Property?.PropertyType?.Name</strong>
+                                <strong class="text-body">@Model.Property?.PropertyType?.Name</strong>
                             </div>
                         </div>
                     </div>

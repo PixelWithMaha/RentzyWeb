@@ -1,4 +1,49 @@
 /* ----------------------------------------------------------------------------------
+   0. THEME VARIABLES (Modular & Theme-Aware)
+---------------------------------------------------------------------------------- */
+:root {
+    --theme-bg: #ffffff;
+    --theme-text: #1f2937;
+    --theme-text-muted: #6b7280;
+    --theme-nav-bg: #ffffff;
+    --theme-nav-border: rgba(0,0,0,0.06);
+    --theme-card-bg: #ffffff;
+    --theme-hero-bg: #f7f9fc;
+    --theme-border: #e5e7eb;
+    --theme-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+    --theme-shadow-lg: 0 15px 40px rgba(0, 0, 0, 0.15);
+    --theme-input-bg: #ffffff;
+    --theme-input-border: #e9ecef;
+    --theme-muted-bg: #f3f4f6;
+}
+
+/* Specific dark overrides - aligned with professional slate palette */
+[data-bs-theme='dark'] {
+    --theme-bg: #0f172a; /* Slate-900 */
+    --theme-text: #f1f5f9; /* Slate-100 */
+    --theme-text-muted: #94a3b8; /* Slate-400 */
+    --theme-nav-bg: #1e293b; /* Slate-800 */
+    --theme-nav-border: rgba(255,255,255,0.06);
+    --theme-card-bg: #1e293b; /* Slate-800 */
+    --theme-hero-bg: #020617; /* Slate-950 */
+    --theme-border: #334155; /* Slate-700 */
+    --theme-shadow: 0 5px 25px rgba(0, 0, 0, 0.35);
+    --theme-shadow-lg: 0 15px 40px rgba(0, 0, 0, 0.55);
+    --theme-input-bg: #0f172a; /* Darker Slate */
+    --theme-input-border: #334155;
+    --theme-muted-bg: #1e293b;
+}
+
+/* Force hardcoded light classes to respect dark mode */
+[data-bs-theme='dark'] .bg-white,
+[data-bs-theme='dark'] .bg-light,
+[data-bs-theme='dark'] .table-light {
+    background-color: var(--theme-card-bg) !important;
+    color: var(--theme-text) !important;
+}
+
+
+/* ----------------------------------------------------------------------------------
    1. GLOBAL LAYOUT AND TYPOGRAPHY (From default template)
 ---------------------------------------------------------------------------------- */
 
@@ -19,11 +64,39 @@ html {
 body {
     /* Creates space at the bottom for the fixed-height footer (60px) */
     margin-bottom: 30px;
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Custom focus styles to match Bootstrap defaults */
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem var(--theme-bg), 0 0 0 0.25rem #258cfb;
+}
+
+/* Global Component Standardizations for System Safety */
+.card {
+    background-color: var(--theme-card-bg) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--theme-text);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.card-header {
+    background-color: var(--theme-card-bg) !important;
+    border-bottom: 1px solid var(--theme-border) !important;
+    color: var(--theme-text);
+}
+
+.form-control, .form-select {
+    background-color: var(--theme-input-bg);
+    border-color: var(--theme-input-border);
+    color: var(--theme-text);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--theme-input-bg);
+    color: var(--theme-text);
 }
 
 
@@ -32,9 +105,10 @@ body {
 ---------------------------------------------------------------------------------- */
 
 .hero-section {
-    background-color: #f7f9fc;
+    background-color: var(--theme-hero-bg);
     padding-top: 2rem;
     padding-bottom: 4rem;
+    transition: background-color 0.2s ease;
 }
 
 .hero-content {
@@ -54,3 +128,38 @@ body {
     .hero-image-container:hover {
         transform: translateY(-5px);
     }
+
+/* ----------------------------------------------------------------------------------
+   3. UNIVERSAL THEME OVERRIDES (Safety Fallbacks for Bootstrap Components)
+---------------------------------------------------------------------------------- */
+
+.table {
+    --bs-table-bg: var(--theme-card-bg);
+    --bs-table-color: var(--theme-text);
+    --bs-table-border-color: var(--theme-border);
+    --bs-table-striped-bg: var(--theme-bg);
+    --bs-table-striped-color: var(--theme-text);
+    --bs-table-active-bg: var(--theme-muted-bg);
+    --bs-table-hover-bg: var(--theme-muted-bg);
+    border-color: var(--theme-border) !important;
+}
+
+.table > :not(caption) > * > * {
+    background-color: var(--bs-table-bg);
+    color: var(--bs-table-color);
+    border-bottom-color: var(--theme-border);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: var(--bs-table-striped-bg) !important;
+    color: var(--bs-table-striped-color) !important;
+}
+
+.table-bordered > :not(caption) > * {
+    border-width: 1px 0;
+    border-color: var(--theme-border);
+}
+.table-bordered > :not(caption) > * > * {
+    border-width: 0 1px;
+    border-color: var(--theme-border);
+}

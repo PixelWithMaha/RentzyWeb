@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.Configuration;
 using Rentzy.BLL.Services;
 using Rentzy.BLL.Services.ApprovalServices;
@@ -112,5 +112,76 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// ==========================================
+//  AUTO-SEEDER: Ensure lookup data exists
+// ==========================================
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<RentzyDBContext>();
+        var dbCreated = context.Database.CanConnect();
+        
+        if (dbCreated)
+        {
+            bool modified = false;
+
+            // ==========================================
+            // SEEDING CORE DATA
+            // ==========================================
+            context.Database.OpenConnection();
+            
+            try 
+            {
+                // Verify Admin User
+                var existingAdmin = context.Users.FirstOrDefault(u => u.Email == "admin@rentzy.com");
+                if (existingAdmin == null)
+                {
+                    Console.WriteLine(">>> CREATING NEW ADMIN USER...");
+                    var adminUser = new Rentzy.DAL.Models.Admin
+                    {
+                        FirstName = "System",
+                        LastName = "Admin",
+                        Email = "admin@rentzy.com",
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!", 8),
+                        Phone = "0000000000",
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    context.Users.Add(adminUser);
+                    context.SaveChanges();
+                    Console.WriteLine(">>> Default Admin user created successfully (admin@rentzy.com / Admin123!).");
+                    existingAdmin = adminUser;
+                }
+                else
+                {
+                    Console.WriteLine(">>> ADMIN USER DETECTED. Resetting password hash to confirm match...");
+                    existingAdmin.PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!", 8);
+                    context.SaveChanges();
+                    Console.WriteLine(">>> Admin password hash forcibly synchronized.");
+                }
+
+                // DIAGNOSTIC CHECK
+                Console.WriteLine($">>> DIAGNOSTIC: Admin Email in DB: '{existingAdmin.Email}'");
+                Console.WriteLine($">>> DIAGNOSTIC: Admin Hash in DB: '{existingAdmin.PasswordHash}'");
+                bool isValid = BCrypt.Net.BCrypt.Verify("Admin123!", existingAdmin.PasswordHash);
+                Console.WriteLine($">>> DIAGNOSTIC: Verify 'Admin123!' against DB hash: {isValid}");
+            } 
+            catch (Exception ex)
+            {
+                Console.WriteLine($">>> ERROR INITIALIZING ADMIN: {ex.Message}");
+            }
+            finally
+            {
+                context.Database.CloseConnection();
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($">>> Warning: Failed to initialize lookup seeds on startup: {ex.Message}");
+    }
+}
 
 app.Run();
