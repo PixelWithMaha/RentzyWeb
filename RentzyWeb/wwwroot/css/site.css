@@ -34,6 +34,15 @@
     --theme-muted-bg: #1e293b;
 }
 
+/* Force hardcoded light classes to respect dark mode */
+[data-bs-theme='dark'] .bg-white,
+[data-bs-theme='dark'] .bg-light,
+[data-bs-theme='dark'] .table-light {
+    background-color: var(--theme-card-bg) !important;
+    color: var(--theme-text) !important;
+}
+
+
 /* ----------------------------------------------------------------------------------
    1. GLOBAL LAYOUT AND TYPOGRAPHY (From default template)
 ---------------------------------------------------------------------------------- */
