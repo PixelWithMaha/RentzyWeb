@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Rentzy.BLL.DTOs.PaymentDTO>
+@model IEnumerable<Rentzy.BLL.DTOs.PaymentDTO>
 @{
     ViewData["Title"] = "Payment Notifications";
 
@@ -34,7 +34,7 @@
                         string statusBadgeClass = payment.StatusId == 1 ? "bg-warning" : payment.StatusId == 2 ? "bg-success" : "bg-danger";
 
                         <div class="card mb-4 shadow-sm">
-                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
                                 <h5 class="card-title mb-0 text-primary">@payment.PropertyTitle</h5>
                                 <span class="badge @statusBadgeClass fs-6">@statusText</span>
                             </div>
