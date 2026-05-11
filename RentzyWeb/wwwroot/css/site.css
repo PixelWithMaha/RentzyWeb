@@ -119,3 +119,38 @@ body {
     .hero-image-container:hover {
         transform: translateY(-5px);
     }
+
+/* ----------------------------------------------------------------------------------
+   3. UNIVERSAL THEME OVERRIDES (Safety Fallbacks for Bootstrap Components)
+---------------------------------------------------------------------------------- */
+
+.table {
+    --bs-table-bg: var(--theme-card-bg);
+    --bs-table-color: var(--theme-text);
+    --bs-table-border-color: var(--theme-border);
+    --bs-table-striped-bg: var(--theme-bg);
+    --bs-table-striped-color: var(--theme-text);
+    --bs-table-active-bg: var(--theme-muted-bg);
+    --bs-table-hover-bg: var(--theme-muted-bg);
+    border-color: var(--theme-border) !important;
+}
+
+.table > :not(caption) > * > * {
+    background-color: var(--bs-table-bg);
+    color: var(--bs-table-color);
+    border-bottom-color: var(--theme-border);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: var(--bs-table-striped-bg) !important;
+    color: var(--bs-table-striped-color) !important;
+}
+
+.table-bordered > :not(caption) > * {
+    border-width: 1px 0;
+    border-color: var(--theme-border);
+}
+.table-bordered > :not(caption) > * > * {
+    border-width: 0 1px;
+    border-color: var(--theme-border);
+}
