@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.DTOs;
 using Rentzy.BLL.Services;
@@ -20,6 +20,7 @@ namespace Rentzy.Web.Controllers
         private readonly ReportsService _reportsService;
         private readonly AuthService _authService;
         private readonly ILandlordApprovalService _landlordApprovalService;
+        private readonly Rentzy.BLL.Services.ReviewService _reviewService;
 
         public LandlordController(
             AuthService authService,
@@ -27,14 +28,16 @@ namespace Rentzy.Web.Controllers
             LandlordService landlordService,
             PaymentService payservice,
             ReportsService reportsService,
-            ILandlordApprovalService landlordApprovalService) // Add this
+            ILandlordApprovalService landlordApprovalService,
+            Rentzy.BLL.Services.ReviewService reviewService) // Add this
         {
             _propertyService = propertyService;
             _landlordService = landlordService;
             _paymentService = payservice;
             _reportsService = reportsService;
             _authService = authService;
-            _landlordApprovalService = landlordApprovalService; // Add this
+            _landlordApprovalService = landlordApprovalService; 
+            _reviewService = reviewService;
         }
 
         // LANDLORD DASHBOARD
@@ -220,6 +223,10 @@ namespace Rentzy.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadImages(int propertyId, List<IFormFile> imageFiles)
         {
+            // Server-side validation: only allow image types and limit file size
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
+
             if (imageFiles != null && imageFiles.Any())
             {
                 var imageUrls = new List<string>();
@@ -229,7 +236,20 @@ namespace Rentzy.Web.Controllers
 
                 foreach (var file in imageFiles)
                 {
-                    var uniqueFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                    if (file == null) continue;
+
+                    var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                    if (!allowedExtensions.Contains(ext))
+                        continue; // skip invalid extensions
+
+                    if (file.Length == 0 || file.Length > MaxFileSizeBytes)
+                        continue; // skip empty or too large
+
+                    // Basic content type check
+                    if (!file.ContentType.StartsWith("image/"))
+                        continue;
+
+                    var uniqueFileName = Guid.NewGuid() + ext;
                     var filePath = Path.Combine(uploadPath, uniqueFileName);
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
@@ -237,6 +257,9 @@ namespace Rentzy.Web.Controllers
                     }
                     imageUrls.Add("/images/properties/" + uniqueFileName);
                 }
+
+                if (!imageUrls.Any())
+                    return BadRequest("No valid image files were uploaded. Please upload jpg, png, gif or webp images under 5 MB.");
 
                 await _propertyService.UploadPropertyImagesAsync(propertyId, imageUrls);
 
@@ -315,6 +338,9 @@ namespace Rentzy.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadNewImages(int propertyId, List<IFormFile> imageFiles)
         {
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
+
             if (imageFiles != null && imageFiles.Any())
             {
                 var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/properties");
@@ -323,7 +349,19 @@ namespace Rentzy.Web.Controllers
                 var uploadedImages = new List<PropertyImage>();
                 foreach (var file in imageFiles)
                 {
-                    var uniqueFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                    if (file == null) continue;
+
+                    var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                    if (!allowedExtensions.Contains(ext))
+                        continue; // skip invalid extensions
+
+                    if (file.Length == 0 || file.Length > MaxFileSizeBytes)
+                        continue; // skip empty or too large
+
+                    if (!file.ContentType.StartsWith("image/"))
+                        continue; // not an image
+
+                    var uniqueFileName = Guid.NewGuid() + ext;
                     var filePath = Path.Combine(uploadPath, uniqueFileName);
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
@@ -335,6 +373,9 @@ namespace Rentzy.Web.Controllers
                         ImageUrl = "/images/properties/" + uniqueFileName
                     });
                 }
+
+                if (!uploadedImages.Any())
+                    return BadRequest("No valid image files were uploaded. Please upload jpg, png, gif or webp images under 5 MB.");
 
                 await _propertyService.UploadPropertyImagesAsync(propertyId, uploadedImages.Select(i => i.ImageUrl).ToList());
                 var property = await _propertyService.GetPropertyByIdAsync(propertyId);
@@ -363,6 +404,20 @@ namespace Rentzy.Web.Controllers
         public IActionResult DoneUpdatingImages(int propertyId)
         {
             return RedirectToAction("EditProperty", new { id = propertyId });
+        }
+
+        // ============================================================================================
+        // Review Insights
+        // ============================================================================================
+
+        [HttpGet]
+        public async Task<IActionResult> Reviews()
+        {
+            var landlordId = HttpContext.Session.GetInt32("UserId");
+            if (landlordId == null) return RedirectToAction("Login", "Account");
+
+            var reviews = await _reviewService.GetReviewsForLandlordAsync(landlordId.Value);
+            return View(reviews);
         }
     }
 }
