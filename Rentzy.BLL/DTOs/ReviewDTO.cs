@@ -5,6 +5,7 @@ namespace Rentzy.BLL.DTOs
 {
     public class ReviewDTO
     {
+        public int Id { get; set; }
         public int PropertyId { get; set; }
         
         public string? PropertyTitle { get; set; }

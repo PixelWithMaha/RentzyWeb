@@ -72,6 +72,7 @@ namespace Rentzy.BLL.Services
             
             return reviews.Select(r => new ReviewDTO
             {
+                Id = r.Id,
                 PropertyId = r.PropertyId,
                 TenantId = r.TenantId,
                 Rating = r.Rating,
@@ -84,6 +85,72 @@ namespace Rentzy.BLL.Services
         public async Task<Dictionary<int, (double AverageRating, int ReviewCount)>> GetReviewAggregatesAsync(IEnumerable<int> propertyIds)
         {
             return await _reviewRepository.GetReviewAggregatesAsync(propertyIds);
+        }
+
+        public async Task<ReviewDTO> GetReviewForEditAsync(int reviewId, int tenantId)
+        {
+            var review = await _reviewRepository.GetReviewByIdAsync(reviewId);
+            
+            if (review == null)
+            {
+                throw new ValidationException("Review not found.");
+            }
+
+            if (review.TenantId != tenantId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to edit this review.");
+            }
+
+            return new ReviewDTO
+            {
+                Id = review.Id,
+                PropertyId = review.PropertyId,
+                PropertyTitle = review.Property?.Title ?? "Unknown Property",
+                TenantId = review.TenantId,
+                Rating = review.Rating,
+                Comment = review.Comment,
+                CreatedAt = review.CreatedAt
+            };
+        }
+
+        public async Task UpdateReviewAsync(ReviewDTO dto)
+        {
+            var review = await _reviewRepository.GetReviewByIdAsync(dto.Id);
+            
+            if (review == null)
+            {
+                throw new ValidationException("Review no longer exists.");
+            }
+
+            if (review.TenantId != dto.TenantId)
+            {
+                throw new UnauthorizedAccessException("Unauthorized modification attempt.");
+            }
+
+            // Apply mutations
+            review.Rating = dto.Rating;
+            review.Comment = dto.Comment;
+            review.CreatedAt = DateTime.UtcNow; // Optional: update timestamp or keep original. Re-stamping typically follows "last modified" logic.
+
+            await _reviewRepository.UpdateReviewAsync(review);
+        }
+
+        public async Task DeleteReviewAsync(int reviewId, int tenantId)
+        {
+            var review = await _reviewRepository.GetReviewByIdAsync(reviewId);
+            
+            if (review == null)
+            {
+                // Idempotent delete, if it doesn't exist then it's already deleted
+                return; 
+            }
+
+            if (review.TenantId != tenantId)
+            {
+                throw new UnauthorizedAccessException("Unauthorized deletion attempt.");
+            }
+
+            await _reviewRepository.DeleteReviewAsync(review);
         }
     }
 }

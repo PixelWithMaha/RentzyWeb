@@ -65,5 +65,25 @@ namespace Rentzy.DAL.Repository
                 x => (x.Average, x.Count)
             );
         }
+
+        public async Task<Review?> GetReviewByIdAsync(int id)
+        {
+            return await _context.Reviews
+                .Include(r => r.Property)
+                .Include(r => r.Tenant)
+                .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        public async Task UpdateReviewAsync(Review review)
+        {
+            _context.Reviews.Update(review);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteReviewAsync(Review review)
+        {
+            _context.Reviews.Remove(review);
+            await _context.SaveChangesAsync();
+        }
     }
 }

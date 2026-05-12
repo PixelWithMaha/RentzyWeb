@@ -161,17 +161,38 @@
                                             </small>
                                         </div>
                                     </div>
-                                    <div class="star-rating small text-warning">
-                                        @for(int i=1; i<=5; i++)
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="star-rating small text-warning">
+                                            @for(int i=1; i<=5; i++)
+                                            {
+                                                if(i <= review.Rating)
+                                                {
+                                                    <i class="fas fa-star"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="far fa-star"></i>
+                                                }
+                                            }
+                                        </div>
+                                        
+                                        @if (Context.Session.GetInt32("UserId") == review.TenantId)
                                         {
-                                            if(i <= review.Rating)
-                                            {
-                                                <i class="fas fa-star"></i>
-                                            }
-                                            else
-                                            {
-                                                <i class="far fa-star"></i>
-                                            }
+                                            <div class="ms-3 border-start ps-3 d-flex gap-2">
+                                                <a asp-controller="Review" asp-action="Edit" asp-route-id="@review.Id" 
+                                                   class="btn btn-sm btn-outline-secondary border-0 py-0" title="Edit Review">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                
+                                                <form asp-controller="Review" asp-action="Delete" method="post" onsubmit="return confirm('Are you sure you want to delete this review?');" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@review.Id" />
+                                                    <input type="hidden" name="propertyId" value="@Model.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0 py-0" title="Delete Review">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         }
                                     </div>
                                 </div>
