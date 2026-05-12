@@ -74,6 +74,19 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-star text-danger" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="card-title">Total Reviews</h5>
+                    <h2 class="text-danger mb-0">@ViewBag.TotalReviews</h2>
+                    <p class="text-muted small">Customer Feedback</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Admin Actions -->
@@ -114,6 +127,13 @@
                                class="btn btn-outline-info w-100 py-3">
                                 <i class="fas fa-chart-bar d-block mb-2" style="font-size: 2rem;"></i>
                                 System Reports
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-controller="Admin" asp-action="ManageReviews"
+                               class="btn btn-outline-danger w-100 py-3">
+                                <i class="fas fa-star-half-alt d-block mb-2" style="font-size: 2rem;"></i>
+                                Manage Reviews
                             </a>
                         </div>
                     </div>

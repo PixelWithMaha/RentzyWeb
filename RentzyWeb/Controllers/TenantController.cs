@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Rentzy.BLL.Services;
 using Rentzy.Web.Authorization;
 using Rentzy.DAL.Models;
@@ -6,6 +6,8 @@ using Rentzy.DAL.Repository;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Threading.Tasks;
+using RentzyWeb.ViewModels;
+using System.Collections.Generic;
 
 namespace RentzyWeb.Controllers
 {
@@ -16,17 +18,20 @@ namespace RentzyWeb.Controllers
         private readonly TenantPaymentService _paymentService;
         private readonly IRentalRequestRepository _rentalRequestRepo;
         private readonly IPropertyRepository _propertyRepo;
+        private readonly ReviewService _reviewService;
 
         public TenantController(
             PaymentNotificationService notifService,
             TenantPaymentService paymentService,
             IRentalRequestRepository rentalRequestRepo,
-            IPropertyRepository propertyRepo)
+            IPropertyRepository propertyRepo,
+            ReviewService reviewService)
         {
             _notifService = notifService;
             _paymentService = paymentService;
             _rentalRequestRepo = rentalRequestRepo;
             _propertyRepo = propertyRepo;
+            _reviewService = reviewService;
         }
 
         // GET: Tenant/Dashboard
@@ -63,7 +68,7 @@ namespace RentzyWeb.Controllers
             await _notifService.MarkAsSeenAsync(id);
 
             var tenantId = HttpContext.Session.GetInt32("UserId");
-            var notification = await _notifService.GetNotificationByIdAsync(id);
+            var notification = await _notifService.GetNotificationByIdAsync(id,tenantId.Value);
 
             if (notification == null) return NotFound();
 
@@ -88,7 +93,7 @@ namespace RentzyWeb.Controllers
             if (tenantId == null) return RedirectToAction("Login", "Account");
 
             var bookings = await _rentalRequestRepo.GetRequestsForTenantAsync(tenantId.Value);
-
+            var viewModels = new List<TenantBookingVM>();
             foreach (var booking in bookings)
             {
                 if (booking.Property != null)
@@ -96,9 +101,27 @@ namespace RentzyWeb.Controllers
                     var propertyDetails = await _propertyRepo.GetPropertyDetailsAsync(booking.Property.Id);
                     booking.Property.Images = propertyDetails?.Images;
                 }
+
+                var isEligible = await _reviewService.IsReviewEligibleAsync(tenantId.Value, booking.PropertyId);
+                System.Console.WriteLine($"[DEBUG] Tenant: {tenantId.Value}, Property: {booking.PropertyId}, Eligible: {isEligible}");
+
+                var vm = new TenantBookingVM
+                {
+                    Request = booking,
+                    IsReviewEligible = isEligible
+                };
+
+                if (vm.IsReviewEligible)
+                {
+                    vm.ExistingReviewId = await _reviewService.GetExistingReviewIdAsync(tenantId.Value, booking.PropertyId);
+                    vm.HasExistingReview = vm.ExistingReviewId.HasValue;
+                    System.Console.WriteLine($"[DEBUG] Tenant: {tenantId.Value}, Property: {booking.PropertyId}, ExistingReviewId: {vm.ExistingReviewId}");
+                }
+
+                viewModels.Add(vm);
             }
 
-            return View(bookings);
+            return View(viewModels);
         }
 
         [HttpPost]

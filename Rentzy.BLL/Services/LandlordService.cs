@@ -1,4 +1,4 @@
-﻿using Rentzy.BLL.DTOs;
+using Rentzy.BLL.DTOs;
 using Rentzy.BLL.DTOs.BookingDTOs;
 using Rentzy.DAL;
 using Rentzy.DAL.Models;
@@ -19,13 +19,16 @@ namespace Rentzy.BLL.Services
         private readonly PropertyService _propertyService;
         private readonly IPropertyRepository _propertyRepo;
         private readonly PaymentService _paymentService;
-        private readonly IPropertyApprovalRequestsRepo _RequestRepo;
 
-        public LandlordService(ILandlordRepository repo, IPropertyRepository propertyRepo, PaymentService paymentService, IPropertyApprovalRequestsRepo _Repo)
+        public LandlordService(
+            ILandlordRepository repo, 
+            IPropertyRepository propertyRepo, 
+            PaymentService paymentService, 
+            PropertyService propertyService)
         {
             _repo = repo;
             _propertyRepo = propertyRepo;
-            _propertyService = new PropertyService(repo, propertyRepo, _Repo); // reuse core property logic
+            _propertyService = propertyService;
             _paymentService = paymentService;
         }
 
@@ -81,14 +84,16 @@ namespace Rentzy.BLL.Services
             var request = await _repo.GetTenantRequestByIdAsync(requestId);
             if (request == null || request.Status.Name != "Pending") return false;
 
+            // 1. Verify all preconditions / lookups first BEFORE saving any changes
             var approvedStatus = await _repo.GetRequestStatusByNameAsync("Approved");
-            if (approvedStatus == null) return false;
+            var activeBookingStatus = await _repo.GetBookingStatusByNameAsync("Active");
 
+            if (approvedStatus == null || activeBookingStatus == null) 
+                return false; // Ensure critical data configuration integrity
+
+            // 2. Commit transactional-like operations
             request.StatusId = approvedStatus.Id;
             await _repo.UpdateRequestAsync(request);
-
-            var activeBookingStatus = await _repo.GetBookingStatusByNameAsync("Active");
-            if (activeBookingStatus == null) return false;
 
             var booking = new Booking
             {

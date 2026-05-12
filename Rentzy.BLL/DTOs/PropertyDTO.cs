@@ -1,4 +1,4 @@
-﻿using Rentzy.DAL.Models;
+using Rentzy.DAL.Models;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -31,5 +31,15 @@ namespace Rentzy.BLL.DTOs
 
         public List<PropertyImage> Images { get; set; } = new List<PropertyImage>();
         public bool IsApproved { get; set; }
+
+        // Added for aggregate review rendering
+        public double AverageRating { get; set; }
+        public int ReviewCount { get; set; }
+        public List<ReviewDTO> Reviews { get; set; } = new List<ReviewDTO>();
+
+        // Review eligibility for logged in tenant
+        public bool IsReviewEligible { get; set; }
+        public bool HasExistingReview { get; set; }
+        public int? ExistingReviewId { get; set; }
     }
 }

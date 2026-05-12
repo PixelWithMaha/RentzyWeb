@@ -1,9 +1,7 @@
-@model IEnumerable<Rentzy.BLL.DTOs.PaymentDTO>
+﻿@model IEnumerable<Rentzy.BLL.DTOs.PaymentNotificationDTO>
 @{
     ViewData["Title"] = "Payment Notifications";
-
-    // Filter only pending payments (StatusId = 1)
-    var pendingPayments = Model?.Where(p => p.StatusId == 1).ToList() ?? Enumerable.Empty<Rentzy.BLL.DTOs.PaymentDTO>();
+    var notifications = Model?.ToList() ?? new List<Rentzy.BLL.DTOs.PaymentNotificationDTO>();
 }
 
 <div class="container mt-4">
@@ -11,10 +9,10 @@
         <div class="col-md-10 mx-auto">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>Payment Notifications</h2>
-                <span class="badge bg-primary fs-6">@pendingPayments.Count() Notifications</span>
+                <span class="badge bg-primary fs-6">@notifications.Count() Notifications</span>
             </div>
 
-            @if (!pendingPayments.Any())
+            @if (!notifications.Any())
             {
                 <div class="card">
                     <div class="card-body text-center py-5">
@@ -28,41 +26,47 @@
             else
             {
                 <div class="notification-list">
-                    @foreach (var payment in pendingPayments)
+                    @foreach (var notification in notifications)
                     {
-                        string statusText = payment.StatusId == 1 ? "Pending" : payment.StatusId == 2 ? "Paid" : "Failed";
-                        string statusBadgeClass = payment.StatusId == 1 ? "bg-warning" : payment.StatusId == 2 ? "bg-success" : "bg-danger";
+                        string statusBadgeClass = notification.Status == "Paid" ? "bg-success"
+                        : notification.Status == "Overdue" ? "bg-danger"
+                        : "bg-warning";
 
-                        <div class="card mb-4 shadow-sm">
-                            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
-                                <h5 class="card-title mb-0 text-primary">@payment.PropertyTitle</h5>
-                                <span class="badge @statusBadgeClass fs-6">@statusText</span>
+                        <div class="card mb-4 shadow-sm @(!notification.IsSeen ? "border-primary" : "")">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0 text-primary">
+                                    @if (!notification.IsSeen)
+                                    {
+                                        <span class="badge bg-info me-2">New</span>
+                                    }
+                                    @notification.PropertyTitle
+                                </h5>
+                                <span class="badge @statusBadgeClass fs-6">@notification.Status</span>
                             </div>
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p class="mb-2"><strong>Amount Due:</strong> <span class="text-danger fw-bold fs-5">@payment.Amount.ToString("C")</span></p>
-                                        <p class="mb-0"><strong>Request ID:</strong> #@payment.RequestId</p>
+                                        <p class="mb-2">
+                                            <strong>Amount Due:</strong>
+                                            <span class="text-danger fw-bold fs-5">@notification.Amount.ToString("C")</span>
+                                        </p>
+                                        <p class="mb-0"><strong>Landlord:</strong> @notification.LandlordName</p>
                                     </div>
                                     <div class="col-md-6">
-                                        <p class="mb-2"><strong>Payment ID:</strong> #@payment.Id</p>
-                                        <p class="mb-2"><strong>Method:</strong> @payment.Method</p>
-                                        @if (payment.PaidAt != null)
-                                        {
-                                            <p class="mb-0"><strong>Last Attempt:</strong> @payment.PaidAt.Value.ToString("MMM dd, yyyy")</p>
-                                        }
+                                        <p class="mb-2"><strong>Due Date:</strong> @notification.DueDate.ToString("MMM dd, yyyy")</p>
+                                        <p class="mb-2"><strong>Message:</strong> @notification.Message</p>
                                     </div>
                                 </div>
 
                                 <div class="mt-4">
-                                    @if (payment.StatusId == 1) // Pending
+                                    @if (notification.Status == "Pending" || notification.Status == "Overdue")
                                     {
                                         <div class="btn-group" role="group">
-                                            <a href="@Url.Action("PayFromNotification", "Notification", new { paymentId = payment.Id })"
+                                            <a href="@Url.Action("PayFromNotification", "Notification", new { paymentId = notification.PaymentId })"
                                                class="btn btn-primary btn-lg">
                                                 <i class="fas fa-credit-card me-2"></i>Pay Now
                                             </a>
-                                            <a href="@Url.Action("PaymentDetails", "Notification", new { paymentId = payment.Id })"
+                                            <a href="@Url.Action("PaymentDetails", "Notification", new { paymentId = notification.PaymentId })"
                                                class="btn btn-outline-secondary btn-lg">
                                                 <i class="fas fa-info-circle me-2"></i>Details
                                             </a>
@@ -77,28 +81,3 @@
         </div>
     </div>
 </div>
-
-@section Styles {
-    <style>
-        .notification-list .card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            border: none;
-            border-radius: 0.5rem;
-        }
-
-            .notification-list .card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
-            }
-
-        .btn-group .btn {
-            border-radius: 0.375rem;
-            margin-right: 0.5rem;
-        }
-
-        .card-header {
-            border-bottom: 1px solid var(--theme-border);
-            background: var(--theme-card-bg);
-        }
-    </style>
-}

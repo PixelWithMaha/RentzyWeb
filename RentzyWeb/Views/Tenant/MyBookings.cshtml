@@ -1,4 +1,4 @@
-@model IEnumerable<Rentzy.DAL.Models.PropertyRentalRequest>
+@model IEnumerable<RentzyWeb.ViewModels.TenantBookingVM>
 @{
     ViewData["Title"] = "My Bookings";
 }
@@ -78,6 +78,18 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(77, 171, 247, 0.4);
         }
+
+    .review-btn {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border: none;
+    }
+
+        .review-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
+            color: white;
+        }
 </style>
 
 <div class="container mt-4">
@@ -140,8 +152,9 @@
         }
         else
         {
-            @foreach (var booking in Model)
+            @foreach (var vm in Model)
             {
+                var booking = vm.Request;
                 <div class="col-lg-6">
                     <div class="card booking-card shadow-sm border-0 h-100">
                         <div class="card-body p-4">
@@ -210,6 +223,24 @@
                                            class="btn details-btn action-btn">
                                             <i class="fas fa-eye me-1"></i>Details
                                         </a>
+
+                                        @if (vm.IsReviewEligible)
+                                        {
+                                            if (vm.HasExistingReview)
+                                            {
+                                                <a asp-controller="Review" asp-action="Edit" asp-route-id="@vm.ExistingReviewId"
+                                                   class="btn review-btn action-btn">
+                                                    <i class="fas fa-edit me-1"></i>Edit Review
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a asp-controller="Review" asp-action="Submit" asp-route-propertyId="@booking.PropertyId"
+                                                   class="btn review-btn action-btn">
+                                                    <i class="fas fa-star me-1"></i>Leave Review
+                                                </a>
+                                            }
+                                        }
 
                                         @if (booking.StatusId != 3 && booking.StatusId != 4) // Not cancelled or completed
                                         {
