@@ -1,4 +1,4 @@
-﻿@using Rentzy.DAL.Models
+@using Rentzy.DAL.Models
 @model List<Rentzy.BLL.DTOs.PropertyDTO>
 
 @{
@@ -146,13 +146,14 @@
     :root {
         --primary-blue: #1e3a8a;
         --medium-blue: #3b82f6;
-        --light-blue: #e0f2fe;
+        --light-blue: rgba(59, 130, 246, 0.1);
         --purple: #6a11cb;
         --accent-blue: #2575fc;
-        --white: #ffffff;
-        --light-bg: #f8fafc;
-        --dark-text: #1e293b;
-        --gray-text: #64748b;
+        --white: var(--theme-card-bg);
+        --light-bg: var(--theme-hero-bg);
+        --dark-text: var(--theme-text);
+        --gray-text: var(--theme-text-muted);
+        --border-light: var(--theme-border);
         --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
@@ -254,7 +255,7 @@
         overflow: hidden;
         box-shadow: var(--shadow);
         transition: all 0.3s ease;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border-light);
     }
 
     .property-card:hover {

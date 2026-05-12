@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.DTOs;
 using Rentzy.BLL.Exceptions;
 using Rentzy.BLL.Factory;
@@ -83,7 +83,21 @@ namespace Rentzy.BLL.Services
             }
             catch (DbUpdateException ex)
             {
+                Console.WriteLine($"CRITICAL DB ERROR IN REGISTRATION: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"INNER EXCEPTION: {ex.InnerException.Message}");
+                }
                 throw new InvalidOperationException("Unable to complete registration. Please try again later.", ex);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"UNEXPECTED ERROR IN REGISTRATION: {ex.GetType().Name} - {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"INNER EXCEPTION: {ex.InnerException.Message}");
+                }
+                throw;
             }
         }
 
@@ -95,19 +109,27 @@ namespace Rentzy.BLL.Services
                 throw new ValidationException("Email and password are required");
             }
 
+            dto.Email = dto.Email.Trim();
+            dto.Password = dto.Password.Trim();
+
+            Console.WriteLine($"[LOGIN ATTEMPT] Email: '{dto.Email}'");
+
             // Get user by email
             var user = await _userRepository.GetUserByEmail(dto.Email);
 
             if (user is NoUser)
             {
-                // Don't reveal if email exists - security best practice
+                Console.WriteLine($"[LOGIN FAILED] User not found in DB for email: '{dto.Email}'");
                 throw new AuthenticationException("Invalid email or password");
             }
 
             // Verify password
-            if (!VerifyPassword(dto.Password, user.PasswordHash))
+            Console.WriteLine($"[LOGIN VERIFY] Checking password against Hash: '{user.PasswordHash}'");
+            bool isValid = VerifyPassword(dto.Password, user.PasswordHash);
+            Console.WriteLine($"[LOGIN RESULT] Password valid: {isValid}");
+            
+            if (!isValid)
             {
-                // Wrong password
                 throw new AuthenticationException("Invalid email or password");
             }
 

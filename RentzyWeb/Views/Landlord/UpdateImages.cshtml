@@ -1,4 +1,4 @@
-﻿@model Rentzy.BLL.DTOs.PropertyDTO
+@model Rentzy.BLL.DTOs.PropertyDTO
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 @{
@@ -8,12 +8,12 @@
 }
 
 <h2 class="text-center my-4 fw-bold text-primary" style="font-size:2rem; letter-spacing:0.5px;">
-    Update Images for <span class="text-dark">@Model.Title</span>
+    Update Images for <span>@Model.Title</span>
 </h2>
 
 <div class="container">
    <div class="mb-4">
-    <label for="imageFiles"  class="form-label fw-semibold text-dark" style="font-size:1.1rem;">
+    <label for="imageFiles"  class="form-label fw-semibold" style="font-size:1.1rem;">
         Add Images
     </label>
     <input type="file" id="imageFiles" class="form-control shadow-sm" multiple />
