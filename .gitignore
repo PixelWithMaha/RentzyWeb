@@ -366,4 +366,9 @@ appsettings.json
 appsettings.Development.json
 
 *.md 
-!README.md 
+!README.md
+issues
+ralph
+ptoA.txt
+
+!solvedIssues/**/*.md

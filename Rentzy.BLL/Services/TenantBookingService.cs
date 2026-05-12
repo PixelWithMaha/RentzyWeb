@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.DTOs;
 using Rentzy.BLL.Services;
 using Rentzy.DAL.Context;
@@ -13,12 +13,14 @@ public class TenantBookingService : ITenantBookingService
     private readonly TenantPaymentService _paymentService;
     private readonly IPropertyApprovalRequestsRepo _requestRepo;
     private readonly RentzyDBContext _context;
+    private readonly ReviewService _reviewService;
     public TenantBookingService(
         IPropertyRepository propertyRepo,
         IRentalRequestRepository rentalRepo,
         TenantPaymentService paymentService,
         IPropertyApprovalRequestsRepo requestRepo,
-        RentzyDBContext context
+        RentzyDBContext context,
+        ReviewService reviewService
         )
     {
         _propertyRepo = propertyRepo;
@@ -26,6 +28,7 @@ public class TenantBookingService : ITenantBookingService
         _paymentService = paymentService;
         _requestRepo = requestRepo;
         _context = context;
+        _reviewService = reviewService;
     }
 
     public async Task<PropertyDTO> GetPropertyDetailsAsync(int propertyId)
@@ -56,6 +59,12 @@ public class TenantBookingService : ITenantBookingService
         // Populate approval status into DTO
         dto.StatusId = approvalRequest?.StatusId ?? 0;
         dto.IsApproved = (approvalRequest != null && (approvalRequest.StatusId == ApprovalStatusConstants.Approved || approvalRequest.StatusId == 2));
+
+        // Populate Reviews
+        var reviews = (await _reviewService.GetReviewsForPropertyAsync(propertyId)).ToList();
+        dto.Reviews = reviews;
+        dto.ReviewCount = reviews.Count;
+        dto.AverageRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
 
         return dto;
     }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using Rentzy.BLL.DTOs;
 using Rentzy.DAL.Models;
@@ -17,28 +17,35 @@ namespace Rentzy.BLL.Services
         private readonly ILandlordRepository _repo;
         private readonly IPropertyRepository _propertyRepository;
         private readonly IPropertyApprovalRequestsRepo _RequestRepo;
+        private readonly ReviewService _reviewService;
 
 
-        public PropertyService(ILandlordRepository repo,IPropertyRepository prepo, IPropertyApprovalRequestsRepo rep )
+        public PropertyService(
+            ILandlordRepository repo,
+            IPropertyRepository prepo,
+            IPropertyApprovalRequestsRepo rep,
+            ReviewService reviewService)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo));
-            _propertyRepository= prepo ?? throw new ArgumentNullException(nameof(prepo));
+            _propertyRepository = prepo ?? throw new ArgumentNullException(nameof(prepo));
             _RequestRepo = rep;
+            _reviewService = reviewService;
         }
-        //public async Task<IEnumerable<PropertyDTO>> GetAllPropertiesAsync()
-        //{
-        //    var properties = await _propertyRepository.GetAllPropertiesAsync();
-        //    return properties.Select(MapToDTO).ToList();
-        //}
+
         public async Task<IEnumerable<PropertyDTO>> GetAllPropertiesAsync()
         {
-            var properties = await _propertyRepository.GetAllPropertiesAsync();
+            var properties = (await _propertyRepository.GetAllPropertiesAsync()).ToList();
+
+            // Pre-fetch aggregates to prevent N+1 performance degradation
+            var propertyIds = properties.Select(p => p.Id).Distinct().ToList();
+            var aggregates = await _reviewService.GetReviewAggregatesAsync(propertyIds);
 
             var result = new List<PropertyDTO>();
             foreach (var p in properties)
             {
-                // get latest approval request for this property (may be null)
                 var approvalRequest = await _RequestRepo.GetByPropertyIdAsync(p.Id);
+
+                aggregates.TryGetValue(p.Id, out var stats);
 
                 var dto = new PropertyDTO
                 {
@@ -51,13 +58,14 @@ namespace Rentzy.BLL.Services
                     LandlordId = p.LandlordId,
                     LandlordName = p.Landlord != null ? p.Landlord.FirstName + " " + p.Landlord.LastName : "N/A",
                     TenantNames = p.Bookings?
-                    .Where(b => b.StatusId == 1 && b.StartDate <= DateTime.Now && b.EndDate >= DateTime.Now)
-                    .Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName)
-                    .ToList() ?? new List<string>(),
+                        .Where(b => b.StatusId == 1 && b.StartDate <= DateTime.Now && b.EndDate >= DateTime.Now)
+                        .Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName)
+                        .ToList() ?? new List<string>(),
                     Images = p.Images?.ToList() ?? new List<PropertyImage>(),
                     StatusId = approvalRequest?.StatusId ?? ApprovalStatusConstants.Pending,
-                    IsApproved = (approvalRequest?.StatusId == ApprovalStatusConstants.Approved)
-                    
+                    IsApproved = (approvalRequest?.StatusId == ApprovalStatusConstants.Approved),
+                    AverageRating = stats.AverageRating,
+                    ReviewCount = stats.ReviewCount
                 };
 
                 // Only include approved properties for tenant listings/search.
@@ -68,20 +76,18 @@ namespace Rentzy.BLL.Services
             return result;
         }
 
-        //public async Task<IEnumerable<PropertyDTO>> SearchPropertiesByTypeAsync(string typeName)
-        //{
-        //    var properties = await _propertyRepository.SearchByPropertyType(typeName);
-        //    return properties.Select(MapToDTO).ToList();
-        //}
-
         public async Task<IEnumerable<PropertyDTO>> SearchPropertiesByTypeAsync(string typeName)
         {
-            var properties = await _propertyRepository.SearchByPropertyType(typeName);
+            var properties = (await _propertyRepository.SearchByPropertyType(typeName)).ToList();
+
+            var propertyIds = properties.Select(p => p.Id).Distinct().ToList();
+            var aggregates = await _reviewService.GetReviewAggregatesAsync(propertyIds);
 
             var result = new List<PropertyDTO>();
             foreach (var p in properties)
             {
                 var approvalRequest = await _RequestRepo.GetByPropertyIdAsync(p.Id);
+                aggregates.TryGetValue(p.Id, out var stats);
 
                 var dto = new PropertyDTO
                 {
@@ -94,12 +100,14 @@ namespace Rentzy.BLL.Services
                     LandlordId = p.LandlordId,
                     LandlordName = p.Landlord != null ? p.Landlord.FirstName + " " + p.Landlord.LastName : "N/A",
                     TenantNames = p.Bookings?
-                    .Where(b => b.StatusId == 1 && b.StartDate <= DateTime.Now && b.EndDate >= DateTime.Now)
-                    .Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName)
-                    .ToList() ?? new List<string>(),
+                        .Where(b => b.StatusId == 1 && b.StartDate <= DateTime.Now && b.EndDate >= DateTime.Now)
+                        .Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName)
+                        .ToList() ?? new List<string>(),
                     Images = p.Images?.ToList() ?? new List<PropertyImage>(),
                     StatusId = approvalRequest?.StatusId ?? ApprovalStatusConstants.Pending,
-                    IsApproved = (approvalRequest?.StatusId == ApprovalStatusConstants.Approved)
+                    IsApproved = (approvalRequest?.StatusId == ApprovalStatusConstants.Approved),
+                    AverageRating = stats.AverageRating,
+                    ReviewCount = stats.ReviewCount
                 };
 
                 if (dto.IsApproved)
@@ -129,18 +137,20 @@ namespace Rentzy.BLL.Services
         }
 
 
-
         // CRUD
         public async Task<List<PropertyDTO>> GetPropertiesByLandlordAsync(int landlordId)
         {
             var properties = await _repo.GetPropertiesByLandlordAsync(landlordId);
 
+            var propertyIds = properties.Select(p => p.Id).Distinct().ToList();
+            var aggregates = await _reviewService.GetReviewAggregatesAsync(propertyIds);
+
             var result = new List<PropertyDTO>();
 
             foreach (var p in properties)
             {
-                // Fetch latest approval request for this property
                 var approvalRequest = await _RequestRepo.GetByPropertyIdAsync(p.Id);
+                aggregates.TryGetValue(p.Id, out var stats);
 
                 result.Add(new PropertyDTO
                 {
@@ -149,18 +159,19 @@ namespace Rentzy.BLL.Services
                     Description = p.Description,
                     Rent = p.MonthlyRent,
                     CityId = p.CityId,
-                    CityName=p.City.Name,
-                    PropertyTypeName=p.PropertyType.Name,
+                    CityName = p.City.Name,
+                    PropertyTypeName = p.PropertyType.Name,
                     PropertyTypeId = p.PropertyTypeId,
                     LandlordId = p.LandlordId,
                     Images = p.Images.ToList(),
-                    StatusId = approvalRequest?.StatusId ?? ApprovalStatusConstants.Pending
+                    StatusId = approvalRequest?.StatusId ?? ApprovalStatusConstants.Pending,
+                    AverageRating = stats.AverageRating,
+                    ReviewCount = stats.ReviewCount
                 });
             }
 
             return result;
         }
-
 
         public async Task<PropertyDTO> GetPropertyByIdAsync(int propertyId)
         {
@@ -234,39 +245,20 @@ namespace Rentzy.BLL.Services
         {
             return _repo.DeletePropertyImageAsync(imageId);
         }
-        //NEWWW
 
         public async Task<List<DateTime>> GetBookedDatesAsync(int propertyId)
         {
             return await _propertyRepository.GetBookedDatesForPropertyAsync(propertyId);
         }
 
-        //public async Task<PropertyDTO> GetPropertyDetailsAsync(int propertyId)
-        //{
-        //    var p = await _propertyRepository.GetPropertyDetailsAsync(propertyId);
-        //    if (p == null) return null;
-
-        //    return new PropertyDTO
-        //    {
-        //        Id = p.Id,
-        //        Title = p.Title,
-        //        Description = p.Description,
-        //        // p.MonthlyRent is your model field — cast/convert to int if DTO expects int
-        //        Rent = (int)p.MonthlyRent,
-        //        CityId = p.CityId,
-        //        PropertyTypeId = p.PropertyTypeId,
-        //        LandlordId = p.LandlordId,
-        //        LandlordName = p.Landlord != null ? p.Landlord.FirstName + " " + p.Landlord.LastName : "N/A",
-        //        TenantNames = p.Bookings?.Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName).ToList() ?? new List<string>(),
-        //        Images = p.Images?.ToList() ?? new List<PropertyImage>()
-        //    };
-        //}
         public async Task<PropertyDTO> GetPropertyDetailsAsync(int propertyId)
         {
             var p = await _propertyRepository.GetPropertyDetailsAsync(propertyId);
             if (p == null) return null;
 
             var approvalRequest = await _RequestRepo.GetByPropertyIdAsync(p.Id);
+
+            var reviews = (await _reviewService.GetReviewsForPropertyAsync(propertyId)).ToList();
 
             return new PropertyDTO
             {
@@ -279,15 +271,17 @@ namespace Rentzy.BLL.Services
                 LandlordId = p.LandlordId,
                 LandlordName = p.Landlord != null ? p.Landlord.FirstName + " " + p.Landlord.LastName : "N/A",
                 TenantNames = p.Bookings?
-                .Where(b => b.StatusId == 1 && b.StartDate <= DateTime.Now && b.EndDate >= DateTime.Now)
-                .Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName)
-                .ToList() ?? new List<string>(),
+                    .Where(b => b.StatusId == 1 && b.StartDate <= DateTime.Now && b.EndDate >= DateTime.Now)
+                    .Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName)
+                    .ToList() ?? new List<string>(),
                 Images = p.Images?.ToList() ?? new List<PropertyImage>(),
                 StatusId = approvalRequest?.StatusId ?? ApprovalStatusConstants.Pending,
-                IsApproved = (approvalRequest?.StatusId == ApprovalStatusConstants.Approved)
+                IsApproved = (approvalRequest?.StatusId == ApprovalStatusConstants.Approved),
+                Reviews = reviews,
+                ReviewCount = reviews.Count,
+                AverageRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0
             };
         }
-
 
         public async Task<int> CreateRentalRequestAsync(int tenantId, int propertyId)
         {
@@ -295,13 +289,12 @@ namespace Rentzy.BLL.Services
             {
                 TenantId = tenantId,
                 PropertyId = propertyId,
-                StatusId = 1, // set to Pending (ensure ApprovalStatus with id 1 exists)
+                StatusId = 1,
                 RequestedAt = DateTime.Now
             };
 
             return await _propertyRepository.AddRentalRequestAsync(req);
         }
-
 
         public async Task<PaymentDTO> GetPaymentInfoAsync(int requestId)
         {
@@ -321,38 +314,33 @@ namespace Rentzy.BLL.Services
             };
         }
 
-
         public async Task ProcessPaymentAsync(int requestId, decimal amount)
         {
             var req = await _propertyRepository.GetRentalRequestAsync(requestId);
             if (req == null) throw new InvalidOperationException("Rental request not found.");
 
-            // Create booking (you may adjust StartDate/EndDate logic to your requirements)
             var booking = new Booking
             {
                 TenantId = req.TenantId,
                 PropertyId = req.PropertyId,
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddMonths(1),
-                StatusId = 1 // Active (ensure BookingStatus with id 1 exists)
+                StatusId = 1
             };
 
             int bookingId = await _propertyRepository.AddBookingAsync(booking);
 
-            // Create payment
             var payment = new Payment
             {
                 BookingId = bookingId,
                 Amount = amount,
                 PaidAt = DateTime.Now,
-                PaymentMethodId = 1, // default
-                StatusId = 1 // Paid (or Pending depending on your logic)
+                PaymentMethodId = 1,
+                StatusId = 1
             };
 
             await _propertyRepository.AddPaymentAsync(payment);
         }
-
-
 
         // Dropdown helpers
         public Task<List<City>> GetAllCitiesAsync() => _repo.GetAllCitiesAsync();
