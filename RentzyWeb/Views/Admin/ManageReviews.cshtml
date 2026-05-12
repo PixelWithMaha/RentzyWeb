@@ -1,0 +1,124 @@
+@model IEnumerable<Rentzy.BLL.DTOs.ReviewDTO>
+
+@{
+    ViewData["Title"] = "Global Review Management";
+}
+
+<div class="container py-5">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold" style="color: var(--theme-text);">
+                <i class="fas fa-shield-alt text-danger me-2"></i>Review Moderation
+            </h2>
+            <p class="text-muted mb-0">Globally oversee platform feedback and expunge harmful context.</p>
+        </div>
+        <div class="mt-3 mt-md-0">
+            <a asp-action="Dashboard" class="btn btn-outline-secondary border-2 rounded-pill px-4">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Listing Table card -->
+    <div class="card shadow border-0" style="border-radius:15px; background: var(--theme-card-bg);">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle" style="color: var(--theme-text);">
+                    <thead class="table-light" style="background-color: rgba(0,0,0,0.03);">
+                        <tr>
+                            <th class="px-4 py-3 text-uppercase small fw-bold text-muted">Property</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted">Reviewer</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted">Rating</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted w-25">Commentary</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted">Date</th>
+                            <th class="px-4 py-3 text-end text-uppercase small fw-bold text-muted">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <i class="far fa-comments fa-3x mb-3 opacity-50"></i>
+                                        <p class="fs-5 mb-0">No submissions recorded yet.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var review in Model)
+                            {
+                                <tr>
+                                    <td class="px-4 py-3">
+                                        <div class="fw-bold text-primary">@review.PropertyTitle</div>
+                                        <small class="text-muted">ID: #@review.PropertyId</small>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-light border d-flex justify-content-center align-items-center me-2" style="width: 32px; height: 32px;">
+                                                <i class="fas fa-user-circle text-muted"></i>
+                                            </div>
+                                            <span>@review.TenantName</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                                            <i class="fas fa-star me-1"></i>@review.Rating.ToString("0")
+                                        </span>
+                                    </td>
+                                    <td class="py-3 text-break small text-muted fst-italic">
+                                        "@review.Comment"
+                                    </td>
+                                    <td class="py-3 text-muted">
+                                        @review.CreatedAt.ToString("MMM dd, yyyy")
+                                    </td>
+                                    <td class="px-4 py-3 text-end">
+                                        <form asp-action="DeleteReview" method="post" 
+                                              onsubmit="return confirm('DANGER: You are about to permanently expunge this feedback content. Continue?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@review.Id" />
+                                            <button type="submit" class="btn btn-danger btn-sm rounded-pill shadow-sm px-3 hover-lift">
+                                                <i class="fas fa-trash-alt me-1"></i> Redact
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3) !important;
+    }
+    table tbody tr {
+        transition: background-color 0.2s;
+    }
+</style>

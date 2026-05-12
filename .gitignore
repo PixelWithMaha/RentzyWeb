@@ -370,3 +370,5 @@ appsettings.Development.json
 issues
 ralph
 ptoA.txt
+
+!solvedIssues/**/*.md
