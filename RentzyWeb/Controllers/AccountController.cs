@@ -1,4 +1,4 @@
-﻿using Humanizer;
+using Humanizer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Rentzy.BLL.DTOs;
@@ -67,15 +67,23 @@ namespace Rentzy.Web.Controllers
             catch (BusinessException ex)
             {
                 ModelState.AddModelError("", ex.Message);
-                return View(model); // ✅ Return ViewModel
+                return View(model);
             }
             catch (ValidationException ex)
             {
                 ModelState.AddModelError("", ex.Message);
                 return View(model);
             }
-            catch (Exception)
+            catch (InvalidOperationException ex)
             {
+                // Surface specific operational blocks (like "Email already exists" or "User not found")
+                ModelState.AddModelError("", ex.Message);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                // Log actual exception to console for debugging
+                Console.WriteLine($"[AccountController.Register] Unhandled Exception: {ex.Message}");
                 ModelState.AddModelError("", "An unexpected error occurred. Please try again.");
                 return View(model);
             }
