@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.Services.ApprovalServices;
 using Rentzy.DAL.Context;
@@ -15,13 +15,15 @@ namespace Rentzy.Web.Controllers
         private readonly ILandlordApprovalService _approvalService;
         private readonly IPropertyApprovalRequestService _propertyService;
         private readonly IUserStatuses_service _statusService;
+        private readonly Rentzy.BLL.Services.ReviewService _reviewService;
 
-        public AdminController(RentzyDBContext context, ILandlordApprovalService approvalService, IPropertyApprovalRequestService rep, IUserStatuses_service statusService)
+        public AdminController(RentzyDBContext context, ILandlordApprovalService approvalService, IPropertyApprovalRequestService rep, IUserStatuses_service statusService, Rentzy.BLL.Services.ReviewService reviewService)
         {
             _context = context;
             _approvalService = approvalService;
             _propertyService = rep;
             _statusService = statusService;
+            _reviewService = reviewService;
         }
 
         [HttpGet]
@@ -49,6 +51,11 @@ namespace Rentzy.Web.Controllers
             ViewBag.UserName = userName;
             ViewBag.UserEmail = userEmail;
             ViewBag.ActiveTenants = Activetenants;
+            
+            // Fetch real-time review total asynchronously (force Wait/Result or convert method? Dashboard is not async but we can make it async)
+            // Wait, Dashboard is [HttpGet] public IActionResult Dashboard().
+            // Let's change Dashboard to be async Task<IActionResult>
+            ViewBag.TotalReviews = _reviewService.GetTotalReviewsCountAsync().Result; 
 
             // Recent users (last 2 days)
             ViewBag.RecentUsers = _context.Users
@@ -404,6 +411,34 @@ namespace Rentzy.Web.Controllers
             if (int.TryParse(idString, out var id)) return id;
             // fallback: admin id 0 (or throw)
             return 0;
+        }
+
+        // ============================================================================================
+        // Review Moderation
+        // ============================================================================================
+
+        [HttpGet]
+        public async Task<IActionResult> ManageReviews()
+        {
+            var reviews = await _reviewService.GetReviewsForAdminAsync();
+            return View(reviews);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteReview(int id)
+        {
+            try
+            {
+                await _reviewService.AdminDeleteReviewAsync(id);
+                TempData["Success"] = "Review has been forcefully redacted from the ecosystem.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Unable to redact review: " + ex.Message;
+            }
+
+            return RedirectToAction(nameof(ManageReviews));
         }
     }
 }

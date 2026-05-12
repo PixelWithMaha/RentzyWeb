@@ -163,3 +163,56 @@ body {
     border-width: 0 1px;
     border-color: var(--theme-border);
 }
+
+/* ----------------------------------------------------------------------------------
+   4. BUTTON CONTRAST OVERRIDES (Force absolute high contrast)
+   ---------------------------------------------------------------------------------- */
+.btn-primary,
+.btn-success,
+.btn-danger,
+.btn-secondary,
+.btn-dark {
+    color: #ffffff !important;
+}
+
+/* Ensure elements/icons nested inside these buttons strictly inherit the white text color */
+.btn-primary *,
+.btn-success *,
+.btn-danger *,
+.btn-secondary *,
+.btn-dark * {
+    color: inherit !important;
+}
+
+/* Keep high dark contrast for yellow Warning buttons */
+.btn-warning {
+    color: #111827 !important; /* Tailored slate-900 dark contrast */
+}
+
+/* Central Developer Safeguard: Catch any future custom-suffixed or action buttons defined across the project views */
+[class*="btn-"][class*="-custom"],
+[class*="btn-"][class*="gradient"],
+.btn-action, .btn-approve, .btn-reject, .btn-edit, .btn-images, .btn-delete {
+    color: #ffffff !important;
+}
+
+/* Ensure icons always inherit explicit high-contrast within these targets */
+[class*="btn-"][class*="-custom"] *,
+[class*="btn-"][class*="gradient"] *,
+.btn-action *, .btn-approve *, .btn-reject *, .btn-edit *, .btn-images *, .btn-delete * {
+    color: inherit !important;
+}
+
+/* Robust interactive feedback for custom targeted buttons */
+[class*="btn-"][class*="-custom"],
+[class*="btn-"][class*="gradient"],
+.btn-action, .btn-approve, .btn-reject, .btn-edit, .btn-images, .btn-delete {
+    transition: all 0.2s ease;
+}
+
+[class*="btn-"][class*="-custom"]:hover,
+[class*="btn-"][class*="gradient"]:hover,
+.btn-action:hover, .btn-approve:hover, .btn-reject:hover, .btn-edit:hover, .btn-images:hover, .btn-delete:hover {
+    transform: translateY(-1px);
+    /* Restoring native visual feedback and removing destructive color filter */
+}
