@@ -68,7 +68,7 @@ namespace RentzyWeb.Controllers
             await _notifService.MarkAsSeenAsync(id);
 
             var tenantId = HttpContext.Session.GetInt32("UserId");
-            var notification = await _notifService.GetNotificationByIdAsync(id);
+            var notification = await _notifService.GetNotificationByIdAsync(id,tenantId.Value);
 
             if (notification == null) return NotFound();
 

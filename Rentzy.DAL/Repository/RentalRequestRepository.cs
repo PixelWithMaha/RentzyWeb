@@ -26,10 +26,17 @@ namespace Rentzy.DAL.Repository
         public async Task<PropertyRentalRequest?> GetRequestByIdAsync(int requestId)
         {
             return await _db.PropertyRentalRequests
-                .Include(r => r.Tenant)
-                .Include(r => r.Property)
-                .Include(r => r.Status)
-                .FirstOrDefaultAsync(r => r.Id == requestId);
+                 .Include(r => r.Tenant)
+        .Include(r => r.Property)
+            .ThenInclude(p => p.Images)        
+        .Include(r => r.Property)
+            .ThenInclude(p => p.City)         
+        .Include(r => r.Property)
+            .ThenInclude(p => p.PropertyType)  
+        .Include(r => r.Property)
+            .ThenInclude(p => p.Landlord)    
+        .Include(r => r.Status)
+        .FirstOrDefaultAsync(r => r.Id == requestId);
         }
 
         public async Task UpdateRequestAsync(PropertyRentalRequest request)

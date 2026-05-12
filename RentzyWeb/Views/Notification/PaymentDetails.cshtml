@@ -27,8 +27,8 @@
                             <p><strong>Amount:</strong> <span class="text-primary fw-bold fs-5">@Model.Amount.ToString("C")</span></p>
                             <p>
                                 <strong>Status:</strong>
-                                <span class="badge @(Model.StatusId == 1 ? "bg-success" : "bg-warning")">
-                                    @(Model.StatusId == 1 ? "Paid" : "Pending")
+                                <span class="badge @(Model.StatusId == 2 ? "bg-success" : Model.StatusId == 3 ? "bg-danger" : "bg-warning")">
+                                    @(Model.StatusId == 2 ? "Paid" : Model.StatusId == 3 ? "Failed" : "Pending")
                                 </span>
                             </p>
                         </div>

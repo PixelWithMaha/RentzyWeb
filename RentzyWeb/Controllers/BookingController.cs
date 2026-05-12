@@ -128,7 +128,7 @@ namespace RentzyWeb.Controllers
             return View(model);
         }
 
-        // PAYMENT CONFIRMATION GET - Show payment confirmation page
+        // CONFIRM PAYMENT GET - Show payment confirmation page
         public async Task<IActionResult> ConfirmPayment(int paymentId)
         {
             var tenantId = HttpContext.Session.GetInt32("UserId");
@@ -137,28 +137,27 @@ namespace RentzyWeb.Controllers
             var payment = await _bookingService.GetPaymentByIdAsync(paymentId);
             if (payment == null) return NotFound();
 
-            // FIX: Get the booking to check tenant authorization
             var booking = await _bookingService.GetBookingByPaymentIdAsync(paymentId);
             if (booking == null || booking.TenantId != tenantId.Value)
                 return Forbid();
 
-            // Check if payment is already paid (StatusId = 2)
-            if (payment.StatusId == 2) // Paid
+            // If already paid, go directly to receipt
+            if (payment.StatusId == 2 && payment.PaidAt != null)
             {
                 TempData["Info"] = "This payment has already been processed.";
                 return RedirectToAction("Receipt", new { paymentId = paymentId });
             }
 
-            // Check if payment is failed (StatusId = 3)
-            if (payment.StatusId == 3) // Failed
+            // If failed, show message but still allow retry
+            if (payment.StatusId == 3)
             {
-                TempData["ErrorMessage"] = "This payment has failed. Please try again.";
+                TempData["ErrorMessage"] = "This payment previously failed. Please try again.";
             }
 
             return View(payment);
         }
 
-        // PAYMENT CONFIRMATION POST - Process the payment
+        // CONFIRM PAYMENT POST - Process the payment
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmPayment(int paymentId, string paymentMethod)
@@ -171,30 +170,27 @@ namespace RentzyWeb.Controllers
                 var payment = await _bookingService.GetPaymentByIdAsync(paymentId);
                 if (payment == null) return NotFound();
 
-                // FIX: Get the booking to check tenant authorization
                 var booking = await _bookingService.GetBookingByPaymentIdAsync(paymentId);
                 if (booking == null || booking.TenantId != tenantId.Value)
                     return Forbid();
 
-                // Check if payment is already paid (StatusId = 2)
-                if (payment.StatusId == 2)
+                // Already paid — redirect to receipt
+                if (payment.StatusId == 2 && payment.PaidAt != null)
                 {
-                    TempData["ErrorMessage"] = "This payment has already been processed.";
-                    return RedirectToAction("PaymentHistory", "Tenant");
+                    TempData["Info"] = "This payment has already been processed.";
+                    return RedirectToAction("Receipt", new { paymentId = paymentId });
                 }
 
-                // Process the payment with selected method
+                // Process the payment
                 var success = await _paymentService.ProcessPaymentAsync(paymentId, paymentMethod);
+
                 if (success)
                 {
-                    // TODO: Implement payment status update in service
-                    // For now, we'll assume the payment service handles status updates
                     TempData["SuccessMessage"] = $"Payment of {payment.Amount:C} completed successfully using {GetPaymentMethodName(paymentMethod)}!";
                     return RedirectToAction("Receipt", new { paymentId = paymentId });
                 }
                 else
                 {
-                    // TODO: Implement payment status update in service  
                     TempData["ErrorMessage"] = "Payment processing failed. Please try again.";
                     return RedirectToAction("ConfirmPayment", new { paymentId = paymentId });
                 }
@@ -217,18 +213,17 @@ namespace RentzyWeb.Controllers
                 var payment = await _bookingService.GetPaymentByIdAsync(paymentId);
                 if (payment == null) return NotFound();
 
-                // FIX: Get the booking to check tenant authorization
                 var booking = await _bookingService.GetBookingByPaymentIdAsync(paymentId);
                 if (booking == null || booking.TenantId != tenantId.Value)
                     return Forbid();
 
-                if (payment.StatusId != 2) // Not paid (StatusId = 2 is Paid)
+                // FIX: Must check BOTH StatusId == 2 AND PaidAt is not null
+                if (payment.StatusId != 2 || payment.PaidAt == null)
                 {
                     TempData["ErrorMessage"] = "Payment not completed. Please complete the payment first.";
                     return RedirectToAction("ConfirmPayment", new { paymentId = paymentId });
                 }
 
-                // Get receipt data
                 var receipt = await _paymentService.GetReceiptAsync(paymentId);
                 return View(receipt);
             }
@@ -239,7 +234,7 @@ namespace RentzyWeb.Controllers
             }
         }
 
-        // UPDATED PAYMENT METHOD - Fixed to properly handle payment flow
+        // PAY POST - Redirect to ConfirmPayment
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Pay(int paymentId)
@@ -250,19 +245,18 @@ namespace RentzyWeb.Controllers
             var payment = await _bookingService.GetPaymentByIdAsync(paymentId);
             if (payment == null) return NotFound();
 
-            // FIX: Get the booking to check tenant authorization
             var booking = await _bookingService.GetBookingByPaymentIdAsync(paymentId);
             if (booking == null || booking.TenantId != tenantId.Value)
                 return Forbid();
 
-            // Check payment status
-            if (payment.StatusId == 2) // Already paid
+            // Already paid — go to receipt
+            if (payment.StatusId == 2 && payment.PaidAt != null)
             {
-                TempData["ErrorMessage"] = "This payment has already been processed.";
+                TempData["Info"] = "This payment has already been processed.";
                 return RedirectToAction("Receipt", new { paymentId = paymentId });
             }
 
-            if (payment.StatusId == 3) // Failed
+            if (payment.StatusId == 3)
             {
                 TempData["Info"] = "Previous payment failed. You can try again.";
             }
@@ -270,7 +264,7 @@ namespace RentzyWeb.Controllers
             return RedirectToAction("ConfirmPayment", new { paymentId = paymentId });
         }
 
-        // NEW: Get pending payments for notifications
+        // GET PENDING PAYMENTS - Returns JSON for notifications
         public async Task<IActionResult> GetPendingPayments()
         {
             var tenantId = HttpContext.Session.GetInt32("UserId");
@@ -287,7 +281,7 @@ namespace RentzyWeb.Controllers
             }
         }
 
-        // NEW: Direct payment from payment ID
+        // DIRECT PAYMENT - Redirect to ConfirmPayment from a paymentId directly
         public async Task<IActionResult> DirectPayment(int paymentId)
         {
             var tenantId = HttpContext.Session.GetInt32("UserId");
@@ -296,19 +290,17 @@ namespace RentzyWeb.Controllers
             var payment = await _bookingService.GetPaymentByIdAsync(paymentId);
             if (payment == null) return NotFound();
 
-            // FIX: Get the booking to check tenant authorization
             var booking = await _bookingService.GetBookingByPaymentIdAsync(paymentId);
             if (booking == null || booking.TenantId != tenantId.Value)
                 return Forbid();
 
-            // Check payment status
-            if (payment.StatusId == 2) // Paid
+            if (payment.StatusId == 2 && payment.PaidAt != null)
             {
                 TempData["Info"] = "This payment has already been processed.";
                 return RedirectToAction("Receipt", new { paymentId = paymentId });
             }
 
-            if (payment.StatusId == 3) // Failed
+            if (payment.StatusId == 3)
             {
                 TempData["Info"] = "Previous payment failed. You can try again.";
             }

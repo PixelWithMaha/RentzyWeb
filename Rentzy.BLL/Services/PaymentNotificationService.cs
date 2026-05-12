@@ -41,7 +41,7 @@ namespace Rentzy.BLL.Services
                 var property = await _propertyRepo.GetPropertyDetailsAsync(booking.PropertyId);
                 if (property == null) continue;
 
-                // FIX: Check for null values
+                // Check for null values
                 var notificationDTO = new PaymentNotificationDTO
                 {
                     Id = notification.Id,
@@ -67,9 +67,9 @@ namespace Rentzy.BLL.Services
         }
 
         // Get single notification by ID - FIXED NULL ISSUES
-        public async Task<PaymentNotificationDTO> GetNotificationByIdAsync(int id)
+        public async Task<PaymentNotificationDTO> GetNotificationByIdAsync(int id,int tenantId)
         {
-            var notifications = await _repo.GetTenantNotificationsAsync(1); // We'll filter after
+            var notifications = await _repo.GetTenantNotificationsAsync(tenantId); // We'll filter after
             var notification = notifications.FirstOrDefault(n => n.Id == id);
 
             if (notification == null) return null;
