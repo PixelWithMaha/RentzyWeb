@@ -1,4 +1,4 @@
-﻿@model Rentzy.BLL.DTOs.PropertyDTO
+@model Rentzy.BLL.DTOs.PropertyDTO
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 @{
@@ -8,16 +8,16 @@
 }
 
 <h2 class="text-center my-4 fw-bold text-primary" style="font-size:2rem; letter-spacing:0.5px;">
-    Update Images for <span class="text-dark">@Model.Title</span>
+    Update Images for <span>@Model.Title</span>
 </h2>
 
 <div class="container">
-   <div class="mb-4">
-    <label for="imageFiles"  class="form-label fw-semibold text-dark" style="font-size:1.1rem;">
+    <div class="mb-4">
+    <label for="imageFiles"  class="form-label fw-semibold" style="font-size:1.1rem;">
         Add Images
     </label>
-    <input type="file" id="imageFiles" class="form-control shadow-sm" multiple />
-    <small class="text-muted">You can select multiple images (jpg, png)</small>
+    <input type="file" id="imageFiles" name="imageFiles" class="form-control shadow-sm" multiple accept="image/*,.jpg,.jpeg,.png,.gif,.webp" />
+    <small class="text-muted">You can select multiple images (jpg, png, gif, webp). Max 5 MB each.</small>
 </div>
 
     <div id="previewImages" class="d-flex flex-wrap gap-3 mb-4">
@@ -108,4 +108,124 @@ small.text-muted {
     background-color: #0b5ed7; /* Slightly darker blue on hover */
 }
 </style>
+
+<script>
+    (function () {
+        const input = document.getElementById('imageFiles');
+        const preview = document.getElementById('previewImages');
+        const propertyId = '@propertyId';
+        const afToken = '@token';
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+
+        function createImageCard(id, url) {
+            const div = document.createElement('div');
+            div.className = 'position-relative image-card';
+            if (id) div.setAttribute('data-image-id', id);
+
+            const img = document.createElement('img');
+            img.src = url;
+            img.className = 'img-thumbnail image-thumb';
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn btn-sm btn-danger position-absolute top-0 end-0 m-1 delete-image-btn';
+            btn.innerHTML = '<i class="fas fa-times"></i>';
+            btn.addEventListener('click', onDeleteClick);
+
+            div.appendChild(img);
+            div.appendChild(btn);
+            return div;
+        }
+
+        async function onDeleteClick(e) {
+            const card = e.currentTarget.closest('.image-card');
+            const imageId = card?.getAttribute('data-image-id');
+
+            if (!imageId) {
+                // image not saved on server yet - just remove preview
+                card.remove();
+                return;
+            }
+
+            if (!confirm('Delete this image?')) return;
+
+            const form = new FormData();
+            form.append('imageId', imageId);
+
+            try {
+                const resp = await fetch('/Landlord/DeletePropertyImage', {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': afToken
+                    },
+                    body: form
+                });
+
+                if (resp.ok) {
+                    card.remove();
+                } else {
+                    alert('Failed to delete image');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Failed to delete image');
+            }
+        }
+
+        input && input.addEventListener('change', async function (ev) {
+            const files = Array.from(ev.target.files || []);
+            if (!files.length) return;
+
+            const validFiles = [];
+            for (const f of files) {
+                const ext = (f.name.match(/\.[0-9a-z]+$/i) || [''])[0].toLowerCase();
+                if (!allowed.includes(ext)) continue;
+                if (!f.type.startsWith('image/')) continue;
+                if (f.size === 0 || f.size > maxSize) continue;
+                validFiles.push(f);
+            }
+
+            if (!validFiles.length) {
+                alert('No valid images selected. Only jpg, png, gif, webp under 5 MB are allowed.');
+                input.value = '';
+                return;
+            }
+
+            const form = new FormData();
+            for (const f of validFiles) form.append('imageFiles', f);
+
+            try {
+                const resp = await fetch(`/Landlord/UploadNewImages?propertyId=${propertyId}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': afToken
+                    },
+                    body: form
+                });
+
+                if (!resp.ok) {
+                    const txt = await resp.text();
+                    alert('Upload failed: ' + txt);
+                    return;
+                }
+
+                const data = await resp.json();
+                // data = [{ id, url }, ...]
+                for (const item of data) {
+                    const card = createImageCard(item.id, item.url);
+                    preview.appendChild(card);
+                }
+
+                input.value = '';
+            } catch (err) {
+                console.error(err);
+                alert('Upload failed');
+            }
+        });
+
+        // Attach delete handlers to existing images
+        document.querySelectorAll('.delete-image-btn').forEach(btn => btn.addEventListener('click', onDeleteClick));
+    })();
+</script>
 
