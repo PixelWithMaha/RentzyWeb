@@ -58,12 +58,15 @@ namespace Rentzy.BLL.Services
                 await _db.SaveChangesAsync();
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine("PAYMENT ERROR: " + ex.Message);
+                Console.WriteLine("INNER: " + ex.InnerException?.Message);
+
                 var failedPayment = await _db.Payments.FindAsync(paymentId);
                 if (failedPayment != null)
                 {
-                    failedPayment.StatusId = 3; // Failed
+                    failedPayment.StatusId = 3;
                     await _db.SaveChangesAsync();
                 }
                 return false;
