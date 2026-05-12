@@ -47,6 +47,11 @@ namespace Rentzy.BLL.Services
             await _reviewRepository.AddReviewAsync(review);
         }
 
+        public async Task<bool> IsReviewEligibleAsync(int tenantId, int propertyId)
+        {
+            return await _reviewRepository.HasCompletedBookingAsync(tenantId, propertyId);
+        }
+
         public async Task<ReviewDTO> PrepareReviewFormAsync(int propertyId, int tenantId)
         {
             var hasCompleted = await _reviewRepository.HasCompletedBookingAsync(tenantId, propertyId);
@@ -64,6 +69,12 @@ namespace Rentzy.BLL.Services
                 PropertyTitle = property?.Title ?? "Unknown Property",
                 TenantId = tenantId
             };
+        }
+
+        public async Task<int?> GetExistingReviewIdAsync(int tenantId, int propertyId)
+        {
+            var review = await _reviewRepository.GetReviewByTenantAndPropertyAsync(tenantId, propertyId);
+            return review?.Id;
         }
 
         public async Task<IEnumerable<ReviewDTO>> GetReviewsForPropertyAsync(int propertyId)

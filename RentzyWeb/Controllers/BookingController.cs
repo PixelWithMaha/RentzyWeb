@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Rentzy.BLL.Services;
 using Rentzy.DAL.Models;
@@ -12,18 +12,33 @@ namespace RentzyWeb.Controllers
     {
         private readonly ITenantBookingService _bookingService;
         private readonly TenantPaymentService _paymentService;
+        private readonly ReviewService _reviewService;
 
-        public BookingController(ITenantBookingService bookingService, TenantPaymentService paymentService)
+        public BookingController(ITenantBookingService bookingService, TenantPaymentService paymentService, ReviewService reviewService)
         {
             _bookingService = bookingService;
             _paymentService = paymentService;
+            _reviewService = reviewService;
         }
 
-        // DETAILS - View property details
         public async Task<IActionResult> Details(int id)
         {
             var model = await _bookingService.GetPropertyDetailsAsync(id);
             if (model == null) return NotFound();
+
+            var tenantId = HttpContext.Session.GetInt32("UserId");
+            var userRole = HttpContext.Session.GetString("UserType");
+
+            if (tenantId.HasValue && userRole == "Tenant")
+            {
+                model.IsReviewEligible = await _reviewService.IsReviewEligibleAsync(tenantId.Value, id);
+                if (model.IsReviewEligible)
+                {
+                    model.ExistingReviewId = await _reviewService.GetExistingReviewIdAsync(tenantId.Value, id);
+                    model.HasExistingReview = model.ExistingReviewId.HasValue;
+                }
+            }
+
             return View(model);
         }
 

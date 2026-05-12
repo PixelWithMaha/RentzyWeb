@@ -36,5 +36,10 @@ namespace Rentzy.BLL.DTOs
         public double AverageRating { get; set; }
         public int ReviewCount { get; set; }
         public List<ReviewDTO> Reviews { get; set; } = new List<ReviewDTO>();
+
+        // Review eligibility for logged in tenant
+        public bool IsReviewEligible { get; set; }
+        public bool HasExistingReview { get; set; }
+        public int? ExistingReviewId { get; set; }
     }
 }
