@@ -142,7 +142,7 @@
         </div>
     }
 
-    <!-- Payment History -->
+    <!-- Payment History List -->
     <div class="row">
         <div class="col-12">
             @if (!Model.Any())
@@ -211,13 +211,11 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4 text-end">
-                                    <div class="d-flex gap-2 justify-content-end">
-                                        <a asp-controller="Booking" asp-action="Receipt"
-                                           asp-route-paymentId="@payment.PaymentId"
-                                           class="btn receipt-btn">
-                                            <i class="fas fa-receipt me-2"></i>View Receipt
-                                        </a>
-                                    </div>
+                                    <a asp-controller="Booking" asp-action="Receipt"
+                                       asp-route-paymentId="@payment.PaymentId"
+                                       class="btn receipt-btn">
+                                        <i class="fas fa-receipt me-2"></i>View Receipt
+                                    </a>
                                 </div>
                             </div>
                         </div>

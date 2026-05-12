@@ -47,7 +47,10 @@ public class TenantBookingService : ITenantBookingService
             LandlordId = p.LandlordId,
             LandlordName = p.Landlord?.FirstName + " " + p.Landlord?.LastName,
             Images = p.Images?.ToList() ?? new List<PropertyImage>(),
-            TenantNames = p.Bookings?.Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName).ToList()
+            TenantNames = p.Bookings?
+           .Where(b => b.StatusId == 1 && b.StartDate <= DateTime.Now && b.EndDate >= DateTime.Now)
+           .Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName)
+           .ToList() ?? new List<string>(),
         };
 
         // Populate approval status into DTO

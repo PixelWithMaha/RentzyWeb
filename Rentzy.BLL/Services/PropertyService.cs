@@ -50,10 +50,14 @@ namespace Rentzy.BLL.Services
                     PropertyTypeId = p.PropertyTypeId,
                     LandlordId = p.LandlordId,
                     LandlordName = p.Landlord != null ? p.Landlord.FirstName + " " + p.Landlord.LastName : "N/A",
-                    TenantNames = p.Bookings?.Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName).ToList() ?? new List<string>(),
+                    TenantNames = p.Bookings?
+                    .Where(b => b.StatusId == 1 && b.StartDate <= DateTime.Now && b.EndDate >= DateTime.Now)
+                    .Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName)
+                    .ToList() ?? new List<string>(),
                     Images = p.Images?.ToList() ?? new List<PropertyImage>(),
                     StatusId = approvalRequest?.StatusId ?? ApprovalStatusConstants.Pending,
                     IsApproved = (approvalRequest?.StatusId == ApprovalStatusConstants.Approved)
+                    
                 };
 
                 // Only include approved properties for tenant listings/search.
@@ -89,7 +93,10 @@ namespace Rentzy.BLL.Services
                     PropertyTypeId = p.PropertyTypeId,
                     LandlordId = p.LandlordId,
                     LandlordName = p.Landlord != null ? p.Landlord.FirstName + " " + p.Landlord.LastName : "N/A",
-                    TenantNames = p.Bookings?.Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName).ToList() ?? new List<string>(),
+                    TenantNames = p.Bookings?
+                    .Where(b => b.StatusId == 1 && b.StartDate <= DateTime.Now && b.EndDate >= DateTime.Now)
+                    .Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName)
+                    .ToList() ?? new List<string>(),
                     Images = p.Images?.ToList() ?? new List<PropertyImage>(),
                     StatusId = approvalRequest?.StatusId ?? ApprovalStatusConstants.Pending,
                     IsApproved = (approvalRequest?.StatusId == ApprovalStatusConstants.Approved)
@@ -271,7 +278,10 @@ namespace Rentzy.BLL.Services
                 PropertyTypeId = p.PropertyTypeId,
                 LandlordId = p.LandlordId,
                 LandlordName = p.Landlord != null ? p.Landlord.FirstName + " " + p.Landlord.LastName : "N/A",
-                TenantNames = p.Bookings?.Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName).ToList() ?? new List<string>(),
+                TenantNames = p.Bookings?
+                .Where(b => b.StatusId == 1 && b.StartDate <= DateTime.Now && b.EndDate >= DateTime.Now)
+                .Select(b => b.Tenant.FirstName + " " + b.Tenant.LastName)
+                .ToList() ?? new List<string>(),
                 Images = p.Images?.ToList() ?? new List<PropertyImage>(),
                 StatusId = approvalRequest?.StatusId ?? ApprovalStatusConstants.Pending,
                 IsApproved = (approvalRequest?.StatusId == ApprovalStatusConstants.Approved)

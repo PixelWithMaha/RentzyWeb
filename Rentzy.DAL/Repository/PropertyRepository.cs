@@ -121,8 +121,10 @@ namespace Rentzy.DAL.Repository
         {
             return await _context.Properties
                 .Include(p => p.Landlord)                  // Include landlord details
-                .Include(p => p.Bookings)                  // Include bookings
-                .ThenInclude(b => b.Tenant)           // Include tenant details in bookings
+                .Include(p => p.Bookings)
+                .ThenInclude(b => b.Tenant)
+                .Include(p => p.Bookings)
+                .ThenInclude(b => b.Status)       
                 .Include(p => p.Images)                    // Include property images
                 .Include(p => p.PropertyType)              // Include property type
                 .ToListAsync();
@@ -135,8 +137,12 @@ namespace Rentzy.DAL.Repository
             return await _context.Properties
                 .Include(p => p.Images)
                 .Include(p => p.Landlord)
+              .Include(p => p.Bookings)
+    .ThenInclude(b => b.Tenant)
+.Include(p => p.Bookings)        // ADD THIS
+    .ThenInclude(b => b.Status)
                 .Include(p => p.Bookings)
-                    .ThenInclude(b => b.Tenant)
+                .ThenInclude(b => b.Status)
                 .Include(p => p.PropertyType)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
