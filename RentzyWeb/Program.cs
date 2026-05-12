@@ -80,6 +80,10 @@ Console.WriteLine("Using REAL Gmail Email Service");
 builder.Services.AddScoped<ReportsRepository>();
 builder.Services.AddScoped<ReportsService>();
 
+// Reviews
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<ReviewService>();
+
 // Session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
