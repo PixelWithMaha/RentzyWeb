@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Rentzy.BLL.DTOs;
 using Rentzy.BLL.Services;
@@ -20,6 +20,7 @@ namespace Rentzy.Web.Controllers
         private readonly ReportsService _reportsService;
         private readonly AuthService _authService;
         private readonly ILandlordApprovalService _landlordApprovalService;
+        private readonly Rentzy.BLL.Services.ReviewService _reviewService;
 
         public LandlordController(
             AuthService authService,
@@ -27,14 +28,16 @@ namespace Rentzy.Web.Controllers
             LandlordService landlordService,
             PaymentService payservice,
             ReportsService reportsService,
-            ILandlordApprovalService landlordApprovalService) // Add this
+            ILandlordApprovalService landlordApprovalService,
+            Rentzy.BLL.Services.ReviewService reviewService) // Add this
         {
             _propertyService = propertyService;
             _landlordService = landlordService;
             _paymentService = payservice;
             _reportsService = reportsService;
             _authService = authService;
-            _landlordApprovalService = landlordApprovalService; // Add this
+            _landlordApprovalService = landlordApprovalService; 
+            _reviewService = reviewService;
         }
 
         // LANDLORD DASHBOARD
@@ -363,6 +366,20 @@ namespace Rentzy.Web.Controllers
         public IActionResult DoneUpdatingImages(int propertyId)
         {
             return RedirectToAction("EditProperty", new { id = propertyId });
+        }
+
+        // ============================================================================================
+        // Review Insights
+        // ============================================================================================
+
+        [HttpGet]
+        public async Task<IActionResult> Reviews()
+        {
+            var landlordId = HttpContext.Session.GetInt32("UserId");
+            if (landlordId == null) return RedirectToAction("Login", "Account");
+
+            var reviews = await _reviewService.GetReviewsForLandlordAsync(landlordId.Value);
+            return View(reviews);
         }
     }
 }

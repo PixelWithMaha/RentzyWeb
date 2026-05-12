@@ -152,5 +152,46 @@ namespace Rentzy.BLL.Services
 
             await _reviewRepository.DeleteReviewAsync(review);
         }
+
+        public async Task<int> GetTotalReviewsCountAsync()
+        {
+            return await _reviewRepository.GetTotalReviewsCountAsync();
+        }
+
+        public async Task<IEnumerable<ReviewDTO>> GetReviewsForLandlordAsync(int landlordId)
+        {
+            var reviews = await _reviewRepository.GetReviewsByLandlordIdAsync(landlordId);
+            return MapToDTOs(reviews);
+        }
+
+        public async Task<IEnumerable<ReviewDTO>> GetReviewsForAdminAsync()
+        {
+            var reviews = await _reviewRepository.GetAllReviewsAsync();
+            return MapToDTOs(reviews);
+        }
+
+        public async Task AdminDeleteReviewAsync(int reviewId)
+        {
+            var review = await _reviewRepository.GetReviewByIdAsync(reviewId);
+            if (review != null)
+            {
+                await _reviewRepository.DeleteReviewAsync(review);
+            }
+        }
+
+        private IEnumerable<ReviewDTO> MapToDTOs(IEnumerable<Review> reviews)
+        {
+            return reviews.Select(r => new ReviewDTO
+            {
+                Id = r.Id,
+                PropertyId = r.PropertyId,
+                PropertyTitle = r.Property?.Title ?? "Unknown",
+                TenantId = r.TenantId,
+                Rating = r.Rating,
+                Comment = r.Comment,
+                CreatedAt = r.CreatedAt,
+                TenantName = r.Tenant != null ? $"{r.Tenant.FirstName} {r.Tenant.LastName}" : "Unknown User"
+            }).ToList();
+        }
     }
 }

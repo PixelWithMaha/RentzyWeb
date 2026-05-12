@@ -80,6 +80,30 @@ namespace Rentzy.DAL.Repository
             await _context.SaveChangesAsync();
         }
 
+        public async Task<IEnumerable<Review>> GetAllReviewsAsync()
+        {
+            return await _context.Reviews
+                .Include(r => r.Property)
+                .Include(r => r.Tenant)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Review>> GetReviewsByLandlordIdAsync(int landlordId)
+        {
+            return await _context.Reviews
+                .Include(r => r.Property)
+                .Include(r => r.Tenant)
+                .Where(r => r.Property.LandlordId == landlordId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<int> GetTotalReviewsCountAsync()
+        {
+            return await _context.Reviews.CountAsync();
+        }
+
         public async Task DeleteReviewAsync(Review review)
         {
             _context.Reviews.Remove(review);
