@@ -24,12 +24,23 @@ namespace Rentzy.DAL.Repository
 
         public async Task<bool> HasCompletedBookingAsync(int tenantId, int propertyId)
         {
-            // In this application, a completed booking correlates directly to a PropertyRentalRequest
-            // record marked with StatusId = 4 (Completed).
-            return await _context.PropertyRentalRequests
-                .AnyAsync(r => r.TenantId == tenantId 
-                            && r.PropertyId == propertyId 
-                            && r.StatusId == 4); // 4 explicitly mapped to Completed
+            // Eligibility is defined as having at least one Booking for the property
+            // that has an associated Payment marked as Paid (StatusId = 2).
+            // Using explicit Join to avoid any navigation property mapping issues.
+            return await _context.Bookings
+                .Join(_context.Payments, 
+                      b => b.Id, 
+                      p => p.BookingId, 
+                      (b, p) => new { b, p })
+                .AnyAsync(x => x.b.TenantId == tenantId 
+                            && x.b.PropertyId == propertyId 
+                            && x.p.StatusId == 2);
+        }
+
+        public async Task<Review?> GetReviewByTenantAndPropertyAsync(int tenantId, int propertyId)
+        {
+            return await _context.Reviews
+                .FirstOrDefaultAsync(r => r.TenantId == tenantId && r.PropertyId == propertyId);
         }
 
         public async Task<IEnumerable<Review>> GetReviewsByPropertyIdAsync(int propertyId)

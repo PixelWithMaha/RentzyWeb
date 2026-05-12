@@ -8,6 +8,7 @@ namespace Rentzy.DAL.Repository
     {
         Task AddReviewAsync(Review review);
         Task<bool> HasCompletedBookingAsync(int tenantId, int propertyId);
+        Task<Review?> GetReviewByTenantAndPropertyAsync(int tenantId, int propertyId);
         Task<IEnumerable<Review>> GetReviewsByPropertyIdAsync(int propertyId);
         Task<Dictionary<int, (double AverageRating, int ReviewCount)>> GetReviewAggregatesAsync(IEnumerable<int> propertyIds);
         Task<Review?> GetReviewByIdAsync(int id);

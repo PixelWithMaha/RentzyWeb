@@ -84,14 +84,16 @@ namespace Rentzy.BLL.Services
             var request = await _repo.GetTenantRequestByIdAsync(requestId);
             if (request == null || request.Status.Name != "Pending") return false;
 
+            // 1. Verify all preconditions / lookups first BEFORE saving any changes
             var approvedStatus = await _repo.GetRequestStatusByNameAsync("Approved");
-            if (approvedStatus == null) return false;
+            var activeBookingStatus = await _repo.GetBookingStatusByNameAsync("Active");
 
+            if (approvedStatus == null || activeBookingStatus == null) 
+                return false; // Ensure critical data configuration integrity
+
+            // 2. Commit transactional-like operations
             request.StatusId = approvedStatus.Id;
             await _repo.UpdateRequestAsync(request);
-
-            var activeBookingStatus = await _repo.GetBookingStatusByNameAsync("Active");
-            if (activeBookingStatus == null) return false;
 
             var booking = new Booking
             {
