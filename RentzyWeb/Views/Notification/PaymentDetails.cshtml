@@ -1,0 +1,61 @@
+﻿@model Rentzy.BLL.DTOs.PaymentDTO
+
+@{
+    ViewData["Title"] = "Payment Details";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="card-title mb-0">Payment Details</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Property Information</h5>
+                            <hr>
+                            <p><strong>Property:</strong> @Model.PropertyTitle</p>
+                            <p><strong>Property ID:</strong> #@Model.PropertyId</p>
+                            <p><strong>Request ID:</strong> #@Model.RequestId</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Payment Information</h5>
+                            <hr>
+                            <p><strong>Payment ID:</strong> #@Model.Id</p>
+                            <p><strong>Amount:</strong> <span class="text-primary fw-bold fs-5">@Model.Amount.ToString("C")</span></p>
+                            <p>
+                                <strong>Status:</strong>
+                                <span class="badge @(Model.StatusId == 2 ? "bg-success" : Model.StatusId == 3 ? "bg-danger" : "bg-warning")">
+                                    @(Model.StatusId == 2 ? "Paid" : Model.StatusId == 3 ? "Failed" : "Pending")
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="payment-actions text-center">
+                        @if (Model.StatusId != 1)
+                        {
+                            <a href="@Url.Action("PayFromNotification", "Notification", new { paymentId = Model.Id })"
+                               class="btn btn-primary btn-lg me-3">
+                                <i class="fas fa-credit-card me-2"></i>Make Payment
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Receipt", "Booking", new { paymentId = Model.Id })"
+                               class="btn btn-success btn-lg me-3">
+                                <i class="fas fa-receipt me-2"></i>View Receipt
+                            </a>
+                        }
+
+                        <a href="@Url.Action("Index", "Notification")" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Notifications
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

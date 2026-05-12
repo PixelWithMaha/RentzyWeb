@@ -1,0 +1,80 @@
+﻿@model List<Rentzy.Web.Models.ManageUserVM>
+
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<div class="container mt-4">
+    <h2>Manage Users</h2>
+
+    <div class="text-end mb-3">
+        <a asp-action="Dashboard" asp-controller="Admin" class="btn btn-secondary">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+
+    <table class="table table-bordered table-striped mt-3">
+        <thead>
+            <tr>
+                <th>User Id</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th style="width:250px;">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.UserId</td>
+                    <td>@user.FullName</td>
+                    <td>@user.Email</td>
+
+                    <td>
+                        @if (user.IsDeleted)
+                        {
+                            <span class="badge bg-danger">Blocked</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                    </td>
+
+                    <td>
+                        @if (!user.IsDeleted)
+                        {
+                            <form asp-action="BlockUser" asp-controller="Admin" method="post" class="d-inline">
+                                <input type="hidden" name="userId" value="@user.UserId" />
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    Block
+                                </button>
+                            </form>
+                        }
+
+                        @if (user.IsDeleted)
+                        {
+                            <form asp-action="UnblockUser" asp-controller="Admin" method="post" class="d-inline">
+                                <input type="hidden" name="userId" value="@user.UserId" />
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    Unblock
+                                </button>
+                            </form>
+                        }
+
+                        @if (!user.IsDeleted)
+                        {
+                            <a asp-action="EditUser" asp-controller="Admin" asp-route-id="@user.UserId"
+                               class="btn btn-sm btn-primary">
+                                Edit
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

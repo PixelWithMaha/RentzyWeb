@@ -1,0 +1,80 @@
+﻿@model Rentzy.DAL.Models.LandlordApproval
+@{
+    ViewData["Title"] = "Landlord Approval Details";
+}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Landlord Approval Details</h1>
+
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Admin/Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="/Admin/LandlordApprovals">Landlord Approvals</a></li>
+        <li class="breadcrumb-item active">Details</li>
+    </ol>
+
+    <!-- Landlord Info Card -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-primary text-white fw-bold rounded-top-4">
+            Landlord Information
+        </div>
+
+        <div class="card-body p-4">
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Full Name:</div>
+                <div class="col-md-8">
+                    @Model.Landlord?.FirstName @Model.Landlord?.LastName
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Email:</div>
+                <div class="col-md-8">@Model.Landlord?.Email</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Approval Details -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-secondary text-white fw-bold rounded-top-4">
+            Approval Details
+        </div>
+
+        <div class="card-body p-4">
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Status:</div>
+                <div class="col-md-8">
+                    <span class="badge px-3 py-2 bg-@(
+                          Model.ApprovalStatus?.Name == "Approved" ? "success" :
+                          Model.ApprovalStatus?.Name == "Rejected" ? "danger" :
+                          "warning"
+                                        )">
+                        @Model.ApprovalStatus?.Name
+                    </span>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Admin Notes:</div>
+                <div class="col-md-8">@Model.AdminNotes</div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Submitted At:</div>
+                <div class="col-md-8">
+                    @Model.SubmittedAt.ToString("dd MMM yyyy hh:mm tt")
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-bold">Reviewed At:</div>
+                <div class="col-md-8">
+                    @Model.ReviewedAt?.ToString("dd MMM yyyy hh:mm tt")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="/Admin/LandlordApprovals" class="btn btn-dark px-4 py-2 rounded-3">
+        <i class="fas fa-arrow-left me-2"></i>Back to List
+    </a>
+</div>

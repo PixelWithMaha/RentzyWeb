@@ -1,0 +1,102 @@
+﻿@model Rentzy.BLL.DTOs.PropertyDTO
+@{
+    ViewData["Title"] = "Edit Property";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+               <div class="card-header py-3" style="background: #f8f9fa; color: #000;">
+    <h3 class="mb-0 text-center">
+        <i class="fas fa-edit me-2"></i>Edit Property
+    </h3>
+</div>
+                <div class="card-body p-4">
+
+                    <form asp-action="EditProperty" method="post">
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Property Title</label>
+                            <input asp-for="Title" class="form-control shadow-sm" placeholder="Enter property title" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control shadow-sm" rows="4" placeholder="Describe your property"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Rent" class="form-label">Monthly Rent ($)</label>
+                            <input asp-for="Rent" type="number" class="form-control shadow-sm" placeholder="Enter rent amount" />
+                            <span asp-validation-for="Rent" class="text-danger"></span>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">City</label>
+                                <select asp-for="CityId" class="form-select shadow-sm" asp-items="@(new SelectList(ViewBag.Cities, "Id", "Name"))">
+                                    <option value="">-- Select City --</option>
+                                </select>
+                                <span asp-validation-for="CityId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Property Type</label>
+                                <select asp-for="PropertyTypeId" class="form-select shadow-sm" asp-items="@(new SelectList(ViewBag.PropertyTypes, "Id", "Name"))">
+                                    <option value="">-- Select Type --</option>
+                                </select>
+                                <span asp-validation-for="PropertyTypeId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <a asp-controller="Landlord" 
+                               asp-action="UpdateImages" 
+                               asp-route-propertyId="@Model.Id" 
+                               class="btn btn-outline-info btn-lg w-100 hover-scale shadow-sm">
+                                <i class="fas fa-image me-2"></i> Update Images
+                            </a>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 hover-scale shadow-sm">
+                            <i class="fas fa-save me-2"></i> Update Property
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-scale:hover {
+        transform: scale(1.03);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .card-header h3 {
+        font-weight: 600;
+    }
+
+    /* Shadow for inputs */
+    .form-control, .form-select {
+        border-radius: 8px;
+    }
+
+    /* Button shadows */
+    .btn-lg {
+        font-weight: 600;
+    }
+</style>
+
+@section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+}

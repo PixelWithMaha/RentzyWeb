@@ -1,0 +1,333 @@
+﻿@{
+    ViewData["Title"] = "Tenant Dashboard";
+}
+
+<style>
+    .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .gradient-success {
+        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+    }
+
+    .gradient-info {
+        background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%);
+    }
+
+    .gradient-warning {
+        background: linear-gradient(135deg, #ffa94d 0%, #ff922b 100%);
+    }
+
+    .gradient-card-1 {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .gradient-card-2 {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .gradient-card-3 {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .gradient-card-4 {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+
+    .card-hover {
+        transition: all 0.3s ease;
+        border: none;
+        overflow: hidden;
+    }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+        }
+
+    .stat-card {
+        border-radius: 20px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.1);
+            transform: rotate(30deg);
+        }
+
+    .stat-icon {
+        font-size: 3rem;
+        opacity: 0.8;
+        margin-bottom: 1rem;
+    }
+
+    .action-card {
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        border: none;
+        overflow: hidden;
+        position: relative;
+    }
+
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .action-card:hover::before {
+            left: 100%;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+
+    .action-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: inline-block;
+        padding: 15px;
+        border-radius: 15px;
+        background: rgba(255,255,255,0.2);
+    }
+
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .welcome-card {
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+    }
+
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.1"><polygon points="1000,100 1000,0 0,100"/></svg>');
+            background-size: cover;
+        }
+
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card welcome-card gradient-bg text-white shadow-lg border-0 pulse-animation">
+                <div class="card-body p-5 position-relative">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="display-6 fw-bold mb-2">
+                                <i class="fas fa-home me-3"></i>Welcome back, @ViewBag.UserName!
+                            </h1>
+                            <p class="lead mb-0 opacity-75">Here's your tenant dashboard overview</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="glass-effect rounded-pill px-4 py-2 d-inline-block">
+                                <small class="fw-bold">TENANT PORTAL</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card stat-card gradient-card-1 shadow-lg border-0 card-hover">
+                <div class="card-body p-4 position-relative">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <div class="stat-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <h3 class="fw-bold mb-1">@ViewBag.MyPropertiesCount</h3>
+                            <p class="mb-0 opacity-75">Rented Properties</p>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="bg-white rounded-circle p-3 d-inline-block">
+                                <i class="fas fa-home text-primary fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card stat-card gradient-card-2 shadow-lg border-0 card-hover">
+                <div class="card-body p-4 position-relative">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <div class="stat-icon">
+                                <i class="fas fa-file-contract"></i>
+                            </div>
+                            <h3 class="fw-bold mb-1">@ViewBag.ActiveAgreementsCount</h3>
+                            <p class="mb-0 opacity-75">Active Agreements</p>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="bg-white rounded-circle p-3 d-inline-block">
+                                <i class="fas fa-handshake text-danger fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-transparent border-0 py-4">
+                    <h3 class="fw-bold mb-0 text-gradient gradient-primary d-inline-block">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h3>
+                    <span class="badge bg-primary ms-2 fs-6">5 Options</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <!-- Browse Properties -->
+                        <div class="col-lg-3 col-md-6">
+                            <a asp-controller="Property" asp-action="Index"
+                               class="card action-card gradient-primary text-white text-decoration-none h-100">
+                                <div class="card-body text-center p-4">
+                                    <div class="action-icon">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-2">Browse Properties</h5>
+                                    <p class="small opacity-75 mb-0">Find your next dream home</p>
+                                    <div class="mt-3">
+                                        <span class="badge bg-white text-primary">Explore</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- My Bookings -->
+                        <div class="col-lg-3 col-md-6">
+                            <a asp-controller="Tenant" asp-action="MyBookings"
+                               class="card action-card gradient-info text-white text-decoration-none h-100">
+                                <div class="card-body text-center p-4">
+                                    <div class="action-icon">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-2">My Bookings</h5>
+                                    <p class="small opacity-75 mb-0">View & manage bookings</p>
+                                    <div class="mt-3">
+                                        <span class="badge bg-white text-info">Manage</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Payment Notifications -->
+                        <div class="col-lg-3 col-md-6">
+                            <a asp-controller="Tenant" asp-action="PaymentNotifications"
+                               class="card action-card gradient-warning text-white text-decoration-none h-100">
+                                <div class="card-body text-center p-4">
+                                    <div class="action-icon">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-2">Notifications</h5>
+                                    <p class="small opacity-75 mb-0">Payment reminders & alerts</p>
+                                    <div class="mt-3">
+                                        <span class="badge bg-white text-warning">Alerts</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Payment History -->
+                        <div class="col-lg-3 col-md-6">
+                            <a asp-controller="Tenant" asp-action="PaymentHistory"
+                               class="card action-card gradient-success text-white text-decoration-none h-100">
+                                <div class="card-body text-center p-4">
+                                    <div class="action-icon">
+                                        <i class="fas fa-receipt"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-2">Payment History</h5>
+                                    <p class="small opacity-75 mb-0">View all transactions</p>
+                                    <div class="mt-3">
+                                        <span class="badge bg-white text-success">Records</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Info Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 glass-effect">
+                <div class="card-body text-center py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8 text-md-start text-center">
+                            <h5 class="fw-bold mb-1">Need help with your rental?</h5>
+                            <p class="text-muted mb-0">Our support team is here to assist you 24/7</p>
+                        </div>
+                        <div class="col-md-4 text-md-end text-center mt-2 mt-md-0">
+                            <button class="btn btn-primary btn-lg rounded-pill px-4">
+                                <i class="fas fa-headset me-2"></i>Get Help
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Font Awesome for icons -->
+<script src="https://kit.fontawesome.com/your-font-awesome-kit.js" crossorigin="anonymous"></script>

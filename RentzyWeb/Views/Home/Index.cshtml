@@ -1,0 +1,161 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<style>
+    /* Feature Cards with Hover Effect */
+    .feature-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        color: white;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        height: 230px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+        .feature-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+    .feature-card-blue {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .feature-card-cyan {
+        background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+    }
+
+    .feature-card-pink {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .feature-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .feature-description {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    /* Custom styles for footer thinness */
+    .footer-custom-thin {
+        padding: 0.5rem 0; /* Significantly reduced vertical padding */
+        line-height: 1.2;
+        font-size: 0.8rem;
+    }
+
+        .footer-custom-thin p {
+            margin-bottom: 0.2rem; /* Reduce margin between paragraphs in footer */
+        }
+</style>
+
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 d-flex align-items-center">
+    <div class="container-fluid px-5 py-2">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6 px-4">
+                <div class="position-relative">
+                    <img src="~/images/new.png"
+                         alt="Rentzy Dashboard"
+                         class="img-fluid rounded-4 shadow-lg"
+                         style="max-width: 100%; height: auto;" />
+                </div>
+            </div>
+
+            <div class="col-lg-6 text-center text-lg-start ps-lg-5">
+                <h1 class="display-5 fw-bold mb-3 lh-sm">
+                    Rentzy:
+                    <span style="background: linear-gradient(135deg, #3B82F6, #9333EA); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        Rental Management
+                    </span>
+                    <span class="d-block mt-2">Simplified</span>
+                </h1>
+
+                <p class="fs-6 text-muted mb-3 lh-base">
+                    The all-in-one platform for Landlords, Tenants, and Admins.
+                    Manage properties, agreements, payments, and maintenance with ease.
+                </p>
+
+                <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center justify-content-lg-start">
+                    <a asp-controller="Account" asp-action="Register"
+                       class="btn-register-modern text-center px-4 py-2">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Get Started Free
+                    </a>
+                    <a href="#features"
+                       class="btn-login-modern text-center px-4 py-2">
+                        <i class="bi bi-lightbulb me-2"></i>View Features
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="features" class="py-4 bg-white">
+    <div class="container-fluid px-5">
+        <h2 class="display-5 fw-bold text-center mb-4">Why Choose Rentzy?</h2> <div class="row g-4 justify-content-center">
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card feature-card-blue">
+                    <div class="feature-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="feature-title">Property Management</div>
+                    <div class="feature-description">
+                        List and manage multiple properties with ease. Track availability and pricing.
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card feature-card-cyan">
+                    <div class="feature-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <div class="feature-title">Secure Payments</div>
+                    <div class="feature-description">
+                        Handle rent payments securely. Automatic reminders and tracking.
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card feature-card-pink">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="feature-title">Analytics Dashboard</div>
+                    <div class="feature-description">
+                        Get insights with detailed reports and real-time analytics.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="py-4 text-white" style="background: linear-gradient(135deg, #3B82F6, #2563EB);">
+    <div class="container-fluid px-5 text-center">
+        <h2 class="display-5 fw-bold mb-3">Ready to Get Started?</h2> <p class="fs-6 mb-3">
+            Join thousands of landlords and tenants managing their properties efficiently.
+        </p>
+        <a asp-controller="Account" asp-action="Register"
+           class="btn btn-light px-4 py-2 fw-bold text-primary">
+            Create Free Account
+        </a>
+    </div>
+</div>

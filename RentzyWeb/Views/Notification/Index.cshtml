@@ -1,0 +1,83 @@
+﻿@model IEnumerable<Rentzy.BLL.DTOs.PaymentNotificationDTO>
+@{
+    ViewData["Title"] = "Payment Notifications";
+    var notifications = Model?.ToList() ?? new List<Rentzy.BLL.DTOs.PaymentNotificationDTO>();
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Payment Notifications</h2>
+                <span class="badge bg-primary fs-6">@notifications.Count() Notifications</span>
+            </div>
+
+            @if (!notifications.Any())
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                        <h4 class="text-success">All Caught Up!</h4>
+                        <p class="text-muted">You have no pending payments at the moment.</p>
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-primary mt-3">Back to Home</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="notification-list">
+                    @foreach (var notification in notifications)
+                    {
+                        string statusBadgeClass = notification.Status == "Paid" ? "bg-success"
+                        : notification.Status == "Overdue" ? "bg-danger"
+                        : "bg-warning";
+
+                        <div class="card mb-4 shadow-sm @(!notification.IsSeen ? "border-primary" : "")">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0 text-primary">
+                                    @if (!notification.IsSeen)
+                                    {
+                                        <span class="badge bg-info me-2">New</span>
+                                    }
+                                    @notification.PropertyTitle
+                                </h5>
+                                <span class="badge @statusBadgeClass fs-6">@notification.Status</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-2">
+                                            <strong>Amount Due:</strong>
+                                            <span class="text-danger fw-bold fs-5">@notification.Amount.ToString("C")</span>
+                                        </p>
+                                        <p class="mb-0"><strong>Landlord:</strong> @notification.LandlordName</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2"><strong>Due Date:</strong> @notification.DueDate.ToString("MMM dd, yyyy")</p>
+                                        <p class="mb-2"><strong>Message:</strong> @notification.Message</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    @if (notification.Status == "Pending" || notification.Status == "Overdue")
+                                    {
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("PayFromNotification", "Notification", new { paymentId = notification.PaymentId })"
+                                               class="btn btn-primary btn-lg">
+                                                <i class="fas fa-credit-card me-2"></i>Pay Now
+                                            </a>
+                                            <a href="@Url.Action("PaymentDetails", "Notification", new { paymentId = notification.PaymentId })"
+                                               class="btn btn-outline-secondary btn-lg">
+                                                <i class="fas fa-info-circle me-2"></i>Details
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

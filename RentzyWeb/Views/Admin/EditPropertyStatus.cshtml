@@ -1,0 +1,78 @@
+﻿@using Rentzy.DAL.Models
+@model Rentzy.DAL.Models.PropertyApprovalRequest
+
+@{
+    ViewData["Title"] = "Edit Property Status";
+}
+
+<div class="container mt-4">
+
+    <div class="row mb-3">
+        <div class="col-8">
+            <h3><i class="fas fa-edit me-2 text-warning"></i>Edit Property Status</h3>
+            <p class="text-muted">Update approval status for the selected property.</p>
+        </div>
+
+        <div class="col-4 text-end">
+            <a class="btn btn-outline-secondary"
+               href="@Url.Action("PropertyApprovals", "Admin")">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light">
+            <strong>Property Information</strong>
+        </div>
+        <div class="card-body">
+
+            <div class="mb-3">
+                <label class="form-label">Property Title</label> <br />
+                <strong>@Model.property?.Title</strong>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Requested At</label> <br />
+                @Model.RequestedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+            </div>
+
+            <hr />
+
+            <form method="post" asp-action="EditPropertyStatus" asp-controller="Admin">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" name="id" value="@Model.Id" />
+
+                <div class="mb-3">
+                    <label class="form-label">Current Status</label>
+
+                    <select class="form-select" name="statusId">
+                        <!-- Hide PENDING (1) -->
+                        <option value="2" selected="@(Model.StatusId == 2)">Approved</option>
+                        <option value="3" selected="@(Model.StatusId == 3)">Rejected</option>
+                        <option value="4" selected="@(Model.StatusId == 4)">Cancelled</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>Save Changes
+                </button>
+
+                <a href="@Url.Action("PropertyApprovals", "Admin")"
+                   class="btn btn-secondary ms-2">
+                    Cancel
+                </a>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        // future JS if needed
+    </script>
+}

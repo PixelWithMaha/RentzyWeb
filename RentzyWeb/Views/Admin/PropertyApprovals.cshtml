@@ -1,0 +1,227 @@
+﻿@using Rentzy.DAL.Models
+@model List<Rentzy.DAL.Models.PropertyApprovalRequest>
+
+@{
+    ViewData["Title"] = "Property Approvals";
+    var statuses = ViewBag.ApprovalStatuses as List<Rentzy.DAL.Models.ApprovalStatus> ?? new List<Rentzy.DAL.Models.ApprovalStatus>();
+    int currentStatus = ViewBag.CurrentStatusId ?? 1;
+}
+
+<div class="container mt-4">
+
+    <div class="row mb-3">
+        <div class="col-8">
+            <h3><i class="fas fa-home me-2 text-primary"></i>Property Approvals</h3>
+            <p class="text-muted">Manage property verification requests</p>
+        </div>
+
+        <div class="col-4 text-end">
+            <a class="btn btn-outline-secondary" href="@Url.Action("Dashboard", "Admin")">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+
+                    <form method="get" class="d-flex gap-2 align-items-center">
+                        <label class="mb-0">Filter Status:</label>
+
+                        <select name="statusId" class="form-select w-auto" onchange="this.form.submit()">
+                            @foreach (var s in statuses)
+                            {
+                                <option value="@s.Id" selected="@(s.Id == currentStatus ? "selected" : null)">
+                                    @s.Name
+                                </option>
+                            }
+                        </select>
+
+                        <a class="btn btn-sm btn-outline-primary ms-2"
+                           href="@Url.Action("PropertyApprovals", "Admin")">Reset</a>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- If list empty -->
+    @if (Model == null || !Model.Any())
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-file-alt" style="font-size:3rem; opacity:0.2"></i>
+                        <p class="mt-3 text-muted">No property approval requests for selected status.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="table-responsive">
+
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Property</th>
+                                        <th>Requested At</th>
+                                        <th>Status</th>
+                                        <th>Reviewed At</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>@item.Id</td>
+
+                                            <td>
+                                                <strong>@item.property?.Title</strong><br />
+                                                <small class="text-muted">ID: @item.PropertyId</small>
+                                            </td>
+
+                                            <td>@item.RequestedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+
+                                            <td>
+                                                <span class="badge bg-@(
+                                                      item.StatusId == 1 ? "secondary" :
+                                                      item.StatusId == 2 ? "success" :
+                                                      item.StatusId == 3 ? "danger" : "warning"
+                                                                                                                                                                                                )">
+                                            @(item.Status?.Name ?? "Unknown")
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        @(item.ReviewedAt.HasValue
+                                                                                ? item.ReviewedAt.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+                                                                                : "-")
+                                    </td>
+
+                                            <td class="text-end">
+
+                                        @if (item.StatusId == 1)
+                                                {
+                                                    <!-- Pending -->
+                                                    <div class="d-flex justify-content-end gap-2">
+
+                                                        <!-- Approve Button -->
+                                                        <button class="btn btn-sm btn-success"
+                                                                onclick="openPropertyNotes(@item.Id, 'approve')">
+                                                            <i class="fas fa-check me-1"></i>Approve
+                                                        </button>
+
+                                                        <!-- Reject Button -->
+                                                        <button class="btn btn-sm btn-danger"
+                                                                onclick="openPropertyNotes(@item.Id, 'reject')">
+                                                            <i class="fas fa-times me-1"></i>Reject
+                                                        </button>
+
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="d-flex justify-content-end gap-2">
+
+                                                        <!-- View Button -->
+                                                        <a class="btn btn-sm btn-outline-primary"
+                                                           href="@Url.Action("PropertyApprovalDetails", "Admin", new { id = item.Id })">
+                                                            <i class="fas fa-eye me-1"></i>View
+                                                        </a>
+
+                                                        <!-- EDIT STATUS BUTTON -->
+                                                        <a class="btn btn-sm btn-outline-warning"
+                                                           href="@Url.Action("EditPropertyStatus", "Admin", new { id = item.Id })">
+                                                            <i class="fas fa-edit me-1"></i>Edit Status
+                                                        </a>
+
+                                                    </div>
+                                                }
+
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div> <!-- table-responsive -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+
+<!-- 🌟 NOTES MODAL FOR APPROVE / REJECT -->
+<div class="modal fade" id="propertyNotesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form method="post" id="propertyNotesForm">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="propertyModalTitle">Add Notes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" name="id" id="propertyApprovalId" />
+
+                    <textarea name="notes" class="form-control" rows="4"
+                              placeholder="Write notes here..." required></textarea>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+
+        function openPropertyNotes(id, type) {
+
+            document.getElementById("propertyApprovalId").value = id;
+
+            if (type === "approve") {
+                document.getElementById("propertyModalTitle").innerText = "Approve Property - Add Notes";
+                document.getElementById("propertyNotesForm").action = "/Admin/ApproveProperty";
+            }
+            else {
+                document.getElementById("propertyModalTitle").innerText = "Reject Property - Add Notes";
+                document.getElementById("propertyNotesForm").action = "/Admin/RejectProperty";
+            }
+
+            let modal = new bootstrap.Modal(document.getElementById('propertyNotesModal'));
+            modal.show();
+        }
+
+    </script>
+}

@@ -1,0 +1,493 @@
+﻿@model Rentzy.BLL.DTOs.PaymentDTO
+
+@{
+    ViewData["Title"] = "Payment Details";
+}
+
+<div class="container my-5">
+
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="dashboard-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-receipt me-2"></i>Payment Details</h1>
+                    <p>Complete payment information and transaction details</p>
+                </div>
+                <div class="header-actions">
+                    <a asp-action="Index" class="btn btn-back">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Payments
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Details Card -->
+    <div class="payment-details-card">
+        <!-- Payment Header -->
+        <div class="payment-header">
+            <div class="payment-identity">
+                <div class="payment-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="payment-title">
+                    <h3>Payment Receipt</h3>
+                    <p>Transaction #@Model.Id</p>
+                </div>
+            </div>
+            <div class="payment-status">
+                <span class="status-badge status-@Model.StatusName.ToLower()">
+                    @Model.StatusName
+                </span>
+            </div>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="payment-info-grid">
+            <!-- Tenant Information -->
+            <div class="info-section">
+                <div class="section-header">
+                    <i class="fas fa-user"></i>
+                    <h4>Tenant Information</h4>
+                </div>
+                <div class="info-content">
+                    <div class="info-item">
+                        <span class="info-label">Tenant Name</span>
+                        <span class="info-value">@Model.TenantName</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property Information -->
+            <div class="info-section">
+                <div class="section-header">
+                    <i class="fas fa-home"></i>
+                    <h4>Property Information</h4>
+                </div>
+                <div class="info-content">
+                    <div class="info-item">
+                        <span class="info-label">Property</span>
+                        <span class="info-value">@Model.PropertyTitle</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Details -->
+            <div class="info-section">
+                <div class="section-header">
+                    <i class="fas fa-credit-card"></i>
+                    <h4>Payment Details</h4>
+                </div>
+                <div class="info-content">
+                    <div class="info-item">
+                        <span class="info-label">Amount</span>
+                        <span class="info-value amount">@Model.Amount.ToString("C")</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Payment Method</span>
+                        <span class="info-value method">
+                            <i class="fas fa-@(Model.Method.ToLower().Contains("card") ? "credit-card" : "money-bill") me-1"></i>
+                            @Model.Method
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction Details -->
+            <div class="info-section">
+                <div class="section-header">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h4>Transaction Details</h4>
+                </div>
+                <div class="info-content">
+                    <div class="info-item">
+                        <span class="info-label">Payment Date</span>
+                        <span class="info-value">
+                            @if (Model.PaidAt.HasValue)
+                            {
+                                    <i class="fas fa-calendar me-1"></i>
+                                @Model.PaidAt.Value.ToString("dd MMM yyyy")
+                            }
+                            else
+                            {
+                                    <span class="text-muted">Not paid yet</span>
+                            }
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Status</span>
+                        <span class="info-value status-@Model.StatusName.ToLower()">@Model.StatusName</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a asp-action="Index" class="btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Payments
+            </a>
+
+            @if (Model.StatusName == "Pending")
+            {
+                    <form asp-action="SendReminder" method="post" class="d-inline">
+                        <input type="hidden" name="paymentId" value="@Model.Id" />
+                        <button type="submit" class="btn-warning">
+                            <i class="fas fa-bell me-2"></i>Send Reminder
+                        </button>
+                    </form>
+            }
+
+            <button onclick="window.print()" class="btn-primary">
+                <i class="fas fa-print me-2"></i>Print Receipt
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-blue: #1e3a8a;
+        --medium-blue: #3b82f6;
+        --light-blue: #e0f2fe;
+        --purple: #6a11cb;
+        --accent-blue: #2575fc;
+        --white: #ffffff;
+        --light-bg: #f8fafc;
+        --dark-text: #1e293b;
+        --gray-text: #64748b;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --success: #10b981;
+        --warning: #f59e0b;
+        --pending: #f59e0b;
+        --danger: #ef4444;
+    }
+
+    /* Dashboard Header */
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--purple) 0%, var(--accent-blue) 100%);
+        border-radius: 16px;
+        padding: 30px;
+        color: var(--white);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    }
+
+    .header-content h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+    .header-content p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .btn-back {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: var(--white);
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+        color: var(--white);
+    }
+
+    /* Payment Details Card */
+    .payment-details-card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Payment Header */
+    .payment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .payment-identity {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .payment-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--purple), var(--accent-blue));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .payment-title h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark-text);
+        margin: 0 0 4px 0;
+    }
+
+    .payment-title p {
+        font-size: 0.9rem;
+        color: var(--gray-text);
+        margin: 0;
+    }
+
+    /* Status Badge */
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+        background: var(--warning);
+        color: white;
+    }
+
+    .status-completed {
+        background: var(--success);
+        color: white;
+    }
+
+    .status-failed {
+        background: var(--danger);
+        color: white;
+    }
+
+    /* Payment Information Grid */
+    .payment-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    /* Info Section */
+    .info-section {
+        background: var(--light-bg);
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .section-header i {
+        color: var(--medium-blue);
+        font-size: 1.1rem;
+    }
+
+    .section-header h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--dark-text);
+        margin: 0;
+    }
+
+    .info-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+    }
+
+    .info-label {
+        font-size: 0.9rem;
+        color: var(--gray-text);
+        font-weight: 500;
+    }
+
+    .info-value {
+        font-size: 0.95rem;
+        color: var(--dark-text);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .info-value.amount {
+        font-size: 1.1rem;
+        color: var(--primary-blue);
+    }
+
+    .info-value.method {
+        color: var(--medium-blue);
+    }
+
+    .info-value.status-pending {
+        color: var(--warning);
+        font-weight: 600;
+    }
+
+    .info-value.status-completed {
+        color: var(--success);
+        font-weight: 600;
+    }
+
+    .info-value.status-failed {
+        color: var(--danger);
+        font-weight: 600;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        padding-top: 20px;
+        border-top: 2px solid #f1f5f9;
+    }
+
+    .btn-secondary, .btn-warning, .btn-primary {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.95rem;
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-warning {
+        background: var(--warning);
+        color: white;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--purple), var(--accent-blue));
+        color: white;
+    }
+
+    .btn-secondary:hover, .btn-warning:hover, .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+        opacity: 0.9;
+        color: white;
+    }
+
+    /* Print Styles */
+    @@media print {
+        .dashboard-header, .action-buttons {
+            display: none;
+        }
+
+        .payment-details-card {
+            box-shadow: none;
+            border: 1px solid #000;
+        }
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .dashboard-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 20px;
+        }
+
+        .payment-header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .payment-identity {
+            justify-content: center;
+        }
+
+        .payment-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-secondary, .btn-warning, .btn-primary {
+            justify-content: center;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .payment-details-card {
+            padding: 20px;
+        }
+
+        .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .payment-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+        }
+    }
+</style>

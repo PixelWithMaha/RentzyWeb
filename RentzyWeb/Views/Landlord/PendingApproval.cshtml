@@ -1,0 +1,205 @@
+﻿@model Rentzy.DAL.Models.LandlordApproval
+
+@{
+    ViewData["Title"] = Model?.ApprovalStatusId == 3 ? "Application Rejected" : "Pending Approval";
+}
+
+<style>
+    .admin-notes-box {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        border-left: 4px solid #EF4444;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            @if (Model?.ApprovalStatusId == 3) 
+            {
+                <!-- Rejection Card -->
+                <div class="card shadow-lg border-0 text-center border-danger">
+                    <div class="card-body p-5">
+
+                        <!-- Icon -->
+                        <div class="mb-4">
+                            <i class="fas fa-times-circle text-danger" style="font-size: 5rem;"></i>
+                        </div>
+
+                        <!-- Title -->
+                        <h1 class="display-5 fw-bold text-danger mb-3">Application Rejected</h1>
+
+                        <!-- Message -->
+                        <p class="lead text-muted mb-4">
+                            Hello, <strong>@ViewBag.UserName</strong>
+                        </p>
+
+                        <p class="text-muted mb-4">
+                            Your landlord application has been reviewed and unfortunately was not approved at this time.
+                        </p>
+
+                        <!-- Dates Info -->
+                        <div class="alert alert-danger border-danger mb-4" role="alert">
+                            <p class="mb-1 small">
+                                <strong>Submitted:</strong> @Model.SubmittedAt.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                            </p>
+
+                            @if (Model.ReviewedAt.HasValue)
+                            {
+                                <p class="mb-0 small">
+                                    <strong>Reviewed:</strong> @Model.ReviewedAt.Value.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                                </p>
+                            }
+                        </div>
+
+                        <!-- Admin Notes -->
+                        @if (!string.IsNullOrWhiteSpace(Model.AdminNotes))
+                        {
+                            <div class="admin-notes-box mb-4 text-start">
+                                <h5 class="fw-bold text-danger mb-3">
+                                    <i class="fas fa-comment-alt me-2"></i>Reason for Rejection
+                                </h5>
+                                <p class="mb-0" style="white-space: pre-line;">@Model.AdminNotes</p>
+                            </div>
+                        }
+
+                        <!-- Actions -->
+                        <div class="d-flex gap-3 justify-content-center mt-4">
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-secondary">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+            else  
+            {
+                <!-- Pending Approval Card -->
+                <div class="card shadow-lg border-0 text-center">
+                    <div class="card-body p-5">
+
+                        <!-- Icon -->
+                        <div class="mb-4">
+                            <i class="fas fa-clock text-warning" style="font-size: 5rem;"></i>
+                        </div>
+
+                        <!-- Title -->
+                        <h1 class="display-5 fw-bold text-warning mb-3">
+                            Account Pending Approval
+                        </h1>
+
+                        <!-- Message -->
+                        <p class="lead text-muted mb-4">
+                            Hello, <strong>@ViewBag.UserName</strong>!
+                        </p>
+
+                        <p class="text-muted mb-4">
+                            Your landlord account is currently under review by our admin team.
+                            You will be able to access the landlord dashboard once your account has been verified.
+                        </p>
+
+                        <!-- Submission Date -->
+                        @if (Model != null)
+                        {
+                            <p class="text-muted small mb-4">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                <strong>Submitted on:</strong>
+                                @Model.SubmittedAt.ToString("MMM dd, yyyy 'at' hh:mm tt")
+                            </p>
+                        }
+
+                        <!-- Status Box -->
+                        <div class="alert alert-warning border-warning" role="alert">
+                            <h5 class="alert-heading mb-3">
+                                <i class="fas fa-info-circle me-2"></i>What happens next?
+                            </h5>
+
+                            <ul class="text-start mb-0">
+                                <li class="mb-2">Our admin team will review your account details</li>
+                                <li class="mb-2">Verification typically takes 1-2 business days</li>
+                                <li>You can log back in anytime to check your status</li>
+                            </ul>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex gap-3 justify-content-center mt-4">
+                            <a asp-controller="Account" asp-action="Profile" class="btn btn-outline-primary">
+                                <i class="fas fa-user me-2"></i>View Profile
+                            </a>
+
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-secondary">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Preview -->
+                <div class="card shadow-sm border-0 mt-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-star text-warning me-2"></i>
+                            What you'll get after approval
+                        </h5>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start">
+                                    <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                                    <div>
+                                        <strong>List Properties</strong>
+                                        <p class="text-muted small mb-0">Add and manage your rental properties</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start">
+                                    <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                                    <div>
+                                        <strong>Manage Tenants</strong>
+                                        <p class="text-muted small mb-0">Handle tenant requests and agreements</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start">
+                                    <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                                    <div>
+                                        <strong>Track Payments</strong>
+                                        <p class="text-muted small mb-0">Monitor rent payments and revenue</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start">
+                                    <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                                    <div>
+                                        <strong>Property Analytics</strong>
+                                        <p class="text-muted small mb-0">View detailed performance reports</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
