@@ -18,5 +18,9 @@ namespace Rentzy.BLL.DTOs
         [Required]
         [StringLength(1000, ErrorMessage = "Comment cannot exceed 1000 characters.")]
         public string Comment { get; set; } = string.Empty;
+
+        // Added for display
+        public string? TenantName { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

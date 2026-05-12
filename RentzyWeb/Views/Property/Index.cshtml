@@ -330,8 +330,22 @@
                     <div class="property-content">
                         <!-- Title and Price -->
                         <h3 class="property-title">@prop.Title</h3>
-                        <div class="property-price">
-                            $@prop.Rent<span class="property-price-period">/month</span>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="property-price mb-0">
+                                $@prop.Rent<span class="property-price-period">/month</span>
+                            </div>
+                            @if(prop.ReviewCount > 0)
+                            {
+                                <div class="small d-flex align-items-center text-warning fw-bold">
+                                    <i class="fas fa-star me-1"></i>
+                                    <span>@prop.AverageRating.ToString("0.0")</span>
+                                    <span class="text-muted ms-1 fw-normal">(@prop.ReviewCount)</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <small class="text-muted">No reviews</small>
+                            }
                         </div>
 
                         <!-- Property Details -->

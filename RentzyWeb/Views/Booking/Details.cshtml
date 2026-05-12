@@ -1,33 +1,188 @@
-﻿@model Rentzy.BLL.DTOs.PropertyDTO
+@model Rentzy.BLL.DTOs.PropertyDTO
 
 @{
     ViewData["Title"] = Model?.Title ?? "Property Details";
 }
 
-<h2>@Model.Title</h2>
-
-<div>
-    <img src="@Model.Images?.FirstOrDefault()?.ImageUrl" alt="@Model.Title"
-         style="width:350px;height:220px;border-radius:10px;object-fit:cover;" />
-</div>
-
-<p>@Model.Description</p>
-
-<p>Rent: <strong>@Model.Rent.ToString("C")</strong></p>
-
-@if (!Model.IsApproved)
-{
-    <p class="text-warning fw-bold">This property is not approved for renting yet.</p>
-}
-else
-{
-    if (Model.TenantNames != null && Model.TenantNames.Any())
-    {
-        <p class="text-danger fw-bold">Currently Rented</p>
-        <p class="small text-muted">Note: this property is currently rented but you can book for available future dates.</p>
+<style>
+    .star-rating {
+        color: #ffc107;
+        font-size: 1.25rem;
     }
+    .review-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+        border-radius: 12px;
+        background: #fff;
+    }
+    [data-bs-theme="dark"] .review-card {
+        background: #2c2c2c;
+        color: #f8f9fa;
+    }
+    .review-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .avatar-circle {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
 
-    <a asp-controller="Booking" asp-action="Request" asp-route-propertyId="@Model.Id" class="btn btn-success">
-        Book Now
-    </a>
-}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h2 class="fw-bold display-6 mb-1">@Model.Title</h2>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="star-rating me-2">
+                            @for(int i=1; i<=5; i++)
+                            {
+                                if(i <= Math.Round(Model.AverageRating))
+                                {
+                                    <i class="fas fa-star"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star"></i>
+                                }
+                            }
+                        </div>
+                        <span class="fw-semibold">@Model.AverageRating.ToString("0.0")</span>
+                        <span class="text-muted ms-2">(@Model.ReviewCount reviews)</span>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <h3 class="text-primary fw-bold mb-0">@Model.Rent.ToString("C")</h3>
+                    <small class="text-muted">per month</small>
+                </div>
+            </div>
+
+            <div class="rounded-4 overflow-hidden shadow-sm mb-4">
+                <img src="@(Model.Images?.FirstOrDefault()?.ImageUrl ?? "/images/placeholder.jpg")" 
+                     alt="@Model.Title"
+                     class="w-100 object-fit-cover" 
+                     style="height:400px;" />
+            </div>
+
+            <div class="card shadow-sm border-0 p-4 mb-4 rounded-3">
+                <h4 class="fw-bold mb-3">About this property</h4>
+                <p class="lead text-muted" style="line-height: 1.7;">@Model.Description</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-3 sticky-top" style="top: 20px;">
+                <div class="card-body p-4 text-center">
+                    @if (!Model.IsApproved)
+                    {
+                        <div class="alert alert-warning rounded-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            This property is not approved for renting yet.
+                        </div>
+                    }
+                    else
+                    {
+                        if (Model.TenantNames != null && Model.TenantNames.Any())
+                        {
+                            <div class="badge bg-danger-subtle text-danger px-3 py-2 mb-3 rounded-pill border border-danger">
+                                <i class="fas fa-lock me-1"></i> Currently Rented
+                            </div>
+                            <p class="small text-muted mb-4">You can still schedule a request for upcoming dates.</p>
+                        }
+                        else
+                        {
+                            <div class="badge bg-success-subtle text-success px-3 py-2 mb-3 rounded-pill border border-success">
+                                <i class="fas fa-check me-1"></i> Available Now
+                            </div>
+                        }
+
+                        <div class="d-grid">
+                            <a asp-controller="Booking" asp-action="Request" asp-route-propertyId="@Model.Id" 
+                               class="btn btn-primary btn-lg rounded-3 shadow-sm py-3 fw-bold">
+                                Book Appointment
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <hr class="my-5 border-muted" />
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h3 class="fw-bold mb-0">Tenant Experiences</h3>
+                @if(Model.Reviews.Any())
+                {
+                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">
+                        @Model.Reviews.Count Total Validated Reviews
+                    </span>
+                }
+            </div>
+
+            @if(Model.Reviews == null || !Model.Reviews.Any())
+            {
+                <div class="text-center py-5 bg-light border rounded-3 text-muted">
+                    <i class="fas fa-comments-dollar fa-3x mb-3 opacity-50"></i>
+                    <p class="lead mb-0">No reviews yet for this property.</p>
+                    <small>Be the first tenant to share your experience after your stay!</small>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-3">
+                    @foreach(var review in Model.Reviews)
+                    {
+                        <div class="card shadow-sm review-card border">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-3 shadow-sm">
+                                            @(review.TenantName?.Substring(0, 1).ToUpper() ?? "T")
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold">@review.TenantName</h6>
+                                            <small class="text-muted">
+                                                <i class="far fa-calendar-alt me-1"></i>
+                                                @review.CreatedAt.ToString("MMM dd, yyyy")
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="star-rating small text-warning">
+                                        @for(int i=1; i<=5; i++)
+                                        {
+                                            if(i <= review.Rating)
+                                            {
+                                                <i class="fas fa-star"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="far fa-star"></i>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                                <p class="card-text fs-6 opacity-90 mb-0" style="font-style: italic;">
+                                    "@review.Comment"
+                                </p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

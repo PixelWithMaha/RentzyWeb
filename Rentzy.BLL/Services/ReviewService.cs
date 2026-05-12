@@ -3,6 +3,8 @@ using Rentzy.BLL.Exceptions;
 using Rentzy.DAL.Models;
 using Rentzy.DAL.Repository;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Rentzy.BLL.Services
@@ -62,6 +64,26 @@ namespace Rentzy.BLL.Services
                 PropertyTitle = property?.Title ?? "Unknown Property",
                 TenantId = tenantId
             };
+        }
+
+        public async Task<IEnumerable<ReviewDTO>> GetReviewsForPropertyAsync(int propertyId)
+        {
+            var reviews = await _reviewRepository.GetReviewsByPropertyIdAsync(propertyId);
+            
+            return reviews.Select(r => new ReviewDTO
+            {
+                PropertyId = r.PropertyId,
+                TenantId = r.TenantId,
+                Rating = r.Rating,
+                Comment = r.Comment,
+                CreatedAt = r.CreatedAt,
+                TenantName = r.Tenant != null ? $"{r.Tenant.FirstName} {r.Tenant.LastName}" : "Unknown Tenant"
+            }).ToList();
+        }
+
+        public async Task<Dictionary<int, (double AverageRating, int ReviewCount)>> GetReviewAggregatesAsync(IEnumerable<int> propertyIds)
+        {
+            return await _reviewRepository.GetReviewAggregatesAsync(propertyIds);
         }
     }
 }
